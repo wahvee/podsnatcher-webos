@@ -1,0 +1,47 @@
+/* Put Application specific CSS here. */
+
+
+a {
+	text-decoration:none;
+	color:#000000;
+}
+fieldset {
+	border-left:none;
+	border-right:none;
+	border-bottom:none;
+	border-top:outset;
+	border-top-width:thick;
+	border-top-color:#990000;
+	padding:5px;
+}
+legend {
+	font-size:14px;
+	color:#990000;
+	margin-left:8px;
+}
+.episodeTitle {
+	float:left;
+}
+.episodeArt {
+	float:right;
+	border-color:black;
+	border-width:1px;
+	border-style:solid;
+	width:30px;
+	height:30px;
+}
+.clear {
+	clear:both;
+}
+.bl {
+	background:url(images/corner_bottomleft.png) 0 100% no-repeat;
+}
+.br {
+	background:url(images/corner_bottomright.png) 100% 100% no-repeat;
+}
+.tl {
+	background:url(images/corner_topleft.png) 0 0 no-repeat;
+}
+.tr {
+	background:url(images/corner_topright.png) 100% 0 no-repeat;
+}

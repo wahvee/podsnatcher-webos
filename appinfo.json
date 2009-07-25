@@ -1,0 +1,9 @@
+{
+	"id": "com.mycompany.podsnatcher",
+	"version": "1.0.0",
+	"vendor": "Lindsey and Ryan",
+	"type": "web",
+	"main": "index.html",
+	"title": "PodSnatcher",
+	"icon": "icon.png"
+}
