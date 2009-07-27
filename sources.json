@@ -3,5 +3,9 @@
     {
         "source": "app\/assistants\/splash-screen-assistant.js",
         "scenes": "splash-screen"
+    },
+    {
+        "source": "app\/assistants\/home-screen-assistant.js",
+        "scenes": "home-screen"
     }
 ]
