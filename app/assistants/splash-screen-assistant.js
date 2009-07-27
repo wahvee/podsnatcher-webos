@@ -2,7 +2,11 @@ function SplashScreenAssistant() {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
+	   that needs the scene controller should be done in the setup function below.
+	   
+	   Also declaring variables here.
+	   
+	   */
 	  
 	this.appVersion = "1.0.0";
 	this.vendor = "Us";
@@ -54,9 +58,10 @@ SplashScreenAssistant.prototype.fileReadCallback = function(transport) {
    this.vendor = transport.responseJSON.vendor;			// Get who made app
    this.appName = transport.responseJSON.title;			// Get program title
    
-   this.controller.document.write("<h1>"+this.appName+"</h1>");
-   this.controller.document.write("<h2>"+this.vendor+"</h2>");
-   this.controller.document.write("<h2>"+this.appVersion+"</h2>");
+   // Get tags $(); e.g. $("appName") get tags named: "appName"
+   $("splash_screen_appName").insert(this.appName);
+   $("splash_screen_vendor").insert(this.vendor);
+   $("splash_screen_appVersion").insert(this.appVersion);
 };
 
 SplashScreenAssistant.prototype.fileReadErrorCallback = function(error){
