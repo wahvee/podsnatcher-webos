@@ -28,7 +28,8 @@ HomeScreenAssistant.prototype.setup = function() {
 		this.attributes = {
 			itemTemplate: "home-screen/list/listItem",
 			swipeToDelete: true,
-			reorderable: true
+			reorderable: true,
+			addItemLabel: $L('Add Podcast')
 		},
 		this.model = {
 			listTitle: $L('List Title'),
@@ -39,6 +40,8 @@ HomeScreenAssistant.prototype.setup = function() {
 				{data:$L("Item 4"), year:$L("2003")},
 				{data:$L("Item 5"), year:$L("1996")},
 				{data:$L("Item 6"), year:$L("1969")},
+				{data:$L("Item 7"), year:$L("1984")},
+				{data:$L("Item 8"), year:$L("1987")},
 				]		
 		}
 	);
