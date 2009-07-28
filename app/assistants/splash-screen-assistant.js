@@ -72,6 +72,6 @@ SplashScreenAssistant.prototype.fileReadErrorCallback = function(error){
 }
 
 SplashScreenAssistant.prototype.nextScreen = function() {
-	this.controller.stageController.popScene("splash-screen");
+	this.controller.stageController.popScene("splash-screen");	// Unload the splash-screen from memory
 	this.controller.stageController.pushScene("home-screen");
 }

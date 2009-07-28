@@ -6,11 +6,42 @@ function HomeScreenAssistant() {
 }
 
 HomeScreenAssistant.prototype.setup = function() {
+	Mojo.Log.info("Home Screen is loaded.");
 	/* this function is for setup tasks that have to happen when the scene is first created */
 		
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed. */
 	
 	/* setup widgets here */
+	/* Create the Command Menu @ the bottom of the screen */
+	this.controller.setupWidget(Mojo.Menu.commandMenu,
+        undefined,
+        this.model = {
+          visible: true,
+          items: [ 
+                 { iconPath: "images/icons_podcast_32x32.png", command: "add_podcast"},
+            ]
+    });
+	
+	/* Create the dynamic list for the page. This is the primary design on this page. */
+	/* NOTE: The item template is relative to the app/views folder */
+	this.controller.setupWidget("home-screen-list",
+		this.attributes = {
+			itemTemplate: "home-screen/list/listItem",
+			swipeToDelete: true,
+			reorderable: true
+		},
+		this.model = {
+			listTitle: $L('List Title'),
+				items : [
+				{data:$L("Item 1"), year:$L("1974")},
+				{data:$L("Item 2"), year:$L("1975")},
+				{data:$L("Item 3"), year:$L("1972")},
+				{data:$L("Item 4"), year:$L("2003")},
+				{data:$L("Item 5"), year:$L("1996")},
+				{data:$L("Item 6"), year:$L("1969")},
+				]		
+		}
+	);
 	
 	/* add event handlers to listen to events from widgets */
 }
@@ -29,4 +60,23 @@ HomeScreenAssistant.prototype.deactivate = function(event) {
 HomeScreenAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
+}
+
+/**
+ * This function is called by the commandMenu at the bottom of the screen.
+ * @param {Object} event	The object that is returned by the button event
+ */
+HomeScreenAssistant.prototype.handleCommand = function(event) {
+	if(event.type == Mojo.Event.command) {
+		switch(event.command)
+		{
+			case "add_podcast":
+				/* TODO: Dynamically add List items! */
+				Mojo.Controller.errorDialog("Lindsey is cool!");
+			break;
+			default:
+				Mojo.Controller.errorDialog("Got command " + event.command);
+			break;
+		}
+	}
 }
