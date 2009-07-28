@@ -62,8 +62,16 @@ SplashScreenAssistant.prototype.fileReadCallback = function(transport) {
    $("splash_screen_appName").insert(this.appName);
    $("splash_screen_vendor").insert(this.vendor);
    $("splash_screen_appVersion").insert(this.appVersion);
+   
+   Mojo.Log.info("Starting timer!");
+   this.nextScreen.bind(this).delay(5);
 };
 
 SplashScreenAssistant.prototype.fileReadErrorCallback = function(error){
 	Mojo.Log.error("Was unable to read the file. Error message is as follows: %s", error);
+}
+
+SplashScreenAssistant.prototype.nextScreen = function() {
+	this.controller.stageController.popScene("splash-screen");
+	this.controller.stageController.pushScene("home-screen");
 }
