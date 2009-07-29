@@ -20,9 +20,7 @@ SplashScreenAssistant.prototype.setup = function() {
 	
 	/* setup widgets here */
 	/* Create the Application Menu @ the top left of the screen */
-	this.controller.setupWidget(Mojo.Menu.appMenu,
-								{omitDefaultItems: true},
-								undefined);
+	this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, undefined);
 	
 	/* add event handlers to listen to events from widgets */
 	Mojo.Log.info("Splash Screen Loaded!");
