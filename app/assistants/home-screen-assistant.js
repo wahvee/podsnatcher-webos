@@ -12,6 +12,8 @@ HomeScreenAssistant.prototype.setup = function() {
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed. */
 	
 	/* setup widgets here */
+	this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, appMenuModel);
+	
 	/* Create the Command Menu @ the bottom of the screen */
 	this.controller.setupWidget(Mojo.Menu.commandMenu,
         undefined,
@@ -29,7 +31,7 @@ HomeScreenAssistant.prototype.setup = function() {
 			itemTemplate: "home-screen/list/listItem",
 			swipeToDelete: true,
 			reorderable: true,
-			addItemLabel: $L('Add Podcast')
+			//addItemLabel: $L('Add Podcast')
 		},
 		this.model = {
 			listTitle: $L('List Title'),
@@ -66,16 +68,22 @@ HomeScreenAssistant.prototype.cleanup = function(event) {
 }
 
 /**
- * This function is called by the commandMenu at the bottom of the screen.
+ * This function is called by the commandMenu and
+ * appMenu on the current scene.
  * @param {Object} event	The object that is returned by the button event
  */
 HomeScreenAssistant.prototype.handleCommand = function(event) {
 	if(event.type == Mojo.Event.command) {
-		switch(event.command)
-		{
+		switch(event.command) {
 			case "add_podcast":
 				/* TODO: Dynamically add List items! */
 				Mojo.Controller.errorDialog("Lindsey is cool!");
+			break;
+			case "palm-show-app-menu":
+				/* DO NOTHING */
+			break;
+			case "do-preferences":
+				/* TODO: Implement the preferences page */
 			break;
 			default:
 				Mojo.Controller.errorDialog("Got command " + event.command);
