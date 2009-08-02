@@ -1,4 +1,17 @@
 function StageAssistant() {
+	this.cookie = new Mojo.Model.Cookie("PodSnatcherPreferences");
+	this.showSplash = true;
+	var existingPrefs = this.cookie.get(); 
+	if (existingPrefs) {
+    	if (existingPrefs.VersionString == "1.0") {
+			this.showSplash = existingPrefs.ShowSplashScreen;
+		} else {
+			this.cookie.put({
+				VersionString: "1.0",
+				ShowSplashScreen: this.showSplash
+			});
+		} 
+   }
 }
 
 StageAssistant.prototype.setup = function() {	
@@ -14,6 +27,11 @@ StageAssistant.prototype.setup = function() {
     	]
   	};
   
-  	Mojo.Log.info("About to start Splash Screen!");
-	this.controller.pushScene("splash-screen");
+  	if (this.showSplash) {
+		Mojo.Log.info("About to start Splash Screen!");
+		this.controller.pushScene("splash-screen");
+	} else {
+		Mojo.Log.info("Skipping the Splash Screen!");
+		this.controller.pushScene("home-screen");
+	}
 }

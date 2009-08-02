@@ -84,6 +84,7 @@ HomeScreenAssistant.prototype.handleCommand = function(event) {
 			break;
 			case "do-preferences":
 				/* TODO: Implement the preferences page */
+				this.controller.stageController.pushScene("preferences");
 			break;
 			default:
 				Mojo.Controller.errorDialog("Got command " + event.command);

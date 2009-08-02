@@ -7,5 +7,9 @@
     {
         "source": "app\/assistants\/home-screen-assistant.js",
         "scenes": "home-screen"
+    },
+    {
+        "source": "app\/assistants\/preferences-assistant.js",
+        "scenes": "preferences"
     }
 ]
