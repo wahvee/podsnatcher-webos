@@ -1,5 +1,8 @@
 [
     {
+        "source": "app/lib/Podcast.js"
+    },
+    {
         "source": "app/lib/jquery/jquery-1.4.1.min.js"
     },
     {
