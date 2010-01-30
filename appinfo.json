@@ -1,7 +1,7 @@
 {
-	"id": "com.mycompany.podsnatcher",
-	"version": "0.1.0",
-	"vendor": "Lindsey and Ryan",
+	"id": "com.wahvee.podsnatcher",
+	"version": "1.0.0",
+	"vendor": "Wahvee",
 	"type": "web",
 	"main": "index.html",
 	"title": "PodSnatcher",

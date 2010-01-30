@@ -1,15 +1,27 @@
 [
-    {"source": "app\/assistants\/stage-assistant.js"},
     {
-        "source": "app\/assistants\/splash-screen-assistant.js",
-        "scenes": "splash-screen"
+        "source": "app/lib/jquery/jquery-1.4.1.min.js"
     },
     {
-        "source": "app\/assistants\/home-screen-assistant.js",
-        "scenes": "home-screen"
-    },
+        "source": "app/lib/jfeed/jquery.jfeed.pack.js"
+    }, 
     {
-        "source": "app\/assistants\/preferences-assistant.js",
-        "scenes": "preferences"
+        "source": "app/assistants/stage-assistant.js"
+    }, 
+    {
+        "source": "app/views/main/main-chrome.js", 
+        "scenes": "main"
+    }, 
+    {
+        "source": "app/assistants/main-assistant.js", 
+        "scenes": "main"
+    }, 
+    {
+        "source": "app/assistants/player-assistant.js", 
+        "scenes": "player"
+    }, 
+    {
+        "source": "app/views/player/player-chrome.js", 
+        "scenes": "player"
     }
 ]
