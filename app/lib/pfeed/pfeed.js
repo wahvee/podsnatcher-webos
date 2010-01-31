@@ -10,6 +10,8 @@ Ajax.getFeed = function(options) {
         data: null,
         success: null
     }, options);
+    
+    Mojo.Log.logProperties(options);
 
     if(options.url) {
         Ajax.Request(options.url, {

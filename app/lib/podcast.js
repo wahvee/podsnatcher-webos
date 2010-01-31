@@ -3,7 +3,7 @@ var Podcast = Class.create(PFeed, {
 		this.url = feedURL;
 		this.isOutOfDate = false;
 	},
-	UpdateFeed: function() {
+	updateFeed: function() {
 		try {
 			Ajax.getFeed({
 				url: this.url,
