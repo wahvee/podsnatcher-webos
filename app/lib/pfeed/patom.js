@@ -1,33 +1,26 @@
-var PAtom = Class.create({
-    initialize: function(xml) {
-        this._parse(xml);
+var PAtom = Class.create(PFeedItem, {
+    version: '1.0',
+    language: '',
+    items: [],
+    initialize: function($super, atomFeed) {
+        $super(atomFeed);
+        this._parse(atomFeed);
     },
-    _parse: function(xml) {    
-        var channel = xml;
-        this.version = '1.0';
-    
-        this.title = (channel.down('title') === undefined) ? "" : channel.down('title').textContent;
-        this.link = (channel.down('link') === undefined) ? "" : channel.down('link').nextSibling.textContent;   // Hack for Prototype 1.6
-        this.description = (channel.down('subtitle') === undefined) ? "" : channel.down('subtitle').textContent;
-        this.language = channel.readAttribute('xml:lang');
-        this.updated = (channel.down('updated') === undefined) ? "" : channel.down('updated').textContent;
-    
-        this.items = [];
+    _parse: function(atomFeed) {
+        this.findLanguage(atomFeed);
+        var channel = atomFeed.entry;
         
-        var feed = this;
-        
-        xml.select('entry').each( function(value) {
-        
-            var item = new PFeedItem();
-            
-            item.title = (value.down('title') === undefined) ? "" : value.down('title').textContent;
-            item.link = (value.down('link') === undefined) ? "" : value.down('link').textContent;
-            item.description = (value.down('content') === undefined) ? "" : value.down('content').textContent;
-            item.updated = (value.down('updated') === undefined) ? "" : value.down('updated').textContent;
-            item.id = (value.down('id') === undefined) ? "" : value.down('id').textContent;
-            
-            feed.items.push(item);
-        });
+        $A(channel).each( function(value, index) {        
+            var item = new PAtomItem(value);            
+            this.items.push(item);
+        }, this);
+    },
+    findLanguage: function(feed) {
+        this.setPropertyFromFeed(feed, 'language', '@xml:lang');
+    },
+    findID: function(feed) {
+        // Over-ride the default findID inherited from PFeedItem
+        this.setPropertyFromFeed(feed, 'id', 'id');
     }
 });
 

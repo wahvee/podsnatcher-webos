@@ -4,34 +4,30 @@
  * and GPL (GPL-license.txt) licenses.
  */
 
-String.prototype.cleanXML = function() {
-    //return this.replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g," ");
-    return this.replace("s/>.*?</></gs", "").replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g," ");
+// Returns true if property exists, false otherwise.
+Object.prototype.hasOwnProperty = function(property) {
+    return typeof(this[property]) !== 'undefined'
 };
 
 var PFeed = Class.create({
     type: '',
-    version: '',
-    title: '',
-    link: '',
-    description: '',
-    initialize: function(xml) {
+    initialize: function(jsonObj) {
         try{
-            if(xml) {
-                this.parse(xml);
+            if(jsonObj) {
+                this.parse(jsonObj);
             }
         } catch(error) {
             console.log("[PFeed Constructor] %s", error);
         }
     },
-    parse: function(xml) {
+    parse: function(jsonObj) {
         var feedClass = undefined;
-        if(xml.select('channel').length == 1)  {
+        if(jsonObj[Object.keys(jsonObj)[0]].hasOwnProperty('channel'))  {
             this.type = 'rss';
-            feedClass = new PRss(xml);
-        } else if(xml.tagName.toLowerCase() == 'feed') {        
+            feedClass = new PRss(jsonObj[Object.keys(jsonObj)[0]]);
+        } else if(jsonObj.feed !== undefined) {        
             this.type = 'atom';
-            feedClass = new PAtom(xml);
+            feedClass = new PAtom(jsonObj.feed);
         }        
         if(feedClass) {
             Object.extend(this, feedClass);
@@ -52,14 +48,11 @@ Ajax.getFeed = function(options) {
             method: 'get',
             onSuccess: function(transport) {
                 try {
-                    if(!Object.isUndefined(transport.responseXML)) {
-                        // Turn the XML response into an Prototype Element
-                        var trimmed = transport.responseText.cleanXML();
-                        var xml = new Element("result").insert(transport.responseText.cleanXML()).cleanWhitespace().firstDescendant();
-                        var feed = new PFeed(xml);
-                        if(Object.isFunction(options.success)) {
-                            options.success(feed);
-                        }
+                    // Turn the XML response into a JSON Object
+                    var json = xml2json(transport.responseXML, "").evalJSON(true);
+                    var feed = new PFeed(json);
+                    if(Object.isFunction(options.success)) {
+                        options.success(feed);
                     }
                 } catch (error) {
                     console.log("[Ajax.getFeed try catch error] %s", error);
