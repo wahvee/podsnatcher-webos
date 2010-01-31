@@ -3,27 +3,28 @@ var PAtom = Class.create({
         this._parse(xml);
     },
     _parse: function(xml) {    
-        var channel = jQuery('feed', xml).eq(0);
+        var channel = xml;
         this.version = '1.0';
-        this.title = jQuery(channel).find('title:first').text();
-        this.link = jQuery(channel).find('link:first').attr('href');
-        this.description = jQuery(channel).find('subtitle:first').text();
-        this.language = jQuery(channel).attr('xml:lang');
-        this.updated = jQuery(channel).find('updated:first').text();
-        
-        this.items = new Array();
+    
+        this.title = (channel.down('title') === undefined) ? "" : channel.down('title').textContent;
+        this.link = (channel.down('link') === undefined) ? "" : channel.down('link').nextSibling.textContent;   // Hack for Prototype 1.6
+        this.description = (channel.down('subtitle') === undefined) ? "" : channel.down('subtitle').textContent;
+        this.language = channel.readAttribute('xml:lang');
+        this.updated = (channel.down('updated') === undefined) ? "" : channel.down('updated').textContent;
+    
+        this.items = [];
         
         var feed = this;
         
-        jQuery('entry', xml).each( function() {
+        xml.select('entry').each( function(value) {
         
             var item = new PFeedItem();
             
-            item.title = jQuery(this).find('title').eq(0).text();
-            item.link = jQuery(this).find('link').eq(0).attr('href');
-            item.description = jQuery(this).find('content').eq(0).text();
-            item.updated = jQuery(this).find('updated').eq(0).text();
-            item.id = jQuery(this).find('id').eq(0).text();
+            item.title = (value.down('title') === undefined) ? "" : value.down('title').textContent;
+            item.link = (value.down('link') === undefined) ? "" : value.down('link').textContent;
+            item.description = (value.down('content') === undefined) ? "" : value.down('content').textContent;
+            item.updated = (value.down('updated') === undefined) ? "" : value.down('updated').textContent;
+            item.id = (value.down('id') === undefined) ? "" : value.down('id').textContent;
             
             feed.items.push(item);
         });

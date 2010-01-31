@@ -4,6 +4,41 @@
  * and GPL (GPL-license.txt) licenses.
  */
 
+String.prototype.cleanXML = function() {
+    //return this.replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g," ");
+    return this.replace("s/>.*?</></gs", "").replace(/(\r\n|\n|\r)/gm,"").replace(/\s+/g," ");
+};
+
+var PFeed = Class.create({
+    type: '',
+    version: '',
+    title: '',
+    link: '',
+    description: '',
+    initialize: function(xml) {
+        try{
+            if(xml) {
+                this.parse(xml);
+            }
+        } catch(error) {
+            console.log("[PFeed Constructor] %s", error);
+        }
+    },
+    parse: function(xml) {
+        var feedClass = undefined;
+        if(xml.select('channel').length == 1)  {
+            this.type = 'rss';
+            feedClass = new PRss(xml);
+        } else if(xml.tagName.toLowerCase() == 'feed') {        
+            this.type = 'atom';
+            feedClass = new PAtom(xml);
+        }        
+        if(feedClass) {
+            Object.extend(this, feedClass);
+        }
+    }
+});
+
 Ajax.getFeed = function(options) {
     
     options = Object.extend({    
@@ -19,9 +54,12 @@ Ajax.getFeed = function(options) {
                 try {
                     if(!Object.isUndefined(transport.responseXML)) {
                         // Turn the XML response into an Prototype Element
-                        var xml = new Element("result").insert(transport.responseText).firstDescendant();
+                        var trimmed = transport.responseText.cleanXML();
+                        var xml = new Element("result").insert(transport.responseText.cleanXML()).cleanWhitespace().firstDescendant();
                         var feed = new PFeed(xml);
-                        if(Object.isFunction(options.success)) options.success(feed);
+                        if(Object.isFunction(options.success)) {
+                            options.success(feed);
+                        }
                     }
                 } catch (error) {
                     console.log("[Ajax.getFeed try catch error] %s", error);
@@ -33,28 +71,3 @@ Ajax.getFeed = function(options) {
         });
     }
 };
-
-var PFeed = Class.create({
-    type: '',
-    version: '',
-    title: '',
-    link: '',
-    description: '',
-    initialize: function(xml) {
-        try{
-            if(xml) this.parse(xml);
-        } catch(error) {
-            console.log("[PFeed Constructor] %s", error);
-        }
-    },
-    parse: function(xml) {
-        if(xml.select('channel').length == 1)  {
-            this.type = 'rss';
-            var feedClass = new PRss(xml);
-        } else if(xml.select('feed').length == 1) {        
-            this.type = 'atom';
-            var feedClass = new PAtom(xml);
-        }        
-        if(feedClass) Object.extend(this, feedClass);
-    }
-});

@@ -3,31 +3,29 @@ var PRss = Class.create({
         this._parse(xml);
     },
     _parse: function(xml) {
-    		Mojo.Log.info("[PRss _parse] %s", Object.keys(xml));
-        if(jQuery('rss', xml).length == 0) this.version = '1.0';
-        else this.version = jQuery('rss', xml).eq(0).attr('version');
+        this.version = (xml.tagName.toLowerCase() != 'rss') ? '1.0' : xml.readAttribute('version');
 
-        var channel = jQuery('channel', xml).eq(0);
+        var channel = xml.select('channel')[0];
     
-        this.title = jQuery(channel).find('title:first').text();
-        this.link = jQuery(channel).find('link:first').text();
-        this.description = jQuery(channel).find('description:first').text();
-        this.language = jQuery(channel).find('language:first').text();
-        this.updated = jQuery(channel).find('lastBuildDate:first').text();
+        this.title = (channel.down('title') === undefined) ? "" : channel.down('title').textContent;
+        this.link = (channel.down('link') === undefined) ? "" : channel.down('link').nextSibling.textContent;   // Hack for Prototype 1.6
+        this.description = (channel.down('description') === undefined) ? "" : channel.down('description').textContent;
+        this.language = (channel.down('language') === undefined) ? "" : channel.down('language').textContent;
+        this.updated = (channel.down('lastBuildDate') === undefined) ? "" : channel.down('lastBuildDate').textContent;
     
-        this.items = new Array();
+        this.items = [];
         
         var feed = this;
         
-        jQuery('item', xml).each( function() {
+        xml.select('item').each( function(value) {
         
             var item = new PFeedItem();
             
-            item.title = jQuery(this).find('title').eq(0).text();
-            item.link = jQuery(this).find('link').eq(0).text();
-            item.description = jQuery(this).find('description').eq(0).text();
-            item.updated = jQuery(this).find('pubDate').eq(0).text();
-            item.id = jQuery(this).find('guid').eq(0).text();
+            item.title = (value.down('title') === undefined) ? "" : value.down('title').textContent;
+            item.link = (value.down('link') === undefined) ? "" : value.down('link').textContent;
+            item.description = (value.down('description') === undefined) ? "" : value.down('description').textContent;
+            item.updated = (value.down('pubDate') === undefined) ? "" : value.down('pubDate').textContent;
+            item.id = (value.down('guid') === undefined) ? "" : value.down('guid').textContent;
             
             feed.items.push(item);
         });
