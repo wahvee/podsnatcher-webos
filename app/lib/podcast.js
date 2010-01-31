@@ -1,4 +1,4 @@
-var Podcast = Class.create(PFeed, {
+var Podcast = Class.create({
 	initialize: function(feedURL) {
 		this.url = feedURL;
 		this.isOutOfDate = false;
