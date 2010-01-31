@@ -1,4 +1,5 @@
 [
+		{ "source": "app/lib/prototype.js" },
     { "source": "app/lib/pfeed/xml2json.js" },
     { "source": "app/lib/pfeed/pfeed.js" },
     { "source": "app/lib/pfeed/pfeeditem.js" },
