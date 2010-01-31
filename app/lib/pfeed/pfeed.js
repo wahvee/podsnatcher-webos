@@ -48,15 +48,13 @@ var PFeed = Class.create({
         }
     },
     parse: function(xml) {
-        console.log("XML is: %s", xml.identify());
-if(Object.isElement(xml)) console.log("XML is an element.");
-	        if(xml.match('channel')) {
-	            this.type = 'rss';
-	            var feedClass = new PRss(xml);
-	        } else if(xml.match('feed')) {        
-	            this.type = 'atom';
-	            var feedClass = new PAtom(xml);
-	        }        
-	        if(feedClass) Object.extend(this, feedClass);
+        if(xml.select('channel').length == 1)  {
+            this.type = 'rss';
+            var feedClass = new PRss(xml);
+        } else if(xml.select('feed').length == 1) {        
+            this.type = 'atom';
+            var feedClass = new PAtom(xml);
+        }        
+        if(feedClass) Object.extend(this, feedClass);
     }
 });
