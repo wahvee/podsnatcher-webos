@@ -6,7 +6,7 @@
 
 // Returns true if property exists, false otherwise.
 Object.prototype.hasOwnProperty = function(property) {
-    return typeof(this[property]) !== 'undefined'
+    return typeof(this[property]) !== 'undefined';
 };
 
 var PFeed = Class.create({
@@ -44,7 +44,7 @@ Ajax.getFeed = function(options) {
     }, options);
 
     if(options.url) {
-        new Ajax.Request(options.url, {
+        var temp = new Ajax.Request(options.url, {
             method: 'get',
             onSuccess: function(transport) {
                 try {
