@@ -1,7 +1,6 @@
 function MainAssistant(argFromPusher) {
 	this.podcastList_ctrl;
 	this.podcast = new Podcast('http://www.wdwradio.com/xml/wdwradio.xml');
-	Mojo.Log.logProperties(this.podcast);
 };
 
 MainAssistant.prototype = {

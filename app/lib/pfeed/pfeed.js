@@ -5,22 +5,34 @@
  */
 
 Ajax.getFeed = function(options) {
+    
     options = Object.extend({    
         url: null,
         data: null,
         success: null
     }, options);
-    
-    Mojo.Log.logProperties(options);
 
-    if(options.url) {
-        Ajax.Request(options.url, {
-            method: 'get',
-            onSuccess: function(xml) {
-                var feed = new PFeed(xml);
-                if(Object.isFunction(options.success)) options.success(feed);
-            }
-        });
+    try {
+        if(options.url) {
+            Mojo.Log.info("[Ajax.getFeed] Connecting to: %s", options.url);
+            new Ajax.Request(options.url, {
+                method: 'get',
+                onSuccess: function(transport) {
+                    try {
+                        Mojo.Log.error("[Ajax.getFeed Success] %s ", Object.keys(transport));
+                        var feed = new PFeed(transport.responseXML);
+                        if(Object.isFunction(options.success)) options.success(feed);
+                    } catch (error) {
+                        Mojo.Log.error("[Ajax.getFeed try catch error] %s", error);
+                    }
+                },
+                onFailure: function(transport) {
+                    Mojo.Log.error("[Ajax.getFeed Error] %s", transport);
+                }
+            });
+        }
+    } catch(error) {
+        Mojo.Log.error("[Ajax.getFeed] %s", error);
     }
 };
 
@@ -31,7 +43,11 @@ var PFeed = Class.create({
     link: '',
     description: '',
     initialize: function(xml) {
-        if(xml) this.parse(xml);
+        try{
+            if(xml) this.parse(xml);
+        } catch(error) {
+            Mojo.Log.info("[PFeed Constructor] %s", error);
+        }
     },
     parse: function() {
         if(xml.include('channel')) {
