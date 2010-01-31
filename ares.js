@@ -1,4 +1,4 @@
-﻿opus = {
+﻿var opus = {
 	paths: {},
 	depends: [],
 	path: {
@@ -21,7 +21,7 @@
 	argify: function(inSearch) {
 		var args = inSearch.slice(1).split("&");
 		for (var i=0, a, nv; a=args[i]; i++) {
-			// convert "name=value" to [name, value] 
+			// convert "name=value" to [name, value]
 			nv = args[i] = a.split("=");
 			// and then to name: value
 			args[nv[0]] = nv.length > 1 ? nv[1] : true;
