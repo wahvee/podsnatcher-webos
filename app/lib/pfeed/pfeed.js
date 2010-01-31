@@ -17,14 +17,18 @@ Ajax.getFeed = function(options) {
             method: 'get',
             onSuccess: function(transport) {
                 try {
-                    var feed = new PFeed(transport.responseXML.documentElement);
-                    if(Object.isFunction(options.success)) options.success(feed);
+                    if(!Object.isUndefined(transport.responseXML)) {
+                        // Turn the XML response into an Prototype Element
+                        var xml = new Element("result").insert(transport.responseText).firstDescendant();
+                        var feed = new PFeed(xml);
+                        if(Object.isFunction(options.success)) options.success(feed);
+                    }
                 } catch (error) {
-                    Mojo.Log.error("[Ajax.getFeed try catch error] %s", error);
+                    console.log("[Ajax.getFeed try catch error] %s", error);
                 }
             },
             onFailure: function(transport) {
-                Mojo.Log.error("[Ajax.getFeed Error] %s", transport);
+                console.log("[Ajax.getFeed Error] %s", transport);
             }
         });
     }
@@ -40,11 +44,12 @@ var PFeed = Class.create({
         try{
             if(xml) this.parse(xml);
         } catch(error) {
-            Mojo.Log.error("[PFeed Constructor] %s", error);
+            console.log("[PFeed Constructor] %s", error);
         }
     },
     parse: function(xml) {
-if(Object.isElement(xml)) Mojo.Log.info("XML is an element.");
+        console.log("XML is: %s", xml.identify());
+if(Object.isElement(xml)) console.log("XML is an element.");
 	        if(xml.match('channel')) {
 	            this.type = 'rss';
 	            var feedClass = new PRss(xml);
