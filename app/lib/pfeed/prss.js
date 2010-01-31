@@ -3,7 +3,7 @@ var PRss = Class.create({
         this._parse(xml);
     },
     _parse: function(xml) {
-    
+    		Mojo.Log.info("[PRss _parse] %s", Object.keys(xml));
         if(jQuery('rss', xml).length == 0) this.version = '1.0';
         else this.version = jQuery('rss', xml).eq(0).attr('version');
 

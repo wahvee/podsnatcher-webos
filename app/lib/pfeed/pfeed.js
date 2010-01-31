@@ -17,7 +17,7 @@ Ajax.getFeed = function(options) {
             method: 'get',
             onSuccess: function(transport) {
                 try {
-                    var feed = new PFeed(transport.responseText);
+                    var feed = new PFeed(transport.responseXML.documentElement);
                     if(Object.isFunction(options.success)) options.success(feed);
                 } catch (error) {
                     Mojo.Log.error("[Ajax.getFeed try catch error] %s", error);
@@ -44,13 +44,14 @@ var PFeed = Class.create({
         }
     },
     parse: function(xml) {
-        if(xml.include('channel')) {
-            this.type = 'rss';
-            var feedClass = new PRss(xml);
-        } else if(xml.include('feed')) {        
-            this.type = 'atom';
-            var feedClass = new PAtom(xml);
-        }        
-        if(feedClass) Object.extend(this, feedClass);
+if(Object.isElement(xml)) Mojo.Log.info("XML is an element.");
+	        if(xml.match('channel')) {
+	            this.type = 'rss';
+	            var feedClass = new PRss(xml);
+	        } else if(xml.match('feed')) {        
+	            this.type = 'atom';
+	            var feedClass = new PAtom(xml);
+	        }        
+	        if(feedClass) Object.extend(this, feedClass);
     }
 });

@@ -1,4 +1,7 @@
 [
+		{
+				"source": "app/lib/prototype.js"
+		},
     {
         "source": "app/lib/pfeed/pfeed.js"
     },

@@ -1,6 +1,7 @@
 function MainAssistant(argFromPusher) {
 	this.podcastList_ctrl;
-	this.podcast = new Podcast('http://www.wdwradio.com/xml/wdwradio.xml');
+	//this.podcast = new Podcast('http://www.wdwradio.com/xml/wdwradio.xml');
+	this.podcast = new Podcast('http://revision3.com/diggnation/feed/MP3');
 };
 
 MainAssistant.prototype = {
