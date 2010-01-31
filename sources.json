@@ -1,18 +1,24 @@
 [
-		{
-				"source": "app/lib/prototype.js"
-		},
     {
-        "source": "app/lib/pfeed/pfeed.js"
+        "source": "app/lib/pfeed/xml2json.js"
     },
     {
-        "source": "app/lib/pfeed/patom.js"
+        "source": "app/lib/pfeed/pfeed.js"
     },
     {
         "source": "app/lib/pfeed/pfeeditem.js"
     },
     {
         "source": "app/lib/pfeed/prss.js"
+    },
+    {
+        "source": "app/lib/pfeed/prssitem.js"
+    },
+    {
+        "source": "app/lib/pfeed/patom.js"
+    },
+    {
+        "source": "app/lib/pfeed/patomitem.js"
     },
     {
         "source": "app/lib/podcast.js"
