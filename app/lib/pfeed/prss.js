@@ -1,4 +1,4 @@
-var PAtom = Class.create({
+var PRss = Class.create({
     initialize: function(xml) {
         this._parse(xml);
     },

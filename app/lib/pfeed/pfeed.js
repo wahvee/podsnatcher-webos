@@ -12,27 +12,21 @@ Ajax.getFeed = function(options) {
         success: null
     }, options);
 
-    try {
-        if(options.url) {
-            Mojo.Log.info("[Ajax.getFeed] Connecting to: %s", options.url);
-            new Ajax.Request(options.url, {
-                method: 'get',
-                onSuccess: function(transport) {
-                    try {
-                        Mojo.Log.error("[Ajax.getFeed Success] %s ", Object.keys(transport));
-                        var feed = new PFeed(transport.responseXML);
-                        if(Object.isFunction(options.success)) options.success(feed);
-                    } catch (error) {
-                        Mojo.Log.error("[Ajax.getFeed try catch error] %s", error);
-                    }
-                },
-                onFailure: function(transport) {
-                    Mojo.Log.error("[Ajax.getFeed Error] %s", transport);
+    if(options.url) {
+        new Ajax.Request(options.url, {
+            method: 'get',
+            onSuccess: function(transport) {
+                try {
+                    var feed = new PFeed(transport.responseText);
+                    if(Object.isFunction(options.success)) options.success(feed);
+                } catch (error) {
+                    Mojo.Log.error("[Ajax.getFeed try catch error] %s", error);
                 }
-            });
-        }
-    } catch(error) {
-        Mojo.Log.error("[Ajax.getFeed] %s", error);
+            },
+            onFailure: function(transport) {
+                Mojo.Log.error("[Ajax.getFeed Error] %s", transport);
+            }
+        });
     }
 };
 
@@ -46,10 +40,10 @@ var PFeed = Class.create({
         try{
             if(xml) this.parse(xml);
         } catch(error) {
-            Mojo.Log.info("[PFeed Constructor] %s", error);
+            Mojo.Log.error("[PFeed Constructor] %s", error);
         }
     },
-    parse: function() {
+    parse: function(xml) {
         if(xml.include('channel')) {
             this.type = 'rss';
             var feedClass = new PRss(xml);
