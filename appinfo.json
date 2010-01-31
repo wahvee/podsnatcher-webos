@@ -1,9 +1,14 @@
 {
-	"id": "com.wahvee.podsnatcher",
-	"version": "1.0.0",
-	"vendor": "Wahvee",
-	"type": "web",
-	"main": "index.html",
-	"title": "PodSnatcher",
-	"icon": "icon.png"
+  "id":"com.wahvee.podsnatcher",
+  "version":"1.0.0",
+  "title":"PodSnatcher",
+  "vendor":"Wahvee",
+  "vendorurl":"http://www.wahvee.com",
+  "main":"index.html",
+  "icon":"icon.png",
+  "miniicon":"miniicon.png",
+  "type":"web",
+  "theme":"light",
+  "noWindow":false,
+  "noDeprecatedStyles":true
 }

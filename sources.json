@@ -1,13 +1,19 @@
 [
     {
-        "source": "app/lib/Podcast.js"
+        "source": "app/lib/pfeed/pfeed.js"
     },
     {
-        "source": "app/lib/jquery/jquery-1.4.1.min.js"
+        "source": "app/lib/pfeed/patom.js"
     },
     {
-        "source": "app/lib/jfeed/jquery.jfeed.pack.js"
-    }, 
+        "source": "app/lib/pfeed/pfeeditem.js"
+    },
+    {
+        "source": "app/lib/pfeed/prss.js"
+    },
+    {
+        "source": "app/lib/podcast.js"
+    },
     {
         "source": "app/assistants/stage-assistant.js"
     }, 

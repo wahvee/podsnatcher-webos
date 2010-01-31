@@ -1,6 +1,5 @@
 function MainAssistant(argFromPusher) {
-	// Get the list on the screen
-	this.podcastList_ctrl = this.controller.get('podcastList');
+	this.podcastList_ctrl;
 	this.podcast = new Podcast('http://www.wdwradio.com/xml/wdwradio.xml');
 	Mojo.Log.logProperties(this.podcast);
 };
@@ -8,13 +7,15 @@ function MainAssistant(argFromPusher) {
 MainAssistant.prototype = {
 	setup: function() {
 		Ares.setupSceneAssistant(this);
+		
+		// Get the list on the screen
+		this.podcastList_ctrl = this.controller.get('podcastList');
 		this.LoadPodcasts();
 	},
 	cleanup: function() {
 		Ares.cleanupSceneAssistant(this);
-	}	
-};
-
-MainAssistant.prototype.LoadPodcasts = function() {
-	
+	},
+	LoadPodcasts: function() {
+		this.podcast.UpdateFeed();
+	}
 };
