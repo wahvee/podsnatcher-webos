@@ -1,5 +1,4 @@
 [
-		{ "source": "app/lib/prototype.js" },
     { "source": "app/lib/pfeed/xml2json.js" },
     { "source": "app/lib/pfeed/pfeed.js" },
     { "source": "app/lib/pfeed/pfeeditem.js" },
@@ -10,7 +9,15 @@
     { "source": "app/lib/podcast.js" },
     {
         "source": "app/assistants/stage-assistant.js"
-    },
+    }, 
+    {
+        "source": "app/views/main/main-chrome.js", 
+        "scenes": "main"
+    }, 
+    {
+        "source": "app/assistants/main-assistant.js", 
+        "scenes": "main"
+    }, 
     {
         "source": "app/assistants/player-assistant.js", 
         "scenes": "player"
