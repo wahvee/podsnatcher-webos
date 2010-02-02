@@ -14,6 +14,6 @@ var Podcast = Class.create({
 		}
 	},
 	onFeedUpdate: function(feed) {
-		Mojo.Log.info("[Podcast] \"%s\" has updated.", feed.title);
+		Mojo.Log.info("[Podcast] \"%s\" has updated, %i new item(s).", feed.title, feed.items.length);
 	}
 });

@@ -10,7 +10,7 @@ MainAssistant.prototype = {
 		
 		// Get the list on the screen
 		this.podcastList_ctrl = this.controller.get('podcastList');
-		//this.podcast.updateFeed();
+		this.podcast.updateFeed();
 	},
 	cleanup: function() {
 		Ares.cleanupSceneAssistant(this);
