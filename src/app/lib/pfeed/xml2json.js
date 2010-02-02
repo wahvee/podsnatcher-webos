@@ -69,7 +69,9 @@ function xml2json(xml, tab) {
          }
          else if (xml.nodeType==9) { // document.node
             o = X.toObj(xml.documentElement);
-         }
+         } else if(xml.nodeType==8) { // comment.node
+	    
+	 }
          else
             console.log("[XML2JSON] Unhandled Node Type (" + xml.nodeType + ") " + xml.toString());
          return o;
