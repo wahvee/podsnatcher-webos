@@ -23,26 +23,18 @@ opus.Gizmo({
 				{
 					name: "podcastList",
 					dropTarget: true,
-					//items: [{name: "Hello"}],
+					items: [],
 					title: undefined,
 					reorderable: false,
+					itemTemplateFile: "main/main-scene-item-template",
 					onlisttap: "",
 					useSampleData: false,
 					type: "Palm.Mojo.List",
 					l: 0,
 					t: 0,
-					h: "100%",
+					h: 100,
 					hAlign: "left",
-					vAlign: "top",
-					controls: [
-						{
-							name: "podcastRow",
-							content: "<div class='result palm-row' x-mojo-tap-highlight='momentary'>\n  <div class=\"palm-row-wrapper\">\n    <img src=\"#{podcast-img}\" alt=\"#{title}'s Cover Art\" width=\"60\" height=\"60\" />\n    <div class=\"podcast-title\">#{title}</div>\n    <div class=\"most-recent-title\">#{most-recent}</div>\n  </div>\n</div>\n",
-							type: "Palm.Mojo.Html",
-							l: 0,
-							t: 0
-						}
-					]
+					vAlign: "top"
 				}
 			]
 		}
