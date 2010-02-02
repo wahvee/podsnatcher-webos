@@ -23,7 +23,7 @@ opus.Gizmo({
 				{
 					name: "podcastList",
 					dropTarget: true,
-					items: [],
+					//items: [{name: "Hello"}],
 					title: undefined,
 					reorderable: false,
 					onlisttap: "",
