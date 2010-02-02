@@ -7,6 +7,8 @@
     { "source": "app/lib/pfeed/patom.js" },
     { "source": "app/lib/pfeed/patomitem.js" },
     { "source": "app/lib/podcast.js" },
+    { "source": "app/lib/podcaststorage.js" },
+    { "source": "app/lib/util/md5-min.js"},
     {
         "source": "app/assistants/stage-assistant.js"
     }, 

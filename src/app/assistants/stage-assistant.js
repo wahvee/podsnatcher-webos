@@ -1,4 +1,5 @@
 function StageAssistant() {
+	this.db = new Storage();
 }
 
 StageAssistant.prototype.setup = function() {
