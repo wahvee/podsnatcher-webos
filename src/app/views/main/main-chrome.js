@@ -32,7 +32,7 @@ opus.Gizmo({
 					type: "Palm.Mojo.List",
 					l: 0,
 					t: 0,
-					h: 100,
+					h: "100%",
 					hAlign: "left",
 					vAlign: "top"
 				}
