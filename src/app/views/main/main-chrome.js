@@ -23,28 +23,7 @@ opus.Gizmo({
 				{
 					name: "podcastList",
 					dropTarget: true,
-					items: [
-						{
-							item: 0,
-							label: "Zero",
-							value: 0
-						},
-						{
-							item: 1,
-							label: "One",
-							value: 1
-						},
-						{
-							item: 2,
-							label: "Two",
-							value: 2
-						},
-						{
-							item: 3,
-							label: "Three",
-							value: 3
-						}
-					],
+					items: [],
 					title: undefined,
 					reorderable: false,
 					onlisttap: "",
@@ -52,7 +31,7 @@ opus.Gizmo({
 					type: "Palm.Mojo.List",
 					l: 0,
 					t: 0,
-					h: 236,
+					h: "100%",
 					hAlign: "left",
 					vAlign: "top",
 					controls: [
