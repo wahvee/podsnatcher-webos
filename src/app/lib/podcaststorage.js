@@ -1,33 +1,40 @@
 var PodcastStorage = Class.create({
 	db: {},
+	testVar: "You can see the Test Variable.",
 	onRead: {},
 	initialize: function(name, onReadCallback) {
 		var dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 		this.onRead = (Object.isFunction(name)) ? name : onReadCallback;
 		
 		var onSuccess = function() {
-			
+			Mojo.Log.info("[PodCastStorage] Connection to database success.");
+			this.getPodcasts();
 		};
 		
 		// Create the database storage
-		this.db = new new Mojo.Depot({
+		this.db = new Mojo.Depot({
 			name: dbName,
 			version: "1",
 			displayName: "PodSnatcher Database",
 			estimatedSize: 25000
-		}, onSuccess, this.onFailure);
+		}, onSuccess.bind(this), this.onFailure);
 	},
 	getPodcasts: function() {
 		var onSuccess = function(response) {
-			var recordSize = Object.values(response).size();
-			if(recordSize == 0) {
+			var recordSize = (Object.isArray(response)) ? response.size() : Object.values(response).size();
+			Mojo.Log.info("[PodcastStorage.getPodcasts] %i podcast(s) loaded.", recordSize);
+			if(recordSize == 0) {// Database has nothing in it.
 				this.populateInitialDB();
 			} else {
-				this.onRead
+				this.onRead();
 			}
 		};
 		
-		this.db.get("podcastList", onSuccess, this.onFailure);
+		try {
+			this.db.get("podcastList", onSuccess.bind(this), this.onFailure);
+		} catch(error) {
+			Mojo.Log.error("[PodcastStorage.getPodcasts] error! %s", error.message);
+		}
 	},
 	getPodcast: function(md5Hash) {
 		
@@ -110,6 +117,7 @@ var PodcastStorage = Class.create({
 			}
 		];
 		
-		this.db.add("podcastList", initialList, onSuccess, this.onFailure);
+		// Perform the addition of the list in the initial app
+		this.db.add("podcastList", initialList, onSuccess.bind(this), this.onFailure);
 	}
 });
