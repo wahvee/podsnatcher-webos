@@ -1,14 +1,12 @@
 var PodcastStorage = Class.create({
 	db: {},
-	initialize: function(name) {
-		var dbName = (name) ? "ext:" + name : "ext:podSnatcherDb";
+	onRead: {},
+	initialize: function(name, onReadCallback) {
+		var dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
+		this.onRead = (Object.isFunction(name)) ? name : onReadCallback;
 		
 		var onSuccess = function() {
 			
-		};
-		
-		var onFailure = function(code) {
-			Mojo.Log.error("[PodSnatcher Database] Failed to open the database on disk.");
 		};
 		
 		// Create the database storage
@@ -17,11 +15,19 @@ var PodcastStorage = Class.create({
 			version: "1",
 			displayName: "PodSnatcher Database",
 			estimatedSize: 25000
-		}, onSuccess, onFailure);
-		if(!this.db) {
-		} else {
-			
-		}
+		}, onSuccess, this.onFailure);
+	},
+	getPodcasts: function() {
+		var onSuccess = function(response) {
+			var recordSize = Object.values(response).size();
+			if(recordSize == 0) {
+				this.populateInitialDB();
+			} else {
+				this.onRead
+			}
+		};
+		
+		this.db.get("podcastList", onSuccess, this.onFailure);
 	},
 	getPodcast: function(md5Hash) {
 		
@@ -60,5 +66,50 @@ var PodcastStorage = Class.create({
 		}
 		
 		return result;
+	},
+	onFailure: function(code) {
+		var error = interpretCode(code);
+		Mojo.Log.error("[PodSnatcher Database] Failed to open the database on disk. %s", error.message);
+	},
+	populateInitialDB: function() {
+		//http://www.wdwradio.com/xml/wdwradio.xml
+		//http://revision3.com/diggnation/feed/MP4-Large
+		//http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595
+		//http://buzzreportpodcast.cnettv.com
+		//http://mailbagpodcast.cnettv.com
+		
+		var onSuccess = function() {
+			this.getPodcasts();
+		};
+		
+		var initialList = [
+			{
+				name: "The WDW Radio Show - Your Walt Disney World Information Station",
+				key: hex_md5("http://www.wdwradio.com/xml/wdwradio.xml"),
+				url: "http://www.wdwradio.com/xml/wdwradio.xml"
+			},
+			{
+				name: "Diggnation (Large MP4)",
+				key: hex_md5("http://revision3.com/diggnation/feed/MP4-Large"),
+				url: "http://revision3.com/diggnation/feed/MP4-Large"
+			},
+			{
+				name: "ESPN: PTI",
+				key: hex_md5("http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595"),
+				url: "http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595"
+			},
+			{
+				name: "Buzz Report (SD)",
+				key: hex_md5("http://buzzreportpodcast.cnettv.com"),
+				url: "http://buzzreportpodcast.cnettv.com"
+			},
+			{
+				name: "Mailbag (SD)",
+				key: hex_md5("http://mailbagpodcast.cnettv.com"),
+				url: "http://mailbagpodcast.cnettv.com"
+			}
+		];
+		
+		this.db.add("podcastList", initialList, onSuccess, this.onFailure);
 	}
 });
