@@ -1,17 +1,19 @@
 var PodcastStorage = Class.create({
 	db: {},
 	testVar: "You can see the Test Variable.",
+	listOfPodcasts: [],
 	onRead: {},
 	initialize: function(name, onReadCallback) {
 		var dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 		this.onRead = (Object.isFunction(name)) ? name : onReadCallback;
 		
+		// Wait for successful creation/connection from the db
 		var onSuccess = function() {
 			Mojo.Log.info("[PodCastStorage] Connection to database success.");
 			this.getPodcasts();
 		};
 		
-		// Create the database storage
+		// Connect/Create statement for the db
 		this.db = new Mojo.Depot({
 			name: dbName,
 			version: "1",
@@ -20,12 +22,18 @@ var PodcastStorage = Class.create({
 		}, onSuccess.bind(this), this.onFailure);
 	},
 	getPodcasts: function() {
+		// When the Mojo.Depot.get() method completes successfully
 		var onSuccess = function(response) {
+			// Return number of records found
 			var recordSize = (Object.isArray(response)) ? response.size() : Object.values(response).size();
 			Mojo.Log.info("[PodcastStorage.getPodcasts] %i podcast(s) loaded.", recordSize);
-			if(recordSize == 0) {// Database has nothing in it.
+			if(recordSize == 0) { // Database has nothing in it.
 				this.populateInitialDB();
 			} else {
+				response.each(function(podcastItem, index) {
+					var item = new Podcast(podcastItem.url);
+					this.listOfPodcasts.push(item);
+				}, this);
 				this.onRead();
 			}
 		};
@@ -36,7 +44,7 @@ var PodcastStorage = Class.create({
 			Mojo.Log.error("[PodcastStorage.getPodcasts] error! %s", error.message);
 		}
 	},
-	getPodcast: function(md5Hash) {
+	getPodcast: function(podcastInstance) {	// Takes an instance of the Podcast class
 		
 	},
 	interpretCode: function(code) {
@@ -91,28 +99,18 @@ var PodcastStorage = Class.create({
 		
 		var initialList = [
 			{
-				name: "The WDW Radio Show - Your Walt Disney World Information Station",
-				key: hex_md5("http://www.wdwradio.com/xml/wdwradio.xml"),
 				url: "http://www.wdwradio.com/xml/wdwradio.xml"
 			},
 			{
-				name: "Diggnation (Large MP4)",
-				key: hex_md5("http://revision3.com/diggnation/feed/MP4-Large"),
 				url: "http://revision3.com/diggnation/feed/MP4-Large"
 			},
 			{
-				name: "ESPN: PTI",
-				key: hex_md5("http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595"),
 				url: "http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595"
 			},
 			{
-				name: "Buzz Report (SD)",
-				key: hex_md5("http://buzzreportpodcast.cnettv.com"),
 				url: "http://buzzreportpodcast.cnettv.com"
 			},
 			{
-				name: "Mailbag (SD)",
-				key: hex_md5("http://mailbagpodcast.cnettv.com"),
 				url: "http://mailbagpodcast.cnettv.com"
 			}
 		];

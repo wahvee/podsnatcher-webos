@@ -1,25 +1,21 @@
 var Podcast = Class.create({
 	url: undefined,
-	podcastGuid: undefined,
+	key: undefined,				// Used for retrieval from the Mojo.Depot
 	isOutOfDate: false,
-	feedItems: {},
+	feedItems: [],
 	initialize: function(feedURL) {
 		this.url = feedURL;		// Store path to feed URL
-		this.feed = hex_md5(this.url);	// MD5 Hash of feed URL (unique cookie ID)
-		this.restoreFromDB();		// Restore the data from the database
+		this.key = hex_md5(this.url);	// MD5 Hash of feed URL (unique cookie ID)
 	},
 	updateFeed: function() {
 		try {
 			Ajax.getFeed({
 				url: this.url,
-				success: this.onFeedUpdate
+				success: this.onFeedUpdate.bind(this)
 			});
 		} catch(error) {
 			Mojo.Log.error("[Podcast.updateFeed] %s", error.message);
 		}
-	},
-	restoreFromDB: function() {
-		
 	},
 	onFeedUpdate: function(feed) {
 		Mojo.Log.info("[Podcast] \"%s\" has updated, %i new item(s).", feed.title, feed.items.length);
