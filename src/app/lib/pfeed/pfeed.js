@@ -49,7 +49,7 @@ Ajax.getFeed = function(options) {
                 try {
                     // Turn the XML response into a JSON Object
                     //var json = xml2json(transport.responseXML, "").evalJSON(true);
-                    var json = $.xmlToJSON(transport.respnoseXML);
+                    var json = $.xmlToJSON(transport.responseXML);
                     var feed = new PFeed(json);
                     if(Object.isFunction(options.success)) {
                         options.success(feed);

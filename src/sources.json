@@ -1,5 +1,4 @@
 [
-    { "source": "app/lib/jquery-1.4.1.min.js"},
     { "source": "app/lib/pfeed/xml2json.js" },
     { "source": "app/lib/pfeed/pfeed.js" },
     { "source": "app/lib/pfeed/pfeeditem.js" },
