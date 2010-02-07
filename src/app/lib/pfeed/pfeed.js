@@ -37,6 +37,7 @@ var PFeed = Class.create({
         if(feedClass) {
             Object.extend(this, feedClass);
         }
+	delete feedClass;
     }
 });
 
