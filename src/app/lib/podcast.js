@@ -44,7 +44,8 @@ var Podcast = Class.create({
 	},
 	onFeedUpdate: function(feed) {
 		this.copyFromObj(feed);
-		Mojo.Log.info("[Podcast.onFeedUpdate] \"%s\" has updated, %i new item(s).", feed.title, feed.items.length);
+		this.outOfDate = false;
+		Mojo.Log.info("[Podcast.onFeedUpdate] \"%s\" has updated, %i new item(s).", this.title, this.items.length);
 	},
 	toListItem: function() {
 }
