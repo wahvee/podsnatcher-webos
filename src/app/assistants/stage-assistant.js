@@ -8,11 +8,10 @@ StageAssistant.prototype.setup = function() {
 	} catch(version_error) {
 		Mojo.Log.error("[Prototype] %s", version_error.message);
 	}
-	
-	//this.controller.pushScene({name: "main", disableSceneScroller: true});
-	//this.controller.setWindowOrientation("free");
 };
 
 StageAssistant.prototype.podcastListFilled = function() {
 	Mojo.Log.info("[StageAssistant] Podcast list updated.");
+	this.controller.pushScene({name: "main", disableSceneScroller: true}, this.db);
+	this.controller.setWindowOrientation("free");
 };
