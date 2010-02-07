@@ -13,15 +13,21 @@ var PFeedItem = Class.create({
 			this.findID(feed);
 		}
 	},
-	setPropertyFromFeed: function(feed, propToSet, sourceProp, txtProp) {
-		// Check to see if a specific property has been specified.
-		var textProperty = (txtProp === undefined) ? "#text" : txtProp;		
+	setPropertyFromFeed: function(feed, propToSet, sourceProp) {
+		// Create an array of properties were data maybe stored
+		// @href
+		// #text
+		// #cdata
+		var textProperty = ["@href", "#text", "#cdata"];
 		// Check to see if the feed has this object
 		var answer = (feed.hasOwnProperty(sourceProp)) ? feed[sourceProp] : "";
 		// If it does have it, check to see if there is an array of them.
 		answer = (Object.isArray(answer)) ? answer[0] : answer;
-		// Check to see if the value is stored within an attribute (textProperty)
-		answer = (answer.hasOwnProperty(textProperty)) ? answer[textProperty] : answer;
+		
+		var propertyPresent = textProperty.detect(function(prop) {
+			return answer.hasOwnProperty(prop);
+		});
+		answer = (propertyPresent !== undefined) ? answer[propertyPresent] : answer;
 		// Set the value
 		this[propToSet] = answer;
 	},
@@ -29,7 +35,7 @@ var PFeedItem = Class.create({
 		this.setPropertyFromFeed(feed, 'title', 'title');
 	},
 	findLink: function(feed) {
-		this.setPropertyFromFeed(feed, 'link', 'link', '@href');
+		this.setPropertyFromFeed(feed, 'link', 'link');
 	},
 	findDescription: function(feed) {
 		this.setPropertyFromFeed(feed, 'description', 'subtitle');
