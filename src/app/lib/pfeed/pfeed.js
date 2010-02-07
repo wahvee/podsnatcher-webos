@@ -27,9 +27,9 @@ var PFeed = Class.create({
     },
     parse: function(jsonObj) {
         var feedClass = undefined;
-        if(jsonObj[Object.keys(jsonObj)[0]].hasOwnProperty('channel'))  {
+        if(jsonObj.hasOwnProperty('channel'))  {
             this.type = 'rss';
-            feedClass = new PRss(jsonObj[Object.keys(jsonObj)[0]]);
+            feedClass = new PRss(jsonObj);
         } else if(jsonObj.feed !== undefined) {        
             this.type = 'atom';
             feedClass = new PAtom(jsonObj.feed);
@@ -48,8 +48,7 @@ Ajax.getFeed = function(options) {
             onSuccess: function(transport) {
                 try {
                     // Turn the XML response into a JSON Object
-                    //var json = xml2json(transport.responseXML, "").evalJSON(true);
-                    var json = $.xmlToJSON(transport.responseXML);
+                    var json = XMLObjectifier.xmlToJSON(transport.responseXML);
                     var feed = new PFeed(json);
                     if(Object.isFunction(options.success)) {
                         options.success(feed);

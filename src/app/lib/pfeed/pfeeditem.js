@@ -14,21 +14,16 @@ var PFeedItem = Class.create({
 		}
 	},
 	setPropertyFromFeed: function(feed, propToSet, sourceProp) {
-		// Create an array of properties were data maybe stored
-		// @href
-		// #text
-		// #cdata
-		var textProperty = ["@href", "#text", "#cdata"];
+		// Get the first item if it is an array, otherwise it's an object
+		var answer = (Object.isArray(feed)) ? feed[0] : feed;
 		// Check to see if the feed has this object
-		var answer = (feed.hasOwnProperty(sourceProp)) ? feed[sourceProp] : "";
+		answer = (answer.hasOwnProperty(sourceProp)) ? answer[sourceProp] : "";
 		// If it does have it, check to see if there is an array of them.
-		answer = (Object.isArray(answer)) ? answer[0] : answer;
-		// Find property that exists
-		var propertyPresent = textProperty.detect(function(prop) {
-			return answer.hasOwnProperty(prop);
-		});
-		// Get the value from the property that is present, if it exists
-		answer = (propertyPresent !== undefined) ? answer[propertyPresent] : answer;
+		// If there is an array select the first item in the array
+		answer = (Object.isArray(answer)) ? answer[0].Text : answer;
+		// If answer is a string at this point we are done
+		// Otherwise it is a object and we need it's Text value
+		answer = (Object.isString(answer)) ? answer : answer.Text;
 		// Set the value
 		this[propToSet] = answer;
 	},

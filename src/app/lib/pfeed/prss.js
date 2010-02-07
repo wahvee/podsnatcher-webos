@@ -11,9 +11,11 @@ var PRss = Class.create(PFeedItem, {
         this.findLanguage(rssFeed.channel);
         
         // Different location for items
-        var feedItems = (this.version == '1.0') ? rssFeed.item : rssFeed.channel.item;
+        var feedItems = (this.version == '1.0') ? rssFeed.item : rssFeed.channel[0].item;
+        // Check to make sure feedItems is an array
+        feedItems = (!Object.isArray(feedItems)) ? $A(feedItems) : feedItems;
         
-        $A(feedItems).each( function(value, index) {        
+        feedItems.each( function(value, index) {        
             var item = new PRssItem(value);            
             this.items.push(item);
         }, this);
