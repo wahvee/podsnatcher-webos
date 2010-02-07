@@ -46,5 +46,6 @@ var Podcast = Class.create({
 		this.copyFromObj(feed);
 		Mojo.Log.info("[Podcast.onFeedUpdate] \"%s\" has updated, %i new item(s).", feed.title, feed.items.length);
 	},
-	toListItem: function() {}
+	toListItem: function() {
+}
 });

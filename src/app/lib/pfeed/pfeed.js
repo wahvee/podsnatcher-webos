@@ -22,7 +22,7 @@ var PFeed = Class.create({
                 this.parse(jsonObj);
             }
         } catch(error) {
-            console.log("[PFeed Constructor] %s", error);
+            Mojo.Log.error("[PFeed Constructor] %s", error.message);
         }
     },
     parse: function(jsonObj) {
@@ -58,7 +58,7 @@ Ajax.getFeed = function(options) {
                 }
             },
             onFailure: function(transport) {
-                console.log("[Ajax.getFeed Error] %s", transport);
+                Mojo.Log.error("[Ajax.getFeed Error] %j", transport);
             }
         });
     } else {
