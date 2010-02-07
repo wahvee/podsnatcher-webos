@@ -3,7 +3,6 @@ var PodcastStorage = Class.create({
 	listOfPodcasts: [],
 	onRead: {},
 	initialize: function(name) {
-		$super();
 		var dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 		
 		this.callback = {};
