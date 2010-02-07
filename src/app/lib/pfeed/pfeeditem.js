@@ -5,11 +5,13 @@ var PFeedItem = Class.create({
 	updated: '',
 	id: '',
 	initialize: function(feed) {
-		this.findTitle(feed);
-		this.findLink(feed);
-		this.findDescription(feed);
-		this.findUpdated(feed);
-		this.findID(feed);
+		if(feed) {
+			this.findTitle(feed);
+			this.findLink(feed);
+			this.findDescription(feed);
+			this.findUpdated(feed);
+			this.findID(feed);
+		}
 	},
 	setPropertyFromFeed: function(feed, propToSet, sourceProp, txtProp) {
 		// Check to see if a specific property has been specified.

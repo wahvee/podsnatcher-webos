@@ -15,6 +15,7 @@ var PodcastStorage = Class.create({
 		
 		// Connect/Create statement for the db
 		this.db = new Mojo.Depot({
+			replace: true,
 			name: dbName,
 			version: "1",
 			displayName: "PodSnatcher Database",
@@ -31,8 +32,9 @@ var PodcastStorage = Class.create({
 				this.populateInitialDB();
 			} else {
 				response.each(function(podcastItem, index) {
-					var item = new Podcast(podcastItem.url);
-					this.listOfPodcasts.push(item);
+					var item = new Podcast(podcastItem);
+					Mojo.Log.logProperties(podcastItem);
+					listOfPodcasts.push(item);
 				}, this);
 				this.onRead();
 			}
@@ -43,9 +45,6 @@ var PodcastStorage = Class.create({
 		} catch(error) {
 			Mojo.Log.error("[PodcastStorage.getPodcasts] error! %s", error.message);
 		}
-	},
-	getPodcast: function(podcastInstance) {	// Takes an instance of the Podcast class
-		
 	},
 	interpretCode: function(code) {
 		var result = {
@@ -98,21 +97,11 @@ var PodcastStorage = Class.create({
 		};
 		
 		var initialList = [
-			{
-				url: "http://www.wdwradio.com/xml/wdwradio.xml"
-			},
-			{
-				url: "http://revision3.com/diggnation/feed/MP4-Large"
-			},
-			{
-				url: "http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595"
-			},
-			{
-				url: "http://buzzreportpodcast.cnettv.com"
-			},
-			{
-				url: "http://mailbagpodcast.cnettv.com"
-			}
+			new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
+			new Podcast('http://revision3.com/diggnation/feed/MP4-Large'),
+			new Podcast('http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595'),
+			new Podcast('http://buzzreportpodcast.cnettv.com'),
+			new Podcast('http://mailbagpodcast.cnettv.com')
 		];
 		
 		// Perform the addition of the list in the initial app
