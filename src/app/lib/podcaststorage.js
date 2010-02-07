@@ -16,7 +16,7 @@ var PodcastStorage = Class.create({
 		
 		// Wait for successful creation/connection from the db
 		var onSuccess = function() {
-			Mojo.Log.info("[PodCastStorage] Connection to database success.");
+			Mojo.Log.info("[PodcastStorage] Connection to database success.");
 			this.getPodcasts();
 		};
 		
