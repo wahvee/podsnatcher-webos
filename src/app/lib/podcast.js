@@ -11,6 +11,9 @@ var Podcast = Class.create({
 		} else {
 			this.copyFromObj(feedURL);
 		}
+		if(this.outOfDate) {
+			this.updateFeed();
+		}
 	},
 	copyFromObj: function(sourceObj) {
 		try {
