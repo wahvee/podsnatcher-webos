@@ -1,16 +1,21 @@
 if(typeof Object.deepClone !== 'function') {
 	console.log("[Object.deepClone] is not defined.");
 	Object.prototype.deepClone = function() {
-		var newObj = (this instanceof Array) ? [] : {};
-		for (i in this) {
-			if (Object.isFunction(this[i])) continue;		// Skip functions
-			if (this[i] && typeof this[i] == "object") {
-				newObj[i] = this[i].clone();
-			} else {
-				newObj[i] = this[i];
+		try {
+			var newObj = (this instanceof Array) ? [] : {};
+			for (i in this) {
+				if (Object.isFunction(this[i])) continue;	// Skip functions
+				if (this[i] && typeof this[i] == "object") {
+					newObj[i] = this[i].clone();
+				} else {
+					newObj[i] = this[i];
+				}
 			}
+			return newObj;
+		} catch(error) {
+			console.log("[Object.deepClone] %s", error.message);
+			return undefined;
 		}
-		return newObj;
 	};
 } else {
 	console.log("[Object.deepClone] is defined.");
