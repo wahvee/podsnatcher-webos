@@ -1,9 +1,9 @@
 var PAtom = Class.create(PFeedItem, {
     version: '1.0',
     language: '',
+    items: [],
     initialize: function($super, atomFeed) {
         $super(atomFeed);
-        this.items = [];
         this._parse(atomFeed);
     },
     _parse: function(atomFeed) {

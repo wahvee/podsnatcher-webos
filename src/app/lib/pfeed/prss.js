@@ -1,9 +1,9 @@
 var PRss = Class.create(PFeedItem, {
     version: '1.0',
     language: '',
+    items: [],
     initialize: function($super, rssFeed) {
         $super(rssFeed.channel[0]);
-        this.items = [];
         this._parse(rssFeed);
     },
     _parse: function(rssFeed) {
