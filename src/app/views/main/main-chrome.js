@@ -9,6 +9,7 @@ opus.Gizmo({
 	chrome: [
 		{
 			name: "appScroller",
+			snapElements: [],
 			type: "Palm.Mojo.Scroller",
 			l: 0,
 			t: 0,
@@ -23,16 +24,17 @@ opus.Gizmo({
 				{
 					name: "podcastList",
 					dropTarget: true,
+					modelName: "podcastListModel",
 					items: [],
+					useSampleData: false,
 					title: undefined,
-					reorderable: false,
 					itemTemplateFile: "main/main-scene-item-template",
 					onlisttap: "",
-					useSampleData: false,
+					reorderable: false,
 					type: "Palm.Mojo.List",
 					l: 0,
 					t: 0,
-					h: "100%",
+					h: 100,
 					hAlign: "left",
 					vAlign: "top"
 				}
