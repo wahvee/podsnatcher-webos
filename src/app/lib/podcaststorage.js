@@ -2,9 +2,18 @@ var PodcastStorage = Class.create({
 	db: {},
 	listOfPodcasts: [],
 	onRead: {},
-	initialize: function(name, onReadCallback) {
+	initialize: function(name) {
+		$super();
 		var dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
-		this.onRead = (Object.isFunction(name)) ? name : onReadCallback;
+		
+		this.callback = {};
+		this.callback[PodcastStorage.PodcastStartUpdate] = [];
+		this.callback[PodcastStorage.PodcastUpdateSuccess] = [];
+		this.callback[PodcastStorage.PodcastUpdateFailure] = [];
+		this.callback[PodcastStorage.SavingDatabaseSuccess] = [];
+		this.callback[PodcastStorage.SavingDatabaseFailure] = [];
+		this.callback[PodcastStorage.LoadingDatabaseSuccess] = [];
+		this.callback[PodcastStorage.LoadingDatabaseFailure] = [];
 		
 		// Wait for successful creation/connection from the db
 		var onSuccess = function() {
@@ -34,7 +43,7 @@ var PodcastStorage = Class.create({
 					var item = new Podcast(podcastItem);
 					this.listOfPodcasts.push(item);
 				}, this);
-				this.onRead();
+				this.doEvent(PodcastStorage.LoadingDatabaseSuccess);
 			}
 		};
 		
@@ -43,6 +52,15 @@ var PodcastStorage = Class.create({
 		} catch(error) {
 			Mojo.Log.error("[PodcastStorage.getPodcasts] error! %s", error.message);
 		}
+	},
+	updatePodcast: function() {
+		
+	},
+	updatePodcasts: function() {
+		this.listOfPodcasts.each(function(podcast, index) {
+			// Update a given podcast
+			this.updatePodcast(podcast.key);
+		}, this);
 	},
 	interpretCode: function(code) {
 		var result = {
@@ -79,9 +97,36 @@ var PodcastStorage = Class.create({
 		
 		return result;
 	},
+	addEventListener: function(event, listener) {
+		try {
+			this.callback[event].push(listener);
+			// Remove duplicate callbacks
+			this.callback[event] = this.callback[event].uniq(true);
+			Mojo.Log.info("[PodcastStorage.addEventListener] %s has %i listener(s)", event, this.callback[event].size());
+		} catch(error) {
+			Mojo.Log.error("[PodcastStorage.addEventListener] %s", error.message);
+		}
+	},
+	removeEventListener: function(event, listener) {
+		//TODO Implement this!
+		this.callback[event].pop(listener);
+		// Remove duplicate callbacks
+		this.callback[event] = this.callback[event].uniq(true);
+		Mojo.Log.info("[PodcastStorage.removeEventListener] %s has %i listener(s)", event, this.callback[event].size());
+	},
+	doEvent: function(event, param1, param2) {
+		try {
+			Mojo.Log.info("[PodcastStorage.doEvent] %s", event);
+			this.callback[event].each(function(item) {
+				item(param1, param2);
+			});
+		} catch(error) {
+			Mojo.Log.error("[PodcastStorage.doEvent] Called event %s. %s", event, error.message);
+		}
+	},
 	onFailure: function(code) {
 		var error = interpretCode(code);
-		Mojo.Log.error("[PodSnatcher Database] Failed to open the database on disk. %s", error.message);
+		Mojo.Log.error("[PodcastStorage] Failed to open the database on disk. %s", error.message);
 	},
 	populateInitialDB: function() {
 		//http://www.wdwradio.com/xml/wdwradio.xml
@@ -113,3 +158,11 @@ var PodcastStorage = Class.create({
 		this.db.add("podcastList", this.listOfPodcasts, onSuccess.bind(this), this.onFailure);
 	}
 });
+
+PodcastStorage.PodcastStartUpdate = 'onStartPodcastUpdate';
+PodcastStorage.PodcastUpdateSuccess = 'onPodcastSuccess';
+PodcastStorage.PodcastUpdateFailure = 'onPodcastFailure';
+PodcastStorage.SavingDatabaseSuccess = 'onDBSaveSuccess';
+PodcastStorage.SavingDatabaseFailure = 'onDBSaveFailure';
+PodcastStorage.LoadingDatabaseSuccess = 'onDBLoadSuccess';
+PodcastStorage.LoadingDatabaseFailure = 'onDBLoadFailure';

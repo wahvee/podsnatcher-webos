@@ -1,5 +1,6 @@
 function StageAssistant() {
-	this.db = new PodcastStorage(this.podcastListFilled.bind(this));
+	this.db = new PodcastStorage();
+	this.db.addEventListener(PodcastStorage.LoadingDatabaseSuccess, this.podcastListFilled.bind(this));
 }
 
 StageAssistant.prototype.setup = function() {
