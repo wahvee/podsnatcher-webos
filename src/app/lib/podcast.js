@@ -21,10 +21,12 @@ var Podcast = Class.create({
 			var newObj = (Object.isArray(sourceObj)) ? [] : {};
 			for (i in sourceObj) {
 				if (Object.isFunction(sourceObj[i])) continue;	// Skip functions
-				if (sourceObj[i] && typeof sourceObj[i] == "object") {
-					newObj[i] = Object.clone(sourceObj[i]);
-				} else {
+				if (Object.isArray(sourceObj[i])) {
+					newObj[i] = sourceObj[i].clone();
+				} else if (Object.isString(sourceObj[i]) || Object.isNumber(sourceObj[i])) {
 					newObj[i] = sourceObj[i];
+				} else {
+					newObj[i] = Object.extend(newObj[i], sourceObj[i]);
 				}
 			}
 			Object.extend(this, newObj);
