@@ -1,7 +1,8 @@
 var Podcast = Class.create({
 	url: undefined,
 	key: undefined,				// Used for retrieval from the Mojo.Depot
-	feedItems: [],
+	imgUrl: undefined,
+	imgPath: undefined,
 	outOfDate: true,
 	initialize: function(feedURL) {
 		if(Object.isString(feedURL)) {
@@ -34,6 +35,7 @@ var Podcast = Class.create({
 	},
 	onFeedUpdate: function(feed) {
 		Mojo.Log.info("[Podcast] \"%s\" has updated, %i new item(s).", feed.title, feed.items.length);
+		this.copyFromObj(feed);
 	},
 	toListItem: function() {
 		// Return this podcast as a list item
