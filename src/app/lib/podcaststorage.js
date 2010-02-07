@@ -1,10 +1,10 @@
 var PodcastStorage = Class.create({
 	db: {},
 	listOfPodcasts: [],
-	onRead: {},
 	initialize: function(name) {
 		var dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 		
+		// Event listener arrays
 		this.callback = {};
 		this.callback[PodcastStorage.PodcastStartUpdate] = [];
 		this.callback[PodcastStorage.PodcastUpdateSuccess] = [];
@@ -29,7 +29,13 @@ var PodcastStorage = Class.create({
 			estimatedSize: 25000
 		}, onSuccess.bind(this), this.onFailure);
 	},
-	getPodcasts: function() {
+	findPodcast: function(feedKey) {
+		var podcastToUpdate = this.listOfPodcasts.detect(function(podcast) {
+			return podcast.key = feedKey;
+		});
+		return podcastToUpdate;
+	},
+	loadPodcasts: function() {
 		// When the Mojo.Depot.get() method completes successfully
 		var onSuccess = function(response) {
 			// Return number of records found
@@ -53,6 +59,12 @@ var PodcastStorage = Class.create({
 			Mojo.Log.error("[PodcastStorage.getPodcasts] error! %s", error.message);
 		}
 	},
+	updatePodcasts: function() {
+		this.listOfPodcasts.each(function(podcast, index) {
+			// Update a given podcast
+			this.updatePodcast(podcast.key);
+		}, this);
+	},
 	getPodcastList: function() {
 		var temp = new Array();
 		this.listOfPodcasts.each(function(podcast, index) {
@@ -61,14 +73,26 @@ var PodcastStorage = Class.create({
 		
 		return temp.clone();
 	},
-	updatePodcast: function() {
-		
+	updatePodcast: function(feedKey) {
+		try {
+			var podcastToUpdate = this.findPodcast(feedKey);
+			
+			// Make sure that the podcast was found
+			if(podcastToUpdate !== undefined) {
+				podcastToUpdate.updateFeed(this.onFeedUpdate.bind(this));
+				// Let listeners know that update for the given podcast is starting
+				this.doEvent(PodcastStorage.PodcastStartUpdate, feedKey);
+			} else {
+				// Since the podcast to update cannot be found notify of failure
+				this.doEvent(PodcastStorage.PodcastUpdateFailure, feedKey);
+			}
+		} catch(error) {
+			Mojo.Log.error("[PodcastStorage.updatePodcast] %s", error.message);
+		}
 	},
-	updatePodcasts: function() {
-		this.listOfPodcasts.each(function(podcast, index) {
-			// Update a given podcast
-			this.updatePodcast(podcast.key);
-		}, this);
+	onFeedUpdate: function(feedKey) {
+		// Do event to notify that the podcast has updated
+		this.doEvent(PodcastStorage.PodcastUpdateSuccess, feedKey);
 	},
 	interpretCode: function(code) {
 		var result = {
@@ -160,7 +184,9 @@ var PodcastStorage = Class.create({
 	},
 	savePodcasts: function() {
 		var onSuccess = function() {
-			Mojo.Log.info("[PodcastStorage.savePodcasts] Success.");	
+			Mojo.Log.info("[PodcastStorage.savePodcasts] Success.");
+			// Event to let it be known that the database was saved
+			this.doEvent(PodcastStorage.SavingDatabaseSuccess);
 		};
 		
 		this.db.add("podcastList", this.listOfPodcasts, onSuccess.bind(this), this.onFailure);

@@ -19,6 +19,8 @@ MainAssistant.prototype = {
 		this.podcastListModel.items = this.db.getPodcastList();
 		this.controller.modelChanged(this.podcastListModel);
 		
+		this.db.updatePodcasts();
+		
 	},
 	cleanup: function() {
 		Ares.cleanupSceneAssistant(this);
@@ -28,13 +30,15 @@ MainAssistant.prototype = {
 // Event listener that is passed the key to the podcast that is
 // about to update
 MainAssistant.prototype.podcastUpdating = function(podcastKey) {
-
+	
 };
 
 // Event listener that is passed the key to the podcast that
 // has successfully updated
 MainAssistant.prototype.podcastUpdateSuccess = function(podcastKey) {
-	
+	// Populate the list with the podcasts
+	this.podcastListModel.items = this.db.getPodcastList();
+	this.controller.modelChanged(this.podcastListModel);
 };
 
 // Event listener that is passed the key to the podcast that

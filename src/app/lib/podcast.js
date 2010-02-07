@@ -1,9 +1,10 @@
 var Podcast = Class.create({
 	url: undefined,
-	key: undefined,				// Used for retrieval from the Mojo.Depot
+	key: undefined,					// Used for retrieval from the Mojo.Depot
 	imgUrl: undefined,
 	imgPath: undefined,
 	outOfDate: true,
+	whoToCallOnFeedUpdate: undefined,
 	initialize: function(feedURL) {
 		if(Object.isString(feedURL)) {
 			this.url = feedURL;		// Store path to feed URL
@@ -31,8 +32,13 @@ var Podcast = Class.create({
 			Mojo.Log.error("[Podcast.copyFromObj] %s", error.message);
 		}
 	},
-	updateFeed: function() {
+	updateFeed: function(whoToCall) {
 		try {
+			// Define who to call once updating is performed
+			if(Object.isFunction(whoToCall)) {
+				this.whoToCallOnFeedUpdate = whoToCall;
+			}
+			
 			Ajax.getFeed({
 				url: this.url,
 				success: this.onFeedUpdate.bind(this)
@@ -44,6 +50,9 @@ var Podcast = Class.create({
 	onFeedUpdate: function(feed) {
 		this.copyFromObj(feed);
 		this.outOfDate = false;
+		if(Object.isFunction(this.whoToCallOnFeedUpdate)) {
+			this.whoToCallOnFeedUpdate(this.key);
+		}
 		Mojo.Log.info("[Podcast.onFeedUpdate] \"%s\" has updated, %i new item(s).", this.title, this.items.length);
 	},
 	toListItem: function() {
