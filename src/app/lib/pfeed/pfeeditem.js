@@ -23,10 +23,11 @@ var PFeedItem = Class.create({
 		var answer = (feed.hasOwnProperty(sourceProp)) ? feed[sourceProp] : "";
 		// If it does have it, check to see if there is an array of them.
 		answer = (Object.isArray(answer)) ? answer[0] : answer;
-		
+		// Find property that exists
 		var propertyPresent = textProperty.detect(function(prop) {
 			return answer.hasOwnProperty(prop);
 		});
+		// Get the value from the property that is present, if it exists
 		answer = (propertyPresent !== undefined) ? answer[propertyPresent] : answer;
 		// Set the value
 		this[propToSet] = answer;
