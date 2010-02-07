@@ -48,7 +48,8 @@ Ajax.getFeed = function(options) {
             onSuccess: function(transport) {
                 try {
                     // Turn the XML response into a JSON Object
-                    var json = xml2json(transport.responseXML, "").evalJSON(true);
+                    //var json = xml2json(transport.responseXML, "").evalJSON(true);
+                    var json = encode(transport.respnoseXML).evalJSON(true);
                     var feed = new PFeed(json);
                     if(Object.isFunction(options.success)) {
                         options.success(feed);
