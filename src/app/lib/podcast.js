@@ -1,26 +1,3 @@
-if(typeof Object.deepClone !== 'function') {
-	console.log("[Object.deepClone] is not defined.");
-	Object.prototype.deepClone = function() {
-		try {
-			var newObj = (this instanceof Array) ? [] : {};
-			for (i in this) {
-				if (Object.isFunction(this[i])) continue;	// Skip functions
-				if (this[i] && typeof this[i] == "object") {
-					newObj[i] = this[i].clone();
-				} else {
-					newObj[i] = this[i];
-				}
-			}
-			return newObj;
-		} catch(error) {
-			console.log("[Object.deepClone] %s", error.message);
-			return undefined;
-		}
-	};
-} else {
-	console.log("[Object.deepClone] is defined.");
-}
-
 var Podcast = Class.create({
 	url: undefined,
 	key: undefined,				// Used for retrieval from the Mojo.Depot
@@ -41,8 +18,16 @@ var Podcast = Class.create({
 	copyFromObj: function(sourceObj) {
 		try {
 			// Try an extend Podcast with the object values from sourceObj
-			var clone = sourceObj.deepClone();
-			Object.extend(this, clone);			
+			var newObj = (Object.isArray(sourceObj)) ? [] : {};
+			for (i in sourceObj) {
+				if (Object.isFunction(sourceObj[i])) continue;	// Skip functions
+				if (sourceObj[i] && typeof sourceObj[i] == "object") {
+					newObj[i] = Object.clone(sourceObj[i]);
+				} else {
+					newObj[i] = sourceObj[i];
+				}
+			}
+			Object.extend(this, newObj);
 		} catch(error) {
 			Mojo.Log.error("[Podcast.copyFromObj] %s", error.message);
 		}
@@ -59,18 +44,7 @@ var Podcast = Class.create({
 	},
 	onFeedUpdate: function(feed) {
 		this.copyFromObj(feed);
-		Mojo.Log.info("[Podcast] \"%s\" has updated, %i new item(s).", feed.title, feed.items.length);
+		Mojo.Log.info("[Podcast.onFeedUpdate] \"%s\" has updated, %i new item(s).", feed.title, feed.items.length);
 	},
-	toListItem: function() {
-		// Return this podcast as a list item
-		var result = new Object();
-		
-		result = Object.extend({
-			title: feed.title,
-			img: feed.img,
-			num_new_items: items.length
-		}, result);
-		
-		return result;
-	}
+	toListItem: function() {}
 });

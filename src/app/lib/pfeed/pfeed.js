@@ -41,12 +41,6 @@ var PFeed = Class.create({
 });
 
 Ajax.getFeed = function(options) {
-    
-    options = Object.extend({    
-        url: null,
-        data: null,
-        success: null
-    }, options);
 
     if(options.url) {
         var temp = new Ajax.Request(options.url, {
@@ -60,12 +54,14 @@ Ajax.getFeed = function(options) {
                         options.success(feed);
                     }
                 } catch (error) {
-                    console.log("[Ajax.getFeed try catch error] %s", error);
+                    Mojo.Log.error("[Ajax.getFeed try catch error] %s", error.message);
                 }
             },
             onFailure: function(transport) {
                 console.log("[Ajax.getFeed Error] %s", transport);
             }
         });
+    } else {
+    	console.log("[Ajax.getFeed] URL is empty. Not perfroming request.");
     }
 };
