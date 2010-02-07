@@ -41,7 +41,7 @@ var PFeed = Class.create({
 });
 
 Ajax.getFeed = function(options) {
-
+		var feed = {};
     if(options.url) {
         var temp = new Ajax.Request(options.url, {
             method: 'get',
@@ -49,7 +49,7 @@ Ajax.getFeed = function(options) {
                 try {
                     // Turn the XML response into a JSON Object
                     var json = XMLObjectifier.xmlToJSON(transport.responseXML);
-                    var feed = new PFeed(json);
+                    feed = new PFeed(json);
                     if(Object.isFunction(options.success)) {
                         options.success(feed);
                     }
