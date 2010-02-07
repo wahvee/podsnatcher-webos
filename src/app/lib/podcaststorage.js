@@ -1,6 +1,5 @@
 var PodcastStorage = Class.create({
 	db: {},
-	testVar: "You can see the Test Variable.",
 	listOfPodcasts: [],
 	onRead: {},
 	initialize: function(name, onReadCallback) {
@@ -105,5 +104,12 @@ var PodcastStorage = Class.create({
 		
 		// Perform the addition of the list in the initial app
 		this.db.add("podcastList", initialList, onSuccess.bind(this), this.onFailure);
+	},
+	savePodcasts: function() {
+		var onSuccess = function() {
+			Mojo.Log.info("[PodcastStorage.savePodcasts] Success.");	
+		};
+		
+		this.db.add("podcastList", this.listOfPodcasts, onSuccess.bind(this), this.onFailure);
 	}
 });

@@ -2,12 +2,16 @@ var Podcast = Class.create({
 	url: undefined,
 	key: undefined,				// Used for retrieval from the Mojo.Depot
 	feedItems: [],
+	outOfDate: true,
 	initialize: function(feedURL) {
 		if(Object.isString(feedURL)) {
 			this.url = feedURL;		// Store path to feed URL
 			this.key = hex_md5(this.url);	// MD5 Hash of feed URL (unique cookie ID)
 		} else {
 			this.copyFromObj(feedURL);
+		}
+		if(outOfDate) {
+			this.updateFeed();
 		}
 	},
 	copyFromObj: function(sourceObj) {
