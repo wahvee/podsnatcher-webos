@@ -48,9 +48,11 @@ var Podcast = Class.create({
 	},
 	toListItem: function() {
 		var temp = new Object();
+		temp.id = this.key;
+		temp.key = this.key;
 		temp.title = this.title;
 		temp.description = this.description;
-		temp.newItems = this.items.length;
+		temp.newItems = (Object.isArray(this.items)) ? this.items.size() : 0 ;
 		temp.img = (this.imgPath !== undefined) ? this.imgPath : this.imgUrl;
 		return temp;
 	}
