@@ -62,8 +62,16 @@ function encode(domNode) {
 			result = encode(domNode.firstChild);
 			break;
 		
+		case Node.ENTITY_REFERENCE_NODE:
+		case Node.ENTITY_NODE:
+		case Node.PROCESSING_INSTRUCTION_NODE:
+		case Node.DOCUMENT_TYPE_NODE:
+		case Node.NOTATION_NODE:
+			Mojo.Log.info("[XML2JSON] %j", domNode);
+			break;
+			
 		default:  //FIXME: Debugging purposes only
-			throw new Error('Unknown node type: '+domNode);
+			throw new Error('Unknown node type: '+domNode.nodeType);
 			break;
 	}   
 	return result;
