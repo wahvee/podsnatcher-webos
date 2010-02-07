@@ -42,6 +42,7 @@ var PodcastStorage = Class.create({
 					var item = new Podcast(podcastItem);
 					this.listOfPodcasts.push(item);
 				}, this);
+				// Perform the event PodcastStorage.LoadingDatabaseSuccess
 				this.doEvent(PodcastStorage.LoadingDatabaseSuccess);
 			}
 		};
@@ -51,6 +52,14 @@ var PodcastStorage = Class.create({
 		} catch(error) {
 			Mojo.Log.error("[PodcastStorage.getPodcasts] error! %s", error.message);
 		}
+	},
+	getPodcastList: function() {
+		var temp = new Array();
+		this.listOfPodcasts.each(function(podcast, index) {
+			temp.push(podcast.toListItem());
+		});
+		
+		return temp.clone();
 	},
 	updatePodcast: function() {
 		

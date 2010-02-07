@@ -47,5 +47,11 @@ var Podcast = Class.create({
 		Mojo.Log.info("[Podcast.onFeedUpdate] \"%s\" has updated, %i new item(s).", this.title, this.items.length);
 	},
 	toListItem: function() {
-}
+		var temp = new Object();
+		temp.title = this.title;
+		temp.description = this.description;
+		temp.newItems = this.items.length;
+		temp.img = (this.imgPath !== undefined) ? this.imgPath : this.imgUrl;
+		return temp;
+	}
 });

@@ -16,7 +16,7 @@ MainAssistant.prototype = {
 		this.podcastList_ctrl = this.controller.get('podcastList');
 		
 		// Populate the list with the podcasts
-		this.podcastListModel = this.db.getPodcastList();
+		this.podcastListModel.items = this.db.getPodcastList();
 		this.controller.modelChanged(this.podcastListModel);
 		
 	},
