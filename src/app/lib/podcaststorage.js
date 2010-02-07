@@ -15,7 +15,7 @@ var PodcastStorage = Class.create({
 		
 		// Connect/Create statement for the db
 		this.db = new Mojo.Depot({
-			replace: true,
+			//replace: true,
 			name: dbName,
 			version: "1",
 			displayName: "PodSnatcher Database",
@@ -33,8 +33,7 @@ var PodcastStorage = Class.create({
 			} else {
 				response.each(function(podcastItem, index) {
 					var item = new Podcast(podcastItem);
-					Mojo.Log.logProperties(podcastItem);
-					listOfPodcasts.push(item);
+					this.listOfPodcasts.push(item);
 				}, this);
 				this.onRead();
 			}
