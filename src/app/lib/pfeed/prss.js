@@ -1,6 +1,7 @@
 var PRss = Class.create(PFeedItem, {
     version: '1.0',
     language: '',
+    imgUrl: '',
     initialize: function($super, rssFeed) {
         $super(rssFeed.channel[0]);
         this.items = [];
@@ -36,6 +37,12 @@ var PRss = Class.create(PFeedItem, {
     findUpdated: function(feed) {
         // Over-ride the default findUpdated inherited from PFeedItem
         this.setPropertyFromFeed(feed, 'updated', 'lastBuildDate');
+    },
+    findImage: function(feed) {
+        // Find an image tag if one exists
+        if(feed.hasOwnProperty('image')) {
+            this.setPropertyFromFeed(feed.image, 'imgUrl', 'url');   
+        }
     }
 });
 
