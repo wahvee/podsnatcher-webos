@@ -1,3 +1,8 @@
+.podcastImg {
+	float: left;
+	width: 60px;
+	margin-top: 0;
+}
 .itemCount {
 	margin: 9px 10px 0px 0px !important;
 	padding: 5px 5px 5px 5px !important;
