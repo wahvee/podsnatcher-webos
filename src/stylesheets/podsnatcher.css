@@ -1,7 +1,16 @@
+.palm-row {
+	height: 75px;
+}
+
+.title {
+	padding-top: 7px;
+}
+
 .podcastImg {
 	float: left;
 	width: 60px;
 	margin-top: 0;
+	padding-top: 7px;
 }
 .itemCount {
 	margin: 9px 10px 0px 0px !important;
