@@ -60,6 +60,15 @@ Ajax.getFeed = function(options) {
             },
             onFailure: function(transport) {
                 Mojo.Log.error("[Ajax.getFeed Error] %j", transport);
+            },
+            onUninitialized: function() {
+                Mojo.Log.error("[Ajax.getFeed] onUninitialized");
+            },
+            onLoading: function() {
+                Mojo.Log.info("[Ajax.getFeed] onLoading");
+            },
+            onInteractive: function() {
+                Mojo.Log.info("[Ajax.getFeed] onInteractive");
             }
         });
     } else {
