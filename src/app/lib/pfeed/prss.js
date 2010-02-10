@@ -10,6 +10,7 @@ var PRss = Class.create(PFeedItem, {
     _parse: function(rssFeed) {
         this.findVersion(rssFeed);
         this.findLanguage(rssFeed.channel);
+        this.findImage(rssFeed.channel);
         
         // Different location for items
         var feedItems = (this.version == '1.0') ? rssFeed.item : rssFeed.channel[0].item;
@@ -40,8 +41,10 @@ var PRss = Class.create(PFeedItem, {
     },
     findImage: function(feed) {
         // Find an image tag if one exists
-        if(feed.hasOwnProperty('image')) {
-            this.setPropertyFromFeed(feed.image, 'imgUrl', 'url');   
+        // feed should be the channel tag...which is going to be an array
+        // so select the first item in the array
+        if(feed[0].hasOwnProperty('image')) {
+            this.setPropertyFromFeed(feed[0].image, 'imgUrl', 'url');   
         }
     }
 });
