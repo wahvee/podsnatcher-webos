@@ -5,25 +5,25 @@ function MainAssistant(db) {
 
 MainAssistant.prototype = {
 	setup: function() {
-		Ares.setupSceneAssistant(this);
-		
-		// Add event listeners for the database
-		this.db.addEventListener(PodcastStorage.PodcastStartUpdate, this.podcastUpdating.bind(this));
-		this.db.addEventListener(PodcastStorage.PodcastUpdateSuccess, this.podcastUpdateSuccess.bind(this));
-		this.db.addEventListener(PodcastStorage.PodcastUpdateFailure, this.podcastUpdateFailure.bind(this));
-		
-		// Get reference to the list on the screen
-		this.podcastList_ctrl = this.controller.get('podcastList');
-		
-		// Populate the list with the podcasts
-		this.podcastListModel.items = this.db.getPodcastList();
-		this.controller.modelChanged(this.podcastListModel);
-		
-		this.db.updatePodcasts();
-		
+	   Ares.setupSceneAssistant(this);
+	   
+	   // Add event listeners for the database
+	   this.db.addEventListener(PodcastStorage.PodcastStartUpdate, this.podcastUpdating.bind(this));
+	   this.db.addEventListener(PodcastStorage.PodcastUpdateSuccess, this.podcastUpdateSuccess.bind(this));
+	   this.db.addEventListener(PodcastStorage.PodcastUpdateFailure, this.podcastUpdateFailure.bind(this));
+	   
+	   // Get reference to the list on the screen
+	   this.podcastList_ctrl = this.controller.get('podcastList');
+	   
+	   // Populate the list with the podcasts
+	   this.podcastListModel.items = this.db.getPodcastList();
+	   this.controller.modelChanged(this.podcastListModel);
 	},
 	cleanup: function() {
 		Ares.cleanupSceneAssistant(this);
+	},
+	activate: function() {
+	   this.db.updatePodcasts();
 	}
 };
 
