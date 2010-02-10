@@ -1,23 +1,23 @@
 /*
-	This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	Author: Sam Tsvilik
-	Version: 4.0 Beta
-	Last Modified: 08/29/2009
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *	
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *	
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	
+ *	Author: Sam Tsvilik
+ *	Version: 4.0 Beta
+ *	Last Modified: 08/29/2009
 */
 (function($) {
-	//Converts XML DOM to JSON				
+	//Converts XML DOM to JSON
 	//Helper functions
 	var TOSTR = Object.prototype.toString,
 		util = {
@@ -27,8 +27,8 @@
 		isDef: function(o) {return (typeof(o) !== "undefined");	},
 		isArr: function(o) { return TOSTR.call(o) === "[object Array]"; },
 		isNum: function(s) {
-			var out = false;					
-			if(util.isStr(s)) { 
+			var out = false;
+			if(util.isStr(s)) {
 				var pattern = /^((-)?([0-9]*)((\.{0,1})([0-9]+))?$)/;
 				out = pattern.test(s);
 			}
@@ -44,7 +44,7 @@
 			}
 			return out;
 		},
-		formatName: function(name) {					
+		formatName: function(name) {
 			var tName = this.trim(String(name));
 			return tName;
 		},
@@ -54,22 +54,24 @@
 		},
 		//Adds a method to the object
 		method: function(){
-			var aLen = arguments.length, to, method, fn, map;			
+			var aLen = arguments.length, to, method, fn, map;
 			switch(aLen) {
-				case 2: to =  arguments[0]; 
-						map = arguments[1];
-						for(method in map) {
-							fn = map[method];
-							to[method] = fn;
-						}
-						break;
-				case 3: to =  arguments[0]; 
-						map = arguments[1];
-						fn = arguments[2];
-						if(util.isFn(fn) && util.isStr(method)) {
-							to[method] = fn;	
-						}
-						break;
+				case 2:
+					to = arguments[0];
+					map = arguments[1];
+					for(method in map) {
+						fn = map[method];
+						to[method] = fn;
+					}
+					break;
+				case 3:
+					to = arguments[0];
+					map = arguments[1];
+					fn = arguments[2];
+					if(util.isFn(fn) && util.isStr(method)) {
+						to[method] = fn;	
+					}
+					break;
 			}
 		}
 	};
@@ -77,42 +79,40 @@
 	var XMLSerializer = {
 		//Creates an XMLDomDocument instance
 		newDocument: function(rootTagName, namespaceURL) {
-		  if (!rootTagName) rootTagName = "";
-		  if (!namespaceURL) namespaceURL = "";
-		  if (document.implementation && document.implementation.createDocument) {
-			// This is the W3C standard way to do it
-			return document.implementation.createDocument(namespaceURL, rootTagName, null);
-		  } else { // This is the IE way to do it
-			// Create an empty document as an ActiveX object
-			// If there is no root element, this is all we have to do
-			var doc = new ActiveXObject("MSXML2.DOMDocument");
-			// If there is a root tag, initialize the document
-			if (rootTagName) {
-			  // Look for a namespace prefix
-			  var prefix = "";
-			  var tagname = rootTagName;
-			  var p = rootTagName.indexOf(':');
-			  if (p !== -1) {
-				prefix = rootTagName.substring(0, p);
-				tagname = rootTagName.substring(p+1);
-			  }
-			  // If we have a namespace, we must have a namespace prefix
-			  // If we don't have a namespace, we discard any prefix
-			  if (namespaceURL) {
-				if (!prefix) prefix = "a0"; // What Firefox uses
-			  } else prefix = "";
-			  // Create the root element (with optional namespace) as a
-			  // string of text
-			  var text = "<" + (prefix?(prefix+":"):"") +  tagname +
-				  (namespaceURL
-				   ?(" xmlns:" + prefix + '="' + namespaceURL +'"')
-				   :"") +
-				  "/>";
-			  // And parse that text into the empty document
-			  doc.loadXML(text);
+			if (!rootTagName) rootTagName = "";
+			if (!namespaceURL) namespaceURL = "";
+			if (document.implementation && document.implementation.createDocument) {
+				// This is the W3C standard way to do it
+				return document.implementation.createDocument(namespaceURL, rootTagName, null);
+			} else { // This is the IE way to do it
+				// Create an empty document as an ActiveX object
+				// If there is no root element, this is all we have to do
+				var doc = new ActiveXObject("MSXML2.DOMDocument");
+				// If there is a root tag, initialize the document
+				if (rootTagName) {
+					// Look for a namespace prefix
+					var prefix = "";
+					var tagname = rootTagName;
+					var p = rootTagName.indexOf(':');
+					if (p !== -1) {
+						prefix = rootTagName.substring(0, p);
+						tagname = rootTagName.substring(p+1);
+					}
+					
+					// If we have a namespace, we must have a namespace prefix
+					// If we don't have a namespace, we discard any prefix
+					if (namespaceURL) {
+						if (!prefix) prefix = "a0"; // What Firefox uses
+					} else prefix = "";
+					
+					// Create the root element (with optional namespace) as a
+					// string of text
+					var text = "<" + (prefix?(prefix+":"):"") +  tagname + (namespaceURL ? (" xmlns:" + prefix + '="' + namespaceURL +'"') : "") + "/>";
+					// And parse that text into the empty document
+					doc.loadXML(text);
+				}
+				return doc;
 			}
-			return doc;
-		  }
 		},
 		//Recursively converts JSON object to an XML node
 		objToNode: function(curNode, obj) {
@@ -125,11 +125,11 @@
 							curNode.setAttribute(subElement.replace('@',''), val);
 						} else if(subElement === "$comments") {
 							if(!!val.length) {
-								var c = 0, clen = val.length-1, cc;									
+								var c = 0, clen = val.length-1, cc;
 								do {
 									cc = val[c];
 									curNode.appendChild(this.createComment(cc));
-								} while(c++ < clen); 
+								} while(c++ < clen);
 							}
 						} else if(util.isNodeSet(val)) {
 							var n = 0, nlen = val.length-1, nn;
@@ -137,30 +137,34 @@
 								nn = val[n];
 								if(!!nn.ns) {
 									if(util.isDef(this.createElementNS)) {
-										newNode = curNode.appendChild(this.createElementNS(nn.ns, subElement));
-									} else {										
-										newNode = curNode.appendChild(this.createNode(1, subElement, nn.ns));
+									newNode = curNode.appendChild(this.createElementNS(nn.ns, subElement));
+									} else {
+									newNode = curNode.appendChild(this.createNode(1, subElement, nn.ns));
 									}
 								} else {
 									newNode = curNode.appendChild(this.createElement(subElement));
-								}								
-								if(!!nn.Text) {	newNode.appendChild(util.isDef(nn.hasCDATA)?this.createCDATASection(nn.Text):this.createTextNode(nn.Text)); }
+								}
+								if(!!nn.Text) {
+									newNode.appendChild( util.isDef(nn.hasCDATA) ? this.createCDATASection(nn.Text) : this.createTextNode(nn.Text));
+								}
+								
 								XMLSerializer.objToNode.call(this, newNode, nn);
-							} while(n++ < nlen);																		
+							} while(n++ < nlen);
 						}
 					}
 				}
 			}
 		}
 	};
+	
 	//Base child element
 	var IChild = function(parent) {
 		this.parent = parent || null;
 	};
 	//Root Node Class
-	var IRoot = function(name) {				
+	var IRoot = function(name) {
 		this.nodeName = name || "";
-		this.ns = "";				
+		this.ns = "";
 	};	
 	//Node Class
 	var INode = function() {
@@ -229,9 +233,9 @@
 							if(util.isDef(val) && val === obj) { out = n; break; }
 						}
 						break;
-				}						
+				}
 			}
-			return out;	
+			return out;
 		},
 		sortByAttribute: function(attr, dir){
 			if(!!this.length && util.isStr(attr)) {
@@ -245,7 +249,7 @@
 					return _out;
 				});
 			}
-		},	
+		},
 		sortByValue: function(dir){
 			if(!!this.length) {
 				this.sort(function(a,b) {
@@ -287,25 +291,25 @@
 		}	
 	});
 	//Engine Factory
-	var XMLObjectifierEngine = (function() {				
+	var XMLObjectifierEngine = (function() {
 		var _public = {
 			makeNodeSet: function() {
-				var node = new INodeSet();				
+				var node = new INodeSet();
 				return node;
 			},
 			makeNode: function(parent, obj)	{
 				var name = obj.localName||obj.baseName;
 					name = util.formatName(name);
 				var node = new INode(parent, name);
-					node.ns = obj.prefix || "";							
+					node.ns = obj.prefix || "";
 					this.setAttributes(node, obj);
 				return node;
 			},
 			setAttributes: function(obj, xnode) {
-				if(util.isDef(xnode) && !!xnode.attributes.length) {							
+				if(util.isDef(xnode) && !!xnode.attributes.length) {
 					var a = xnode.attributes.length-1, attName = null, objParent = null;
 					do { //Order is irrelevant (speed-up)
-						attName = "@"+xnode.attributes[a].name;							
+						attName = "@"+xnode.attributes[a].name;
 						obj.attr(attName, xnode.attributes[a].value);
 					} while(a--);
 				}
@@ -318,7 +322,7 @@
 						do {
 							curChild = xobj.childNodes[n];
 							switch(curChild.nodeType) {
-								case 1: //Node										
+								case 1: //Node
 									//Create a single node
 									newNode = _public.makeNode(parent, curChild);
 									if(util.isFn(this.decorator)) {
@@ -330,7 +334,7 @@
 										//Add child node to parent
 										parent.appendChild(newNode);
 										//Recursive call if node contains children
-										if(curChild.hasChildNodes()){ _public.run.apply(this, [newNode, curChild]); }												
+										if(curChild.hasChildNodes()){ _public.run.apply(this, [newNode, curChild]); }
 									}
 									break;
 								case 3: //Text Value (This method gets executed regardless of CDATA present so we combine Text value)
@@ -340,7 +344,7 @@
 										parent.Text += util.trim(curChild.nodeValue);
 									}
 									break;
-								case 4: //CDATA										
+								case 4: //CDATA
 									parent.hasCDATA = true;
 									parent.val(util.isDef(curChild.text)?util.trim(curChild.text):util.trim(curChild.nodeValue));												
 									break;
@@ -349,7 +353,7 @@
 										if(!util.isDef(parent.$comments)) { parent.$comments = []; }
 										parent.$comments.push(util.trim(curChild.nodeValue));
 									}
-									break;											
+									break;
 							}
 						} while(n++ < nodesLen);
 					}
@@ -374,7 +378,7 @@
 				if(xobj.nodeType === 3 || xobj.nodeType === 4) {
 					return xobj.nodeValue;
 				}
-				//Begins a recursive process to build out a JSON structure						
+				//Begins a recursive process to build out a JSON structure
 				this.run.apply(opt, [root, xroot]);
 				this.setAttributes(root, xroot);
 				return root;
@@ -398,7 +402,7 @@
 			}
 		};
 		
-		return _public;				 
+		return _public;
 	})();
 	IRoot.prototype = {
 		typeOf: "xmlObjectifier",
@@ -431,7 +435,7 @@
 				tokens = sel.match(rx);
 				if(!!tokens.length) {
 					var t = 0, tLen = tokens.length-1;
-					do {								
+					do {
 						token = tokens[t];
 						tokenOnly = token.match(/[A-Za-z\-]+/)[0];
 						curMatch = !!curMatch?(util.isArr(curMatch)?curMatch[0]:curMatch)[tokenOnly]:this[tokenOnly];
@@ -453,7 +457,7 @@
 							} else if(util.isNum(conditionStr)){ 
 								curMatch = curMatch[~~+conditionStr];
 							}
-						}								
+						}
 					} while(t++ < tLen);
 					out = curMatch;
 				}
