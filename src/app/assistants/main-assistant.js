@@ -31,6 +31,7 @@ MainAssistant.prototype = {
 // about to update
 MainAssistant.prototype.podcastUpdating = function(podcastKey) {
 	Mojo.Log.info("[MainAssistant] Podcast %s updating.", podcastKey);
+	this.controller.setupWidget("spinner_"+podcastKey, { spinnerSize: 'small' }, { spinning: true });
 };
 
 // Event listener that is passed the key to the podcast that
