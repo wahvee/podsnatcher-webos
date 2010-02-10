@@ -17,7 +17,7 @@ var PodcastStorage = Class.create({
 		// Wait for successful creation/connection from the db
 		var onSuccess = function() {
 			Mojo.Log.info("[PodcastStorage] Connection to database success.");
-			this.getPodcasts();
+			this.loadPodcasts();
 		};
 		
 		// Connect/Create statement for the db
@@ -60,10 +60,16 @@ var PodcastStorage = Class.create({
 		}
 	},
 	updatePodcasts: function() {
-		this.listOfPodcasts.each(function(podcast, index) {
-			// Update a given podcast
-			this.updatePodcast(podcast.key);
-		}, this);
+		try {
+			this.listOfPodcasts.each(function(podcast, index) {
+				// Update a given podcast
+				podcast.updateFeed(this.onFeedUpdate.bind(this));
+				// Let listeners know that update for the given podcast is starting
+				this.doEvent(PodcastStorage.PodcastStartUpdate, podcast.key);
+			}, this);
+		} catch (error) {
+			Mojo.Log.error("[PodcastStorage.updatePodcasts] %s", error.message);
+		}
 	},
 	getPodcastList: function() {
 		var temp = new Array();
@@ -72,23 +78,6 @@ var PodcastStorage = Class.create({
 		});
 		
 		return temp.clone();
-	},
-	updatePodcast: function(feedKey) {
-		try {
-			var podcastToUpdate = this.findPodcast(feedKey);
-			
-			// Make sure that the podcast was found
-			if(podcastToUpdate !== undefined) {
-				podcastToUpdate.updateFeed(this.onFeedUpdate.bind(this));
-				// Let listeners know that update for the given podcast is starting
-				this.doEvent(PodcastStorage.PodcastStartUpdate, feedKey);
-			} else {
-				// Since the podcast to update cannot be found notify of failure
-				this.doEvent(PodcastStorage.PodcastUpdateFailure, feedKey);
-			}
-		} catch(error) {
-			Mojo.Log.error("[PodcastStorage.updatePodcast] %s", error.message);
-		}
 	},
 	onFeedUpdate: function(feedKey) {
 		// Do event to notify that the podcast has updated
@@ -168,15 +157,15 @@ var PodcastStorage = Class.create({
 		//http://mailbagpodcast.cnettv.com
 		
 		var onSuccess = function() {
-			this.getPodcasts();
+			this.loadPodcasts();
 		};
 		
 		var initialList = [
 			new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
 			new Podcast('http://revision3.com/diggnation/feed/MP4-Large'),
 			new Podcast('http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595'),
-			new Podcast('http://buzzreportpodcast.cnettv.com'),
-			new Podcast('http://mailbagpodcast.cnettv.com')
+			new Podcast('http://feeds.feedburner.com/cnet/buzzreport?format=xml'),
+			new Podcast('http://feeds.feedburner.com/cnet/mailbag?format=xml')
 		];
 		
 		// Perform the addition of the list in the initial app

@@ -34,7 +34,9 @@
 			}
 			return out;
 		},
-		isXNode: function(o) { return (typeof(o) === "object" && this.isDef(o.nodeName)); },
+		isXNode: function(o) {
+			return (o !== null && typeof(o) === "object" && this.isDef(o.nodeName));
+		},
 		isNodeSet: function(o) { return o instanceof INodeSet; },
 		//Alters attribute and collection names to comply with JS
 		trim: function(str) {

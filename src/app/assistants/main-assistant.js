@@ -30,12 +30,13 @@ MainAssistant.prototype = {
 // Event listener that is passed the key to the podcast that is
 // about to update
 MainAssistant.prototype.podcastUpdating = function(podcastKey) {
-	
+	Mojo.Log.info("[MainAssistant] Podcast %s updating.", podcastKey);
 };
 
 // Event listener that is passed the key to the podcast that
 // has successfully updated
 MainAssistant.prototype.podcastUpdateSuccess = function(podcastKey) {
+	Mojo.Log.info("[MainAssistant] Podcast %s finished updating.", podcastKey);
 	// Populate the list with the podcasts
 	this.podcastListModel.items = this.db.getPodcastList();
 	this.controller.modelChanged(this.podcastListModel);
