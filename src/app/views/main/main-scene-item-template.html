@@ -1,6 +1,9 @@
-<div id="#{id}" class='result palm-row' x-mojo-tap-highlight='momentary'>
-<div>#{title}</div>
-<!--<div>#{description}</div>-->
-<div>#{newItems}</div>
-<img src="#{img}" alt="#{title} Podcast Image" width="60" height="60"/>
+<div class="palm-row" x-mojo-tap-highlight="momentary">
+	<div class="palm-row-wrapper">
+		<div class="podcastImg">
+			<img src="#{img}" alt="#{title} Podcast Image" width="60" height="60"/>
+		</div>
+		<div class="label itemCount">#{newItems}</div>
+		<div class="title truncating-text">#{title}</div>
+	</div>
 </div>
