@@ -2,7 +2,6 @@
 	background-image: url(../images/background-top.png);
 	background-repeat: no-repeat;
 	height: 155px;
-	position: relative;
 }
 
 #album-art-area {
@@ -11,9 +10,9 @@
 	background-image: url(../images/tabs.png);
 	background-repeat: no-repeat;
 	margin: 0 auto;
-	position: absolute;
-	left: 52px;
-	top: 59px;
+	position: relative;
+	top: -145px;
+	z-index: 500;
 }
 
 #album-art {
@@ -25,15 +24,21 @@
 	background-image: url(../images/border.png);
 	background-repeat: no-repeat;
 	margin: 0 auto;
-	position: absolute;
-	left: 60px;
-	top: 14px;
+	position: relative;
+	top: 8px;
 	z-index: 1000;
 }
 
 img#image {
 	margin: 28px;
 	background-color: #caff42;
+}
+
+#stripe {
+	background-image: url(../images/stripe.png);
+	background-repeat: repeat-x;
+	height: 27px;
+	z-index: 250;
 }
 
 #footer {
@@ -44,8 +49,15 @@ img#image {
 }
 
 #episodeList {
+	margin: 0 auto;
 	position: relative;
-	top: 45px;
+	top: 25px;
+	height: 400px;
+	width: 85%;
+	z-index: 0;
+}
+#episodeListScroller {
+	z-index: 0;
 }
 
 .listItem,
