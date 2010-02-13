@@ -1,12 +1,39 @@
-body {
-	height: 400px;
-	width: 320px;
-}
-
 #header {
 	background-image: url(../images/background-top.png);
 	background-repeat: no-repeat;
 	height: 155px;
+	position: relative;
+}
+
+#album-art-area {
+	width: 216px;
+	height: 111px;
+	background-image: url(../images/tabs.png);
+	background-repeat: no-repeat;
+	margin: 0 auto;
+	position: absolute;
+	left: 52px;
+	top: 59px;
+}
+
+#album-art {
+	/* Album Art = 144x144px
+	   Border = 14px, 172x172px
+	   Actual "border.png" 14px, 200x200px */
+	width: 200px;
+	height: 200px;
+	background-image: url(../images/border.png);
+	background-repeat: no-repeat;
+	margin: 0 auto;
+	position: absolute;
+	left: 60px;
+	top: 14px;
+	z-index: 1000;
+}
+
+img#image {
+	margin: 28px;
+	background-color: #caff42;
 }
 
 #footer {
@@ -17,31 +44,8 @@ body {
 	background-color: #ebf7f8;
 }
 
-#album-art-area {
-	width: 217px;
-	height: 110px;
-	background-image: url(../images/tabs.png);
-	background-repeat: no-repeat;
-	margin: 0 auto;
-	position: relative;
-	top: -130px;
-}
-
-#album-art {
-	width: 185px;
-	height: 185px;
-	background-image: url(../images/border.png);
-	background-repeat: no-repeat;
-	margin: 0 auto;
-	position: relative;
-	top: 18px;
-	z-index: 1000;
-}
-
-img#image {
-	/*background-color: #CAFF42;
-*/
-	border: none;
+#episodeList {
+	
 }
 
 /* CLICKABLE AREA */
