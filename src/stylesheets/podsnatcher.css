@@ -1,3 +1,8 @@
+body {
+	height: 400px;
+	width: 320px;
+}
+
 #header {
 	background-image: url(../images/background-top.png);
 	background-repeat: no-repeat;
@@ -19,8 +24,24 @@
 	background-repeat: no-repeat;
 	margin: 0 auto;
 	position: relative;
-	top: 60px;
-	z-index: 0;
+	top: -130px;
+}
+
+#album-art {
+	width: 185px;
+	height: 185px;
+	background-image: url(../images/border.png);
+	background-repeat: no-repeat;
+	margin: 0 auto;
+	position: relative;
+	top: 18px;
+	z-index: 1000;
+}
+
+img#image {
+	/*background-color: #CAFF42;
+*/
+	border: none;
 }
 
 /* CLICKABLE AREA */
@@ -39,20 +60,3 @@
 	z-index: 1000;
 }
 /******************/
-
-#album-art {
-	width: 185px;
-	heigh: 185px;
-	background-image: url(../images/border.png);
-	background-repeat: no-repeat;
-	position: relative;
-	top: 0px;
-	margin: 0 auto;
-	z-index: 500;
-	border: 1px solid yellow;
-}
-
-img#image {
-	/*background-color: #CAFF42;*/
-	border: none;
-}
