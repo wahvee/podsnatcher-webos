@@ -37,7 +37,6 @@ img#image {
 }
 
 #footer {
-	height: 400px;
 	background-position: top;
 	background-image: url(../images/background-bottom.png);
 	background-repeat: repeat-x;
@@ -48,15 +47,27 @@ img#image {
 	position: relative;
 	top: 45px;
 }
-.listItem {
+
+.listItem,
+.palm-row {
 	margin: 0 auto;
-	background-color: #88abc2;
-	border: 4px solid #acc9dd;
+	margin-bottom: 4px; 
+	background-image: none !important;
+	background-color: #88abc2 !important;
+	border: 4px solid #acc9dd !important;
 	color: #ffffff;
 	height: 46px;
 	width: 256px;
 	overflow: hidden;
 }
+
+.listItem.palm-row.selected {
+	-webkit-border-image: none !important;
+	background: none !important;
+	border: 4px solid #acc9dd !important;
+	background-color: #49708A !important;
+}
+
 .episodeTitle {
 	width: 100%;
 	float: left;
