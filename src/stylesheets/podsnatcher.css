@@ -45,7 +45,35 @@ img#image {
 }
 
 #episodeList {
-	
+	position: relative;
+	top: 45px;
+}
+.listItem {
+	margin: 0 auto;
+	background-color: #88abc2;
+	border: 4px solid #acc9dd;
+	color: #ffffff;
+	height: 46px;
+	width: 256px;
+	overflow: hidden;
+}
+.episodeTitle {
+	width: 100%;
+	float: left;
+	margin: 0px;
+	padding: 0px 4px 0px 4px;
+	font-size: 16px;
+}
+.episodeLength {
+	width: 100%;
+	float: right;
+	text-align: right;
+	margin: 0px;
+	padding-right: 4px;
+	font-size: 14px;
+	overflow: hidden;
+	position: relative;
+	bottom: -4px;
 }
 
 /* CLICKABLE AREA */
