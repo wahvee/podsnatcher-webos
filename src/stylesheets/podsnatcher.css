@@ -5,40 +5,54 @@
 }
 
 #footer {
+	height: 400px;
+	background-position: top;
 	background-image: url(../images/background-bottom.png);
 	background-repeat: repeat-x;
 	background-color: #ebf7f8;
 }
 
 #album-art-area {
+	width: 217px;
+	height: 110px;
 	background-image: url(../images/tabs.png);
 	background-repeat: no-repeat;
-	margin-left: auto;
-	margin-right: auto;
+	margin: 0 auto;
 	position: relative;
-	top: 65px;
+	top: 60px;
 	z-index: 0;
 }
 
 /* CLICKABLE AREA */
 #album-art-area-right {
+	height: 110px;
 	width: 100px;
 	float: right;
+	border: 1px solid red;
+	z-index: 1000;
 }
 #album-art-area-left {
+	height: 110px;
 	width: 100px;
 	float: left;
+	border: 1px solid green;
+	z-index: 1000;
 }
 /******************/
 
 #album-art {
+	width: 185px;
+	heigh: 185px;
 	background-image: url(../images/border.png);
 	background-repeat: no-repeat;
 	position: relative;
-	top: 28px;
-	z-index: 1000;
+	top: 0px;
+	margin: 0 auto;
+	z-index: 500;
+	border: 1px solid yellow;
 }
 
 img#image {
-	background-color: red;
+	/*background-color: #CAFF42;*/
+	border: none;
 }
