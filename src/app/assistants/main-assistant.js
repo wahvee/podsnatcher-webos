@@ -36,10 +36,9 @@ function MainAssistant(db) {
 
 MainAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
-	   $("episodeListScroller").setStyle({
-			 height: this.screenHeight + "px;",
-			 width: this.screenWidth + "px;"
-	   });
+	$("episodeListScroller").setStyle({
+		height: this.screenHeight + "px;"
+	});
 	   
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed. */
 	
@@ -77,30 +76,10 @@ MainAssistant.prototype.cleanup = function(event) {
  *	the user has the phone in.
  */
 MainAssistant.prototype.handleOrientation = function(event) {
-	   var width = this.screenWidth;
-	   var height = this.screenHeight;
-	   
-	   switch(event.position) {
-			 case 0:
-				    break;
-			 case 1:
-				    break;
-			 case 2:
-			 case 3:
-				    // Do nothing this is the normal width and height
-				    break;
-			 case 4:
-			 case 5:
-				    width = this.screenHeight;
-				    height = this.screenWidth;
-				    break;
-			 default:
-				    Mojo.Log.info("[MainAssistant.handleOrientation] %s!! I was promised a number 0 - 5.", event.position);
-				    break;
-	   }
-	   
-	   $("episodeListScroller").setStyle({
-			 height: height + "px;",
-			 width: width + "px;"
-	   });
+	var width = (event.position == 0 || event.position == 1 || event.position == 2 || event.position == 3) ? this.screenWidth : this.screenHeight;
+	var height = (event.position == 0 || event.position == 1 || event.position == 2 || event.position == 3) ? this.screenHeight : this.screenWidth;
+	
+	$("episodeListScroller").setStyle({
+		height: height + "px;"
+	});
 }
