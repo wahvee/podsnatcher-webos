@@ -5,6 +5,9 @@ function MainAssistant(db) {
 	   that needs the scene controller should be done in the setup function below. */
 	this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
 	this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
+	this.animationFinish = 500;
+	this.animationDuration = 0.25;
+	this.animationType = 'ease-in';
 	
 	Mojo.Log.info("[MainAssistant] Screen size is: %sx%s", this.screenWidth, this.screenHeight);
 	
@@ -49,6 +52,7 @@ MainAssistant.prototype.setup = function() {
 	/* add event handlers to listen to events from widgets */
 	// Wait for screen changes
 	this.controller.listen(document, 'orientationchange', this.handleOrientation.bindAsEventListener(this));
+	this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
 }
 
 MainAssistant.prototype.activate = function(event) {
@@ -73,4 +77,45 @@ MainAssistant.prototype.cleanup = function(event) {
  */
 MainAssistant.prototype.handleOrientation = function(event) {
 	
+}
+
+/**
+ * If the user flicks the album art to switch to the next podcast.
+ */
+MainAssistant.prototype.handleAlbumArtFlick = function(event) {
+	   var start = $("album-art").cumulativeOffset().left;
+	   if(event.velocity.x >= 500) {
+			 Mojo.Animation.animateStyle($("album-art"), 'left', 'bezier', {
+				    from: start,
+				    to: this.animationFinish,
+				    duration: this.animationDuration,
+				    curve: this.animationType,
+				    onComplete: this.switchPodcast.bind(this, 'next')
+			 });
+	   } else if(event.velocity.x <= - 500) {
+			 Mojo.Animation.animateStyle($("album-art"), 'left', 'bezier', {
+				    from: start,
+				    to: -this.animationFinish,
+				    duration: this.animationDuration,
+				    curve: this.animationType,
+				    onComplete: this.switchPodcast.bind(this, 'previous')
+			 });
+	   }
+}
+
+MainAssistant.prototype.switchPodcast = function(next) {
+	   // Calculate the start and ending positions of the animations
+	   var start = (next === 'next') ? -this.animationFinish : this.animationFinish;
+	   var finish = 0;
+	   // Move the image to it's new starting position
+	   $('album-art').setStyle({
+			 left: start + "px"
+	   });
+	   // Perform the animation
+	   Mojo.Animation.animateStyle($('album-art'), 'left', 'bezier', {
+			 from: start,
+			 to: finish,
+			 duration: this.animationDuration,
+			 curve: this.animationType
+	   });
 }
