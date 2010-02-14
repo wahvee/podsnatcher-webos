@@ -7,6 +7,6 @@ StageAssistant.prototype.setup = function() {
 	} catch(version_error) {
 		Mojo.Log.error("[Prototype] %s", version_error.message);
 	}
-	this.controller.pushScene({name: "main", disableSceneScroller: true});
+	this.controller.pushScene({name: "main"});
 	this.controller.setWindowOrientation("free");
 };

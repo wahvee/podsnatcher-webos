@@ -36,15 +36,11 @@ function MainAssistant(db) {
 
 MainAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
-	$("episodeListScroller").setStyle({
-		height: this.screenHeight + "px;"
-	});
 	   
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed. */
 	
 	/* setup widgets here */
 	try {
-		this.controller.setupWidget("episodeListScroller", {mode: 'vertical'}, {});
 		this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
 	} catch (func_error) {
 		Mojo.Log.info("[Create Widgets] %s", func_error.message);
@@ -76,10 +72,5 @@ MainAssistant.prototype.cleanup = function(event) {
  *	the user has the phone in.
  */
 MainAssistant.prototype.handleOrientation = function(event) {
-	var width = (event.position == 0 || event.position == 1 || event.position == 2 || event.position == 3) ? this.screenWidth : this.screenHeight;
-	var height = (event.position == 0 || event.position == 1 || event.position == 2 || event.position == 3) ? this.screenHeight : this.screenWidth;
 	
-	$("episodeListScroller").setStyle({
-		height: height + "px;"
-	});
 }
