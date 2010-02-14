@@ -1,3 +1,7 @@
+#mojo-scene-main-scene-scroller {
+	background: url(../images/background-bottom.png) repeat-x #ebf7f8;
+}
+
 #header {
 	position: fixed;
 	top: 0;
@@ -46,15 +50,13 @@ img#image {
 	z-index: 250;
 }
 
-#episodeListScroller {
-	margin: 0;
-	padding: 0;
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	background: url(../images/background-bottom.png) repeat-x #ebf7f8;
-	z-index: 0;
+#podcastTitle {
+	position: relative;
+	top: 200px;
+	color: #49708A;
+	text-align: center;
+	font-size: 16px;
+	font-weight: bold;
 }
 
 #episodeList {
