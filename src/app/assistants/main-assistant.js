@@ -3,6 +3,11 @@ function MainAssistant(db) {
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
+	this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
+	this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
+	
+	Mojo.Log.info("[MainAssistant] Screen size is: %sx%s", this.screenWidth, this.screenHeight);
+	
 	this.episodeListAttributes = {
 		listTemplate: "main/episodeListTemplate",
 		itemTemplate: "main/episodeListItemTemplate",
@@ -31,7 +36,11 @@ function MainAssistant(db) {
 
 MainAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
-		
+	   $("episodeListScroller").setStyle({
+			 height: this.screenHeight + "px;",
+			 width: this.screenWidth + "px;"
+	   });
+	   
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed. */
 	
 	/* setup widgets here */
@@ -43,6 +52,8 @@ MainAssistant.prototype.setup = function() {
 	}
 	
 	/* add event handlers to listen to events from widgets */
+	// Wait for screen changes
+	this.controller.listen(document, 'orientationchange', this.handleOrientation.bindAsEventListener(this));
 }
 
 MainAssistant.prototype.activate = function(event) {
@@ -59,4 +70,37 @@ MainAssistant.prototype.deactivate = function(event) {
 MainAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
+}
+
+/**
+ *	Make sure the screen size is always correct for whatever orientation
+ *	the user has the phone in.
+ */
+MainAssistant.prototype.handleOrientation = function(event) {
+	   var width = this.screenWidth;
+	   var height = this.screenHeight;
+	   
+	   switch(event.position) {
+			 case 0:
+				    break;
+			 case 1:
+				    break;
+			 case 2:
+			 case 3:
+				    // Do nothing this is the normal width and height
+				    break;
+			 case 4:
+			 case 5:
+				    width = this.screenHeight;
+				    height = this.screenWidth;
+				    break;
+			 default:
+				    Mojo.Log.info("[MainAssistant.handleOrientation] %s!! I was promised a number 0 - 5.", event.position);
+				    break;
+	   }
+	   
+	   $("episodeListScroller").setStyle({
+			 height: height + "px;",
+			 width: width + "px;"
+	   });
 }
