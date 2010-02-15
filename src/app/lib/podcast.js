@@ -55,6 +55,9 @@ var Podcast = Class.create({
 		}
 		Mojo.Log.info("[Podcast.onFeedUpdate] \"%s\" has updated, %i new item(s).", this.title, this.items.length);
 	},
+	getImage: function(feed) {
+	   return (this.imgPath !== undefined) ? this.imgPath : this.imgUrl;
+	},
 	toListItem: function() {
 		var temp = new Object();
 		temp.id = this.key;

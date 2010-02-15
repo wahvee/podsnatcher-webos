@@ -3,56 +3,64 @@ function MainAssistant(db) {
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
-	this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
-	this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
-	this.animationFinish = 500;
-	this.animationDuration = 0.25;
-	this.animationType = 'ease-in';
-	
-	Mojo.Log.info("[MainAssistant] Screen size is: %sx%s", this.screenWidth, this.screenHeight);
-	
-	this.episodeListAttributes = {
-		listTemplate: "main/episodeListTemplate",
-		itemTemplate: "main/episodeListItemTemplate",
-		swipeToDelete: false,
-		renderLimit: 15,
-		reorderable: false
-	};
-	
-	this.episodeListModel = {
-		items: [
-			{title: "Episode 1 is really cool live it! Yeah@@ like it so much you should try", length: "01:13:01:01:13:01:01:13:01"},
-			{title: "Episode 2", length: "01:13:01"},
-			{title: "Episode 3", length: "01:13:01"},
-			{title: "Episode 4", length: "01:13:01"},
-			{title: "Episode 5", length: "01:13:01"},
-			{title: "Episode 6", length: "13:01"},
-			{title: "Episode 7", length: "13:01"},
-			{title: "Episode 8", length: "13:01"},
-			{title: "Episode 9", length: "13:01"},
-			{title: "Episode 10", length: "13:01"},
-			{title: "Episode 11", length: "13:01"},
-			{title: "Episode 12", length: "13:01"}
-		]
-	};
+	   this.db = db;
+	   this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
+	   this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
+	   this.animationFinish = 500;
+	   this.animationDuration = 0.25;
+	   this.animationType = 'ease-in';
+	   
+	   this.episodeListAttributes = {
+			 listTemplate: "main/episodeListTemplate",
+			 itemTemplate: "main/episodeListItemTemplate",
+			 swipeToDelete: false,
+			 renderLimit: 15,
+			 reorderable: false
+	   };
+	   
+	   this.episodeListModel = {
+			 items: []
+	   };
 }
 
 MainAssistant.prototype.setup = function() {
-	/* this function is for setup tasks that have to happen when the scene is first created */
+	   /* this function is for setup tasks that have to happen when the scene is first created */
+	   // Set the title and img for the first podcast to be displayed
+	   var currPodcast = this.db.currentPodcast();
+	   $('album-art').removeChild($('image'));
+	   $('album-art').appendChild(new Element('img', {
+			 id: 'image',
+			 src: currPodcast.getImage(),
+			 alt: '',
+			 height: '144px',
+			 width: '144px'
+	   }));
 	   
-	/* use Mojo.View.render to render view templates and add them to the scene, if needed. */
-	
-	/* setup widgets here */
-	try {
-		this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
-	} catch (func_error) {
-		Mojo.Log.info("[Create Widgets] %s", func_error.message);
-	}
+	   /* use Mojo.View.render to render view templates and add them to the scene, if needed. */
+	   
+	   /* setup widgets here */
+	   try {
+			 // Colorize the background of the scroller for this scene
+			 //this.controller.sceneScroller.addClassName('scrollerBg');
+			 this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
+	   } catch (func_error) {
+			 Mojo.Log.info("[Create Widgets] %s", func_error.message);
+	   }
 	
 	/* add event handlers to listen to events from widgets */
-	// Wait for screen changes
-	this.controller.listen(document, 'orientationchange', this.handleOrientation.bindAsEventListener(this));
+	// Wait for screen orientation changes
+	this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
+	// Listen for user to flick the album-art to change podcasts
 	this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
+	this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
+	// Listen for podcast updates
+	this.db.addEventListener(PodcastStorage.PodcastStartUpdate, this.podcastUpdating.bind(this));
+	this.db.addEventListener(PodcastStorage.PodcastUpdateSuccess, this.podcastUpdateSuccess.bind(this));
+	this.db.addEventListener(PodcastStorage.PodcastUpdateFailure, this.podcastUpdateFailure.bind(this));
+	this.db.addEventListener(PodcastStorage.PodcastListStartUpdate, this.updatingPodcasts.bind(this, 'start'));
+	this.db.addEventListener(PodcastStorage.PodcastListFinishUpdate, this.updatingPodcasts.bind(this, 'finish'));
+	//this.db.addEventListener(PodcastStorage.SavingDatabaseSuccess, undefined);
+	//this.db.addEventListener(PodcastStorage.SavingDatabaseFailure, undefined);
 }
 
 MainAssistant.prototype.activate = function(event) {
@@ -71,12 +79,47 @@ MainAssistant.prototype.cleanup = function(event) {
 	   a result of being popped off the scene stack */
 }
 
+MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
+	   // Check to see whether the podcasts are starting to update or finishing
+}
+
+MainAssistant.prototype.podcastUpdating = function(podcastKey) {
+	   
+}
+
+MainAssistant.prototype.podcastUpdateSuccess = function(podcastKey) {
+	   Mojo.Log.info("[MainAssistant.podcastUpdateSuccess] %s finished updating.", podcastKey);
+	   // Updated podcast is the currently showing podcast
+	   if(this.db.currentPodcast().key == podcastKey) {
+			 var currPodcast = this.db.currentPodcast();
+			 $('album-art').removeChild($('image'));
+			 $('album-art').appendChild(new Element('img', {
+				    id: 'image',
+				    src: currPodcast.getImage(),
+				    alt: '',
+				    height: '144px',
+				    width: '144px'
+			 }));
+			 $('podcastTitle').innerHTML = currPodcast.title;
+			 this.episodeListModel.items = currPodcast.items;
+			 this.controller.modelChanged(this.episodeListModel);
+	   }
+}
+
+MainAssistant.prototype.podcastUpdateFailure = function(podcastKey) {
+	   
+}
+
 /**
  *	Make sure the screen size is always correct for whatever orientation
  *	the user has the phone in.
  */
 MainAssistant.prototype.handleOrientation = function(event) {
 	
+}
+
+MainAssistant.prototype.handleAlbumArtHold = function(event) {
+	   this.db.updateCurrent();
 }
 
 /**
