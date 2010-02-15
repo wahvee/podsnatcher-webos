@@ -186,6 +186,8 @@ PodcastStorage.prototype.findPodcast = function(feedKey) {
 };
 
 PodcastStorage.prototype.updateCurrent = function() {
+	// Let listeners know that update for the given podcast is starting
+	this.doEvent(PodcastStorage.PodcastStartUpdate, this.listOfPodcasts[this._currentPodcast].key);
 	this.listOfPodcasts[this._currentPodcast].updateFeed(function(feedKey) {
 		this.doEvent(PodcastStorage.PodcastUpdateSuccess, feedKey);
 	}.bind(this));

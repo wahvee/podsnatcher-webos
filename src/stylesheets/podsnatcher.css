@@ -28,6 +28,7 @@
 	   Actual "border.png" 14px, 200x200px */
 	width: 200px;
 	height: 200px;
+	/*border: 1px solid red;*/
 	background: url(../images/border.png) no-repeat;
 	margin: 0 auto;
 	position: relative;
@@ -36,8 +37,20 @@
 }
 
 img#image {
-	margin: 28px;
+	margin: 0px 28px 0px 28px;
+	position: relative;
+	top: -100px;
 	background-color: #caff42;
+}
+
+#updatingSpinner {
+	width: 128px;
+	height: 128px;
+	position: relative;
+	top: 36px;
+	margin: 0 auto;
+	z-index: 2000;
+	/*border: 1px solid green;*/
 }
 
 #stripe {

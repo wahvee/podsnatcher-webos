@@ -10,6 +10,14 @@ function MainAssistant(db) {
 	   this.animationDuration = 0.25;
 	   this.animationType = 'ease-in';
 	   
+	   this.spinnerAttributes = {
+			 spinnerSize: Mojo.Widget.spinnerLarge
+	   };
+	   
+	   this.spinnerModel = {
+			 spinning: false
+	   };
+	   
 	   this.episodeListAttributes = {
 			 listTemplate: "main/episodeListTemplate",
 			 itemTemplate: "main/episodeListItemTemplate",
@@ -34,6 +42,7 @@ MainAssistant.prototype.setup = function() {
 	   try {
 			 // Colorize the background of the scroller for this scene
 			 //this.controller.sceneScroller.addClassName('scrollerBg');
+			 this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 			 this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
 	   } catch (func_error) {
 			 Mojo.Log.info("[Create Widgets] %s", func_error.message);
@@ -58,6 +67,10 @@ MainAssistant.prototype.setup = function() {
 MainAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
+	   $("updatingSpinner").show();
+	   $("updatingSpinner").setStyle({
+			 visibility: 'hidden'
+	   });
 }
 
 
@@ -95,19 +108,42 @@ MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
 }
 
 MainAssistant.prototype.podcastUpdating = function(podcastKey) {
-	   
+	   Mojo.Log.info("[MainAssistant.podcastUpdating] %s starting update.", podcastKey);
+	   // Updated podcast is the currently showing podcast
+	   if(this.db.currentPodcast().key == podcastKey) {
+			 this.spinnerModel.spinning = true;
+			 this.controller.modelChanged(this.spinnerModel);
+			 $("updatingSpinner").setStyle({
+				    visibility: 'visible'
+			 });
+	   }
 }
 
 MainAssistant.prototype.podcastUpdateSuccess = function(podcastKey) {
 	   Mojo.Log.info("[MainAssistant.podcastUpdateSuccess] %s finished updating.", podcastKey);
 	   // Updated podcast is the currently showing podcast
 	   if(this.db.currentPodcast().key == podcastKey) {
+			 this.spinnerModel.spinning = false;
+			 this.controller.modelChanged(this.spinnerModel);
+			 $("updatingSpinner").show();
+			 $("updatingSpinner").setStyle({
+				    visibility: 'hidden'
+			 });
+			 
 			 this.refreshUI();
 	   }
 }
 
 MainAssistant.prototype.podcastUpdateFailure = function(podcastKey) {
-	   
+	   // Updated podcast is the currently showing podcast
+	   if(this.db.currentPodcast().key == podcastKey) {
+			 this.spinnerModel.spinning = false;
+			 this.controller.modelChanged(this.spinnerModel);
+			 $("updatingSpinner").show();
+			 $("updatingSpinner").setStyle({
+				    visibility: 'hidden'
+			 });
+	   }
 }
 
 /**
