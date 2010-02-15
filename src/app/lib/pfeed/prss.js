@@ -44,7 +44,10 @@ var PRss = Class.create(PFeedItem, {
         // feed should be the channel tag...which is going to be an array
         // so select the first item in the array
         if(feed[0].hasOwnProperty('image')) {
-            this.setPropertyFromFeed(feed[0].image, 'imgUrl', 'url');   
+        	feed[0].image.detect(function(imageNode) {
+	        	this.setPropertyFromFeed(imageNode, 'imgUrl', 'url');
+	        	return (this.imgUrl !== undefined && !this.imgUrl.blank());
+	        }, this);   
         }
     }
 });
