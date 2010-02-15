@@ -26,15 +26,7 @@ function MainAssistant(db) {
 MainAssistant.prototype.setup = function() {
 	   /* this function is for setup tasks that have to happen when the scene is first created */
 	   // Set the title and img for the first podcast to be displayed
-	   var currPodcast = this.db.currentPodcast();
-	   $('album-art').removeChild($('image'));
-	   $('album-art').appendChild(new Element('img', {
-			 id: 'image',
-			 src: currPodcast.getImage(),
-			 alt: '',
-			 height: '144px',
-			 width: '144px'
-	   }));
+	   this.refreshUI();
 	   
 	   /* use Mojo.View.render to render view templates and add them to the scene, if needed. */
 	   
@@ -79,6 +71,25 @@ MainAssistant.prototype.cleanup = function(event) {
 	   a result of being popped off the scene stack */
 }
 
+MainAssistant.prototype.refreshUI = function() {
+	   try {
+			 var currPodcast = this.db.currentPodcast();
+			 $('album-art').removeChild($('image'));
+			 $('album-art').appendChild(new Element('img', {
+				    id: 'image',
+				    src: currPodcast.getImage(),
+				    alt: '',
+				    height: '144px',
+				    width: '144px'
+			 }));
+			 $('podcastTitle').innerHTML = currPodcast.title;
+			 this.episodeListModel.items = (currPodcast.items === undefined) ? [] : currPodcast.items;
+			 this.controller.modelChanged(this.episodeListModel);
+	   } catch(error) {
+			 Mojo.Log.error("[MainAssistant.refreshUI] %s", error.message);
+	   }
+}
+
 MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
 	   // Check to see whether the podcasts are starting to update or finishing
 }
@@ -91,18 +102,7 @@ MainAssistant.prototype.podcastUpdateSuccess = function(podcastKey) {
 	   Mojo.Log.info("[MainAssistant.podcastUpdateSuccess] %s finished updating.", podcastKey);
 	   // Updated podcast is the currently showing podcast
 	   if(this.db.currentPodcast().key == podcastKey) {
-			 var currPodcast = this.db.currentPodcast();
-			 $('album-art').removeChild($('image'));
-			 $('album-art').appendChild(new Element('img', {
-				    id: 'image',
-				    src: currPodcast.getImage(),
-				    alt: '',
-				    height: '144px',
-				    width: '144px'
-			 }));
-			 $('podcastTitle').innerHTML = currPodcast.title;
-			 this.episodeListModel.items = currPodcast.items;
-			 this.controller.modelChanged(this.episodeListModel);
+			 this.refreshUI();
 	   }
 }
 
@@ -150,6 +150,13 @@ MainAssistant.prototype.switchPodcast = function(next) {
 	   // Calculate the start and ending positions of the animations
 	   var start = (next === 'next') ? -this.animationFinish : this.animationFinish;
 	   var finish = 0;
+	   if(next === 'next') {
+			 this.db.nextPodcast();
+			 this.refreshUI();
+	   } else if(next === 'previous') {
+			 this.db.previousPodcast();
+			 this.refreshUI();
+	   }
 	   // Move the image to it's new starting position
 	   $('album-art').setStyle({
 			 left: start + "px"

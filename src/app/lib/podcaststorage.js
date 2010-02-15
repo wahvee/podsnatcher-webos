@@ -164,7 +164,18 @@ PodcastStorage.prototype.currentPodcast = function() {
 
 PodcastStorage.prototype.nextPodcast = function() {
 	this._currentPodcast++;
-	return this.currPodcast();
+	if(this._currentPodcast >= this.listOfPodcasts.size()) {
+		this._currentPodcast = 0;
+	}
+	return this.currentPodcast();
+}
+
+PodcastStorage.prototype.previousPodcast = function() {
+	this._currentPodcast--;
+	if(this._currentPodcast < 0) {
+		this._currentPodcast = this.listOfPodcasts.size() - 1;
+	}
+	return this.currentPodcast();
 }
 
 PodcastStorage.prototype.findPodcast = function(feedKey) {
