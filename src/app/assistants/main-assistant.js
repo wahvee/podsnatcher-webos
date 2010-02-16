@@ -33,8 +33,6 @@ function MainAssistant(db) {
 
 MainAssistant.prototype.setup = function() {
 	   /* this function is for setup tasks that have to happen when the scene is first created */
-	   // Set the title and img for the first podcast to be displayed
-	   this.refreshUI();
 	   
 	   /* use Mojo.View.render to render view templates and add them to the scene, if needed. */
 	   
@@ -55,11 +53,16 @@ MainAssistant.prototype.setup = function() {
 	this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
 	this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
 	// Listen for podcast updates
+	this.db.addEventListener(PodcastStorage.LoadingDatabaseSuccess, this.dbLoaded.bind(this));
+	this.db.addEventListener(PodcastStorage.LoadingDatabaseFailure, this.dbLoaded.bind(this));
+	
 	this.db.addEventListener(PodcastStorage.PodcastStartUpdate, this.podcastUpdating.bind(this));
 	this.db.addEventListener(PodcastStorage.PodcastUpdateSuccess, this.podcastUpdateSuccess.bind(this));
 	this.db.addEventListener(PodcastStorage.PodcastUpdateFailure, this.podcastUpdateFailure.bind(this));
+	
 	this.db.addEventListener(PodcastStorage.PodcastListStartUpdate, this.updatingPodcasts.bind(this, 'start'));
 	this.db.addEventListener(PodcastStorage.PodcastListFinishUpdate, this.updatingPodcasts.bind(this, 'finish'));
+	
 	//this.db.addEventListener(PodcastStorage.SavingDatabaseSuccess, undefined);
 	//this.db.addEventListener(PodcastStorage.SavingDatabaseFailure, undefined);
 }
@@ -71,6 +74,9 @@ MainAssistant.prototype.activate = function(event) {
 	   $("updatingSpinner").setStyle({
 			 visibility: 'hidden'
 	   });
+	   
+	   // Begin loading the database
+	   this.db.loadDatabase();
 }
 
 
@@ -90,12 +96,12 @@ MainAssistant.prototype.refreshUI = function() {
 			 $('album-art').removeChild($('image'));
 			 $('album-art').appendChild(new Element('img', {
 				    id: 'image',
-				    src: currPodcast.getImage(),
+				    src: (Object.isFunction(currPodcast.getImage)) ? currPodcast.getImage() : '',
 				    alt: '',
 				    height: '144px',
 				    width: '144px'
 			 }));
-			 $('podcastTitle').innerHTML = currPodcast.title;
+			 $('podcastTitle').innerHTML = (currPodcast.title === undefined) ? "Loading..." : currPodcast.title;
 			 this.episodeListModel.items = (currPodcast.items === undefined) ? [] : currPodcast.items;
 			 this.controller.modelChanged(this.episodeListModel);
 	   } catch(error) {
@@ -103,8 +109,26 @@ MainAssistant.prototype.refreshUI = function() {
 	   }
 }
 
+MainAssistant.prototype.dbLoaded = function(error) {
+	   if(error !== undefined) {
+			 Mojo.Log.error("[MainAssistant.dbLoaded] %s", error.message);
+	   } else {
+			 Mojo.Log.info("[MainAssistant.dbLoaded]");
+			 if(this.db.requiresUpdate) {
+				    this.db.updatePodcasts();
+			 } else {
+				    this.refreshUI();
+			 }
+	   }
+}
+
 MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
 	   // Check to see whether the podcasts are starting to update or finishing
+	   Mojo.Log.info("[MainAssistant.updatingPodcasts] Podcasts are %sing updates.", startOrFinish);
+	   this.refreshUI();
+	   if(startOrFinish == 'finish') {
+			 //this.db.savePodcasts();
+	   }
 }
 
 MainAssistant.prototype.podcastUpdating = function(podcastKey) {
@@ -116,6 +140,11 @@ MainAssistant.prototype.podcastUpdating = function(podcastKey) {
 			 $("updatingSpinner").setStyle({
 				    visibility: 'visible'
 			 });
+	   } else {
+			 // TODO Dashboard please...
+			 var title = undefined; //this.db.findPodcast(podcastKey).title;
+			 var message = (title === undefined) ? "Updating podcast..." : "Updating " + title;
+			 Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
 	   }
 }
 
@@ -186,6 +215,7 @@ MainAssistant.prototype.switchPodcast = function(next) {
 	   // Calculate the start and ending positions of the animations
 	   var start = (next === 'next') ? -this.animationFinish : this.animationFinish;
 	   var finish = 0;
+	   // Actually perform loading or changing to next podcast
 	   if(next === 'next') {
 			 this.db.nextPodcast();
 			 this.refreshUI();

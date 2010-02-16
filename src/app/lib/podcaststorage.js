@@ -146,7 +146,7 @@ var PodcastStorage = Class.create({
 		//http://mailbagpodcast.cnettv.com
 		
 		var onSuccess = function() {
-			this.loadPodcasts();
+			this.loadDatabase();
 		};
 		
 		var initialList = [
@@ -247,7 +247,7 @@ PodcastStorage.prototype.onFeedUpdate = function(feedKey) {
 		// Update the next podcast in the list
 		this.listOfPodcasts[this.indexUpdating].updateFeed(this.onFeedUpdate.bind(this));
 		// Let listeners know that update for the given podcast is starting
-		this.doEvent(PodcastStorage.PodcastStartUpdate, podcast.key);
+		this.doEvent(PodcastStorage.PodcastStartUpdate, this.listOfPodcasts[this.indexUpdating].key);
 	}
 };
 
