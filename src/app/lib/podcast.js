@@ -3,7 +3,6 @@ var Podcast = Class.create({
 	key: undefined,					// Used for retrieval from the Mojo.Depot
 	imgUrl: undefined,
 	imgPath: undefined,
-	outOfDate: true,
 	whoToCallOnFeedUpdate: undefined,
 	initialize: function(feedURL) {
 		if(Object.isString(feedURL)) {
@@ -49,11 +48,17 @@ var Podcast = Class.create({
 	},
 	onFeedUpdate: function(feed) {
 		this.copyFromObj(feed);
-		this.outOfDate = false;
 		if(Object.isFunction(this.whoToCallOnFeedUpdate)) {
 			this.whoToCallOnFeedUpdate(this.key);
 		}
 		Mojo.Log.info("[Podcast.onFeedUpdate] \"%s\" has updated, %i new item(s).", this.title, this.items.length);
+	},
+	isOutOfDate: function() {
+	   // Check to see if the title has been set,
+	   // title is not blank (empty),
+	   // that the items db has been defined,
+	   // that the items db is an array
+	   return (this.title === undefined || this.title.blank() || this.items === undefined || !Object.isArray(this.items));
 	},
 	getImage: function(feed) {
 	   return (this.imgPath !== undefined) ? this.imgPath : this.imgUrl;

@@ -1,9 +1,12 @@
 var PodcastStorage = Class.create({
 	initialize: function(name) {
-		var dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
+		this.dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
+		this.requiresUpdate = false;
 		
 		// Event listener arrays
 		this.callback = {};
+		this.callback[PodcastStorage.ConnectionToDatabase] = [];
+		this.callback[PodcastStorage.FailedConnectionToDatabase] = [];
 		this.callback[PodcastStorage.PodcastStartUpdate] = [];
 		this.callback[PodcastStorage.PodcastUpdateSuccess] = [];
 		this.callback[PodcastStorage.PodcastUpdateFailure] = [];
@@ -13,30 +16,37 @@ var PodcastStorage = Class.create({
 		this.callback[PodcastStorage.SavingDatabaseFailure] = [];
 		this.callback[PodcastStorage.LoadingDatabaseSuccess] = [];
 		this.callback[PodcastStorage.LoadingDatabaseFailure] = [];
-		
+	},
+	connectToDatabase: function() {
 		// Wait for successful creation/connection from the db
 		var onSuccess = function() {
 			Mojo.Log.info("[PodcastStorage] Connection to database success.");
-			this.loadPodcasts();
+			// Perform the event PodcastStorage.ConnectionToDatabase
+			this.doEvent(PodcastStorage.ConnectionToDatabase);
 		};
 		
 		// Wait for failure creation/connection from the db
 		var onFailure = function(code) {
 			var error = interpretCode(code);
 			Mojo.Log.error("[PodcastStorage] Failed to open the database on disk. %s", error.message);
-			this.doEvent(PodcastStorage.LoadingDatabaseFailure, error);
+			this.doEvent(PodcastStorage.FailedConnectionToDatabase, error);
 		};
 		
-		// Connect/Create statement for the db
-		this.db = new Mojo.Depot({
-			//replace: true,
-			name: dbName,
-			version: "1",
-			displayName: "PodSnatcher Database",
-			estimatedSize: 25000
-		}, onSuccess.bind(this), onFailure.bind(this));
+		try {
+			// Connect/Create statement for the db
+			this.db = new Mojo.Depot({
+				//replace: true,
+				name: this.dbName,
+				version: "1",
+				displayName: "PodSnatcher Database",
+				estimatedSize: 25000
+			}, onSuccess.bind(this), onFailure.bind(this));
+		} catch(error) {
+			this.doEvent(PodcastStorage.LoadingDatabaseFailure, error);
+			Mojo.Log.error("[PodcastStorage.connectToDatabase] %s", error.message);
+		}
 	},
-	loadPodcasts: function() {
+	loadDatabase: function() {
 		// When the Mojo.Depot.get() method completes successfully
 		var onSuccess = function(response) {
 			// Return number of records found
@@ -47,6 +57,9 @@ var PodcastStorage = Class.create({
 			} else {
 				response.each(function(podcastItem, index) {
 					var item = new Podcast(podcastItem);
+					if(item.isOutOfDate()) {
+						this.requiresUpdate = true;
+					}
 					this.listOfPodcasts.push(item);
 				}, this);
 				// Perform the event PodcastStorage.LoadingDatabaseSuccess
@@ -54,11 +67,18 @@ var PodcastStorage = Class.create({
 			}
 		};
 		
+		// Wait for failure creation/connection from the db
+		var onFailure = function(code) {
+			var error = interpretCode(code);
+			Mojo.Log.error("[PodcastStorage] Failed to open the database on disk. %s", error.message);
+			this.doEvent(PodcastStorage.LoadingDatabaseFailure, error);
+		};
+		
 		try {
-			this.db.get("podcastList", onSuccess.bind(this), this.onFailure);
+			this.db.get("podcastList", onSuccess.bind(this), onFailure.bind(this));
 		} catch(error) {
 			this.doEvent(PodcastStorage.LoadingDatabaseFailure, error);
-			Mojo.Log.error("[PodcastStorage.getPodcasts] error! %s", error.message);
+			Mojo.Log.error("[PodcastStorage.loadDatabase] error! %s", error.message);
 		}
 	},
 	getPodcastList: function() {
@@ -147,6 +167,11 @@ var PodcastStorage = Class.create({
 			this.doEvent(PodcastStorage.SavingDatabaseSuccess);
 		};
 		
+		var onFailure = function(code) {
+			Mojo.Log.info("[PodcastStorage.savePodcasts] Failed.");
+			this.doEvent(PodcastStorage.SavingDatabaseFailures, this.interpretCode(code));
+		};
+		
 		this.db.add("podcastList", this.listOfPodcasts, onSuccess.bind(this), this.onFailure);
 	}
 });
@@ -202,7 +227,7 @@ PodcastStorage.prototype.updatePodcasts = function() {
 		// Update the first podcast in the list
 		this.listOfPodcasts[this.indexUpdating].updateFeed(this.onFeedUpdate.bind(this));
 		// Let listeners know that update for the given podcast is starting
-		this.doEvent(PodcastStorage.PodcastStartUpdate, podcast.key);
+		this.doEvent(PodcastStorage.PodcastStartUpdate, this.listOfPodcasts[this.indexUpdating].key);
 	} catch (error) {
 		Mojo.Log.error("[PodcastStorage.updatePodcasts] %s", error.message);
 	}
@@ -214,7 +239,7 @@ PodcastStorage.prototype.onFeedUpdate = function(feedKey) {
 	// Do event to notify that the podcast has updated
 	this.doEvent(PodcastStorage.PodcastUpdateSuccess, feedKey);
 	// Check to see if more podcasts need to be updated
-	if(this.indexUpdating == this.listOfPodcasts.sizeOf()) {
+	if(this.indexUpdating == this.listOfPodcasts.size()) {
 		// If the are equal everything is done updating
 		this.doEvent(PodcastStorage.PodcastListFinishUpdate);
 	} else {
@@ -251,6 +276,9 @@ PodcastStorage.PodcastUpdateFailure = 'onPodcastFailure';
 
 PodcastStorage.PodcastListStartUpdate = 'onStartPodcastListUpdate';
 PodcastStorage.PodcastListFinishUpdate = 'onFinishPodcastListUpdate';
+
+PodcastStorage.ConnectionToDatabase = 'onConnectionToDB';
+PodcastStorage.FailedConnectionToDatabase = 'onFailedConnectionToDB';
 
 PodcastStorage.SavingDatabaseSuccess = 'onDBSaveSuccess';
 PodcastStorage.SavingDatabaseFailure = 'onDBSaveFailure';
