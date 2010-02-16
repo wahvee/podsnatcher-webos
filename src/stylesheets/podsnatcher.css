@@ -80,8 +80,7 @@ img#image {
 	z-index: 0;
 }
 
-.listItem,
-.palm-row {
+.listItem.palm-row {
 	margin: 0 auto;
 	margin-bottom: 4px; 
 	background-image: none !important;
