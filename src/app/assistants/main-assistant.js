@@ -46,25 +46,27 @@ MainAssistant.prototype.setup = function() {
 			 Mojo.Log.info("[Create Widgets] %s", func_error.message);
 	   }
 	
-	/* add event handlers to listen to events from widgets */
-	// Wait for screen orientation changes
-	this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
-	// Listen for user to flick the album-art to change podcasts
-	this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
-	this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
-	// Listen for podcast updates
-	this.db.addEventListener(PodcastStorage.LoadingDatabaseSuccess, this.dbLoaded.bind(this));
-	this.db.addEventListener(PodcastStorage.LoadingDatabaseFailure, this.dbLoaded.bind(this));
-	
-	this.db.addEventListener(PodcastStorage.PodcastStartUpdate, this.podcastUpdating.bind(this));
-	this.db.addEventListener(PodcastStorage.PodcastUpdateSuccess, this.podcastUpdateSuccess.bind(this));
-	this.db.addEventListener(PodcastStorage.PodcastUpdateFailure, this.podcastUpdateFailure.bind(this));
-	
-	this.db.addEventListener(PodcastStorage.PodcastListStartUpdate, this.updatingPodcasts.bind(this, 'start'));
-	this.db.addEventListener(PodcastStorage.PodcastListFinishUpdate, this.updatingPodcasts.bind(this, 'finish'));
-	
-	//this.db.addEventListener(PodcastStorage.SavingDatabaseSuccess, undefined);
-	//this.db.addEventListener(PodcastStorage.SavingDatabaseFailure, undefined);
+	   /* add event handlers to listen to events from widgets */
+	   // Wait for screen orientation changes
+	   this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
+	   // Listen for user to flick the album-art to change podcasts
+	   this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
+	   this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
+	   // Listen for podcast updates
+	   this.db.addEventListener(PodcastStorage.LoadingDatabaseSuccess, this.dbLoaded.bind(this));
+	   this.db.addEventListener(PodcastStorage.LoadingDatabaseFailure, this.dbLoaded.bind(this));
+	   
+	   this.db.addEventListener(PodcastStorage.PodcastStartUpdate, this.podcastUpdating.bind(this));
+	   this.db.addEventListener(PodcastStorage.PodcastUpdateSuccess, this.podcastUpdateSuccess.bind(this));
+	   this.db.addEventListener(PodcastStorage.PodcastUpdateFailure, this.podcastUpdateFailure.bind(this));
+	   
+	   this.db.addEventListener(PodcastStorage.PodcastListStartUpdate, this.updatingPodcasts.bind(this, 'start'));
+	   this.db.addEventListener(PodcastStorage.PodcastListFinishUpdate, this.updatingPodcasts.bind(this, 'finish'));
+	   
+	   //this.db.addEventListener(PodcastStorage.SavingDatabaseSuccess, undefined);
+	   this.db.addEventListener(PodcastStorage.SavingDatabaseFailure, function() {
+			 Mojo.Controller.errorDialog("There was an error. %s", error.message);
+	   });
 }
 
 MainAssistant.prototype.activate = function(event) {
@@ -127,7 +129,7 @@ MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
 	   Mojo.Log.info("[MainAssistant.updatingPodcasts] Podcasts are %sing updates.", startOrFinish);
 	   this.refreshUI();
 	   if(startOrFinish == 'finish') {
-			 //this.db.savePodcasts();
+			 this.db.savePodcasts();
 	   }
 }
 
