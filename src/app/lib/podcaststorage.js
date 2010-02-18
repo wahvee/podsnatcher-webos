@@ -59,6 +59,10 @@ var PodcastStorage = Class.create({
 					var item = new Podcast(podcastItem);
 					if(item.isOutOfDate()) {
 						this.requiresUpdate = true;
+					} else {
+						if(!item.isImageCached()) {
+							item.cacheImage();
+						}
 					}
 					this.listOfPodcasts.push(item);
 				}, this);

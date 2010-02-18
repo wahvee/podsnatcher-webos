@@ -66,6 +66,34 @@ var Podcast = Class.create({
 	getImage: function(feed) {
 		return (this.imgPath !== undefined) ? this.imgPath : this.imgUrl;
 	},
+	cacheImage: function(mojoController) {
+		try {
+			Mojo.Controller.SceneController.serviceRequest('palm://com.palm.downloadmanager', {
+			//mojoController.serviceRequest('palm://com.palm.downloadmanager', {
+				method: 'download',
+				parameters: {
+					target: this.imgUrl,
+					targetDir: "/media/internal/PodSnatcher/cache",
+					keepFilenameOnRedirect: true
+				},
+				onSuccess: function(response) {
+					if(response.returnValue) {
+						Mojo.Log.info("[Podcast.cacheImage] %", response.target);
+						this.imgPath = response.target;
+					}
+				},
+				onFailure: function(e) {
+					Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s")
+				}
+			});
+		} catch(error) {
+			Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s", error.message);
+		}
+	},
+	isImageCached: function() {
+		// Returns true if image is stored locally
+		return (this.imgPath !== undefined && !this.imgPath.blank());
+	},
 	toListItem: function() {
 		var temp = new Object();
 		temp.id = this.key;
