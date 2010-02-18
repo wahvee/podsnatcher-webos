@@ -68,8 +68,9 @@ var Podcast = Class.create({
 	},
 	cacheImage: function(mojoController) {
 		try {
-			Mojo.Controller.SceneController.serviceRequest('palm://com.palm.downloadmanager', {
-			//mojoController.serviceRequest('palm://com.palm.downloadmanager', {
+			//Mojo.Controller.StageController.activeScene();
+			//Mojo.Controller.SceneController.serviceRequest('palm://com.palm.downloadmanager', {
+			mojoController.serviceRequest('palm://com.palm.downloadmanager', {
 				method: 'download',
 				parameters: {
 					target: this.imgUrl,
@@ -78,10 +79,10 @@ var Podcast = Class.create({
 				},
 				onSuccess: function(response) {
 					if(response.returnValue) {
-						Mojo.Log.info("[Podcast.cacheImage] %", response.target);
+						Mojo.Log.info("[Podcast.cacheImage] %s", response.target);
 						this.imgPath = response.target;
 					}
-				},
+				}.bind(this),
 				onFailure: function(e) {
 					Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s")
 				}

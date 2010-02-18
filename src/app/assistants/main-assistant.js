@@ -90,6 +90,7 @@ MainAssistant.prototype.deactivate = function(event) {
 MainAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
+	   this.db.save();
 }
 
 MainAssistant.prototype.refreshUI = function() {
@@ -106,6 +107,7 @@ MainAssistant.prototype.refreshUI = function() {
 			 $('podcastTitle').innerHTML = (currPodcast.title === undefined) ? "Loading..." : currPodcast.title;
 			 this.episodeListModel.items = (currPodcast.items === undefined) ? [] : currPodcast.items;
 			 this.controller.modelChanged(this.episodeListModel);
+			 this.db.save();
 	   } catch(error) {
 			 Mojo.Log.error("[MainAssistant.refreshUI] %s", error.message);
 	   }
@@ -129,7 +131,7 @@ MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
 	   Mojo.Log.info("[MainAssistant.updatingPodcasts] Podcasts are %sing updates.", startOrFinish);
 	   this.refreshUI();
 	   if(startOrFinish == 'finish') {
-			 this.db.savePodcasts();
+			 this.db.save();
 	   }
 }
 

@@ -1,7 +1,8 @@
 var PodcastStorage = Class.create({
-	initialize: function(name) {
+	initialize: function(name, stgController) {
 		this.dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 		this.requiresUpdate = false;
+		this.stageController = stgController;
 		
 		// Event listener arrays
 		this.callback = {};
@@ -61,7 +62,7 @@ var PodcastStorage = Class.create({
 						this.requiresUpdate = true;
 					} else {
 						if(!item.isImageCached()) {
-							item.cacheImage();
+							item.cacheImage(this.stageController.controller.activeScene());
 						}
 					}
 					this.listOfPodcasts.push(item);
@@ -164,7 +165,7 @@ var PodcastStorage = Class.create({
 		// Perform the addition of the list in the initial app
 		this.db.add("podcastList", initialList, onSuccess.bind(this), this.onFailure);
 	},
-	savePodcasts: function() {
+	save: function() {
 		var onSuccess = function() {
 			Mojo.Log.info("[PodcastStorage.savePodcasts] Success.");
 			// Event to let it be known that the database was saved
@@ -186,6 +187,7 @@ PodcastStorage.prototype.indexUpdating = 0;
 PodcastStorage.prototype.db = {};
 PodcastStorage.prototype.listOfPodcasts = [];
 PodcastStorage.prototype.callback = {};
+PodcastStorage.prototype.stageController = undefined;
 
 PodcastStorage.prototype.currentPodcast = function() {
 	return Object.clone(this.listOfPodcasts[this._currentPodcast]);

@@ -1,5 +1,5 @@
 function StageAssistant() {
-	this.db = new PodcastStorage();
+	this.db = new PodcastStorage("podSnatcherDb", this);
 	this.db.addEventListener(PodcastStorage.ConnectionToDatabase, this.connectionToDatabase.bind(this));
 	this.db.addEventListener(PodcastStorage.FailedConnectionToDatabase, this.connectionToDatabaseFailed.bind(this));
 	this.standardMenuAttr = undefined;
