@@ -6,6 +6,7 @@ function MainAssistant(db) {
 	   this.db = db;
 	   this.selectedRow = undefined;
 	   this.audioPlayer = new Audio();
+	   this.videoPlayer = {};
 	   this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
 	   this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
 	   this.animationFinish = 500;
@@ -24,7 +25,7 @@ function MainAssistant(db) {
 			 listTemplate: "main/episodeListTemplate",
 			 itemTemplate: "main/episodeListItemTemplate",
 			 swipeToDelete: false,
-			 renderLimit: 5,
+			 renderLimit: 15,
 			 reorderable: false
 	   };
 	   
@@ -40,9 +41,11 @@ MainAssistant.prototype.setup = function() {
 	   
 	   /* setup widgets here */
 	   try {
+			 //this.videoPlayer = $('video-object');
+			 //this.videoPlayer = VideoTag.extendElement(this.videoPlayer, this.controller);
 			 // Colorize the background of the scroller for this scene
 			 //this.controller.sceneScroller.addClassName('scrollerBg');
-			 this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
+			 //this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 			 this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
 	   } catch (func_error) {
 			 Mojo.Log.info("[Create Widgets] %s", func_error.message);
@@ -100,10 +103,6 @@ MainAssistant.prototype.setup = function() {
 MainAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
-	   $("updatingSpinner").show();
-	   $("updatingSpinner").setStyle({
-			 visibility: 'hidden'
-	   });
 	   
 	   // Begin loading the database
 	   this.db.loadDatabase();
@@ -272,15 +271,37 @@ MainAssistant.prototype.switchPodcast = function(next) {
 }
 
 MainAssistant.prototype.handleListClick = function(event) {
-	   Mojo.Log.info("[MainAssistant.handleListClick] %s", event.item.link);
-	   this.selectedRow = $$('div.palm-row.selected')[0];
-	   //this.audioPlayer.src = event.item.link;
-	   this.selectedRow.setStyle({
-			 backgroundColor: "#000000"
-	   });
-	   Mojo.Log.info("%j", this.selectedRow);
+	   Mojo.Log.info("[MainAssistant.handleListClick] %s", event.item.enclosure);
+	   this.selectedRow = $(event.item.key);
+	   switch(event.item.enclosureType) {
+			 case 'video/mp4':
+			 case 'video/x-m4v':
+			 case 'video/quicktime':
+				    Mojo.Log.info("[MainAssistant.handleListClick] Playing Video");
+				    //$('video-object').toggleClassName('video');
+				    //this.videoPlayer.src = event.item.enclosure;
+				    var args = {
+						  appId: "com.palm.app.videoplayer",
+						  name: "nowplaying"
+				    };
+				    var params = {
+						  target: event.item.enclosure,
+						  title: event.item.title,
+						  thumbUrl: this.db.currentPodcast().getImage()
+				    };
+				    this.controller.stageController.pushScene(args, params);
+				    break;
+			 case 'audio/mpeg':
+				    Mojo.Log.info("[MainAssistant.handleListClick] Playing Audio");
+				    //this.audioPlayer.src = event.item.enclosure
+				    break;
+			 default:
+				    Mojo.Log.error("[MainAssistant.handleListClick] Unknown file extension.");
+				    break;			 
+	   }
 }
 
 MainAssistant.prototype.audioEvent = function(event) {
 	   Mojo.Log.error("[MainAssistant.audioEvent] %s", event.type);
 }
+
