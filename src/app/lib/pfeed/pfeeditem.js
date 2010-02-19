@@ -16,6 +16,12 @@ var PFeedItem = Class.create({
 			this.findUpdated(feed);
 			this.findEnclosure(feed);
 			this.findID(feed);
+			
+			if(this.enclosure !== undefined) {
+			 this.key = hex_md5(this.enclosure);
+			} else {
+			 this.key = hex_md5(this.id);
+			}
 		}
 	},
 	setPropertyFromFeed: function(feed, propToSet, sourceProp) {
@@ -45,7 +51,13 @@ var PFeedItem = Class.create({
 		this.setPropertyFromFeed(feed, 'updated', 'updated');
 	},
 	findEnclosure: function(feed) {
-	   this.setPropertyFromFeed(feed, 'enclosure', 'enclosure');
+	   var answer = (Object.isArray(feed)) ? feed[0] : feed;
+	   if(answer.hasOwnProperty('enclosure')) {
+			 answer = answer.enclosure[0];
+			 enclosure = answer['@url'];
+			 enclosureType = answer['@type'];
+			 enclosureLength = answer['@length'];
+	   }
 	},
 	findID: function(feed) {
 		this.setPropertyFromFeed(feed, 'id', 'guid');
