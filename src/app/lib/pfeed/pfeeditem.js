@@ -4,12 +4,17 @@ var PFeedItem = Class.create({
 	description: '',
 	updated: '',
 	id: '',
+	key: '',
+	enclosure: '',
+	enclosureType: '',
+	enclosureLength: '',
 	initialize: function(feed) {
 		if(feed) {
 			this.findTitle(feed);
 			this.findLink(feed);
 			this.findDescription(feed);
 			this.findUpdated(feed);
+			this.findEnclosure(feed);
 			this.findID(feed);
 		}
 	},
@@ -38,6 +43,9 @@ var PFeedItem = Class.create({
 	},
 	findUpdated: function(feed) {
 		this.setPropertyFromFeed(feed, 'updated', 'updated');
+	},
+	findEnclosure: function(feed) {
+	   this.setPropertyFromFeed(feed, 'enclosure', 'enclosure');
 	},
 	findID: function(feed) {
 		this.setPropertyFromFeed(feed, 'id', 'guid');
