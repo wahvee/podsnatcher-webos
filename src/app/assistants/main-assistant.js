@@ -4,6 +4,7 @@ function MainAssistant(db) {
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
 	   this.db = db;
+	   this.selectedRow = undefined;
 	   this.audioPlayer = new Audio();
 	   this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
 	   this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
@@ -23,7 +24,7 @@ function MainAssistant(db) {
 			 listTemplate: "main/episodeListTemplate",
 			 itemTemplate: "main/episodeListItemTemplate",
 			 swipeToDelete: false,
-			 renderLimit: 15,
+			 renderLimit: 5,
 			 reorderable: false
 	   };
 	   
@@ -50,6 +51,7 @@ MainAssistant.prototype.setup = function() {
 	   /* add event handlers to listen to events from widgets */
 	   // Wait for screen orientation changes
 	   this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
+	   this.controller.listen(document, "shakeend", this.handleShaking.bindAsEventListener(this));
 	   // Listen for user to flick the album-art to change podcasts
 	   this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
 	   this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
@@ -212,6 +214,10 @@ MainAssistant.prototype.handleOrientation = function(event) {
 	
 }
 
+MainAssistant.prototype.handleShaking = function(event) {
+	Mojo.Log.info("[MainAssistant.handleShaking] %s", event.magnitude);
+}
+
 MainAssistant.prototype.handleAlbumArtHold = function(event) {
 	   this.db.updateCurrent();
 }
@@ -266,11 +272,15 @@ MainAssistant.prototype.switchPodcast = function(next) {
 }
 
 MainAssistant.prototype.handleListClick = function(event) {
-	   Mojo.Log.info("[MainAssistant.handleListClick] %s", 'http://www.dailywav.com/0110/noNotThisTime.wav');
-	   this.audioPlayer.src = 'http://www.dailywav.com/0110/noNotThisTime.wav';
+	   Mojo.Log.info("[MainAssistant.handleListClick] %s", event.item.link);
+	   this.selectedRow = $$('div.palm-row.selected')[0];
+	   //this.audioPlayer.src = event.item.link;
+	   this.selectedRow.setStyle({
+			 backgroundColor: "#000000"
+	   });
+	   Mojo.Log.info("%j", this.selectedRow);
 }
 
 MainAssistant.prototype.audioEvent = function(event) {
-	   Mojo.Log.info("[MainAssistant.audioEvent] %s", event.type);
-	   //Mojo.Log.info("%j", event.target);
+	   Mojo.Log.error("[MainAssistant.audioEvent] %s", event.type);
 }
