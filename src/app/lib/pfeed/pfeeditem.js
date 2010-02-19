@@ -54,9 +54,9 @@ var PFeedItem = Class.create({
 	   var answer = (Object.isArray(feed)) ? feed[0] : feed;
 	   if(answer.hasOwnProperty('enclosure')) {
 			 answer = answer.enclosure[0];
-			 enclosure = answer['@url'];
-			 enclosureType = answer['@type'];
-			 enclosureLength = answer['@length'];
+			 this.enclosure = answer['@url'];
+			 this.enclosureType = answer['@type'];
+			 this.enclosureLength = answer['@length'];
 	   }
 	},
 	findID: function(feed) {
