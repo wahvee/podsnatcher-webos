@@ -1,10 +1,12 @@
 var Podcast = Class.create({
+	parent: undefined,
 	url: undefined,
 	key: undefined,					// Used for retrieval from the Mojo.Depot
 	imgUrl: undefined,
 	imgPath: undefined,
 	whoToCallOnFeedUpdate: undefined,
-	initialize: function(feedURL) {
+	initialize: function(feedURL, parentObj) {
+		this.parent = parentObj;
 		if(Object.isString(feedURL)) {
 			this.url = feedURL;		// Store path to feed URL
 			this.key = hex_md5(this.url);	// MD5 Hash of feed URL (unique cookie ID)
@@ -67,42 +69,30 @@ var Podcast = Class.create({
 		return (this.imgPath !== undefined) ? this.imgPath : this.imgUrl;
 	},
 	cacheImage: function(mojoController) {
-		try {
-			//Mojo.Controller.StageController.activeScene();
-			//Mojo.Controller.SceneController.serviceRequest('palm://com.palm.downloadmanager', {
-			mojoController.serviceRequest('palm://com.palm.downloadmanager', {
-				method: 'download',
-				parameters: {
-					target: this.imgUrl,
-					targetDir: "/media/internal/PodSnatcher/cache",
-					keepFilenameOnRedirect: true
-				},
-				onSuccess: function(response) {
-					if(response.returnValue) {
-						Mojo.Log.info("[Podcast.cacheImage] %s", response.target);
-						this.imgPath = response.target;
-					}
-				}.bind(this),
-				onFailure: function(e) {
-					Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s")
-				}
-			});
-		} catch(error) {
-			Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s", error.message);
-		}
+		//try {
+		//	mojoController.serviceRequest('palm://com.palm.downloadmanager', {
+		//		method: 'download',
+		//		parameters: {
+		//			target: this.imgUrl,
+		//			targetDir: "/media/internal/PodSnatcher/cache",
+		//			keepFilenameOnRedirect: true
+		//		},
+		//		onSuccess: function(response) {
+		//			if(response.returnValue) {
+		//				Mojo.Log.info("[Podcast.cacheImage] %s", response.target);
+		//				this.imgPath = response.target;
+		//			}
+		//		}.bind(this),
+		//		onFailure: function(e) {
+		//			Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s")
+		//		}
+		//	});
+		//} catch(error) {
+		//	Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s", error.message);
+		//}
 	},
 	isImageCached: function() {
 		// Returns true if image is stored locally
 		return (this.imgPath !== undefined && !this.imgPath.blank());
-	},
-	toListItem: function() {
-		var temp = new Object();
-		temp.id = this.key;
-		temp.key = this.key;
-		temp.title = this.title;
-		temp.description = this.description;
-		temp.newItems = (Object.isArray(this.items)) ? this.items.size() : 0 ;
-		temp.img = (this.imgPath !== undefined) ? this.imgPath : this.imgUrl;
-		return temp;
 	}
 });

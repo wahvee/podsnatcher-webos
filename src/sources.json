@@ -9,6 +9,7 @@
     {"source": "app/lib/podcast.js"},
     {"source": "app/lib/podcaststorage.js"},
     {"source": "app/lib/util/md5-min.js"},
+    {"source": "/usr/palm/frameworks/media/media.js"},
     {"source": "app/assistants/stage-assistant.js"},
     {
         "scenes": "main",
