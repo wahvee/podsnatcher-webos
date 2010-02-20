@@ -167,7 +167,7 @@ MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
 MainAssistant.prototype.handleCommand = function(command) {
 	   switch(command.type) {
 			 case Podcast.PodcastStartUpdate:
-				    var podcastKey = command.target.key;
+				    var podcastKey = command.podcast.key;
 				    Mojo.Log.info("[MainAssistant.podcastUpdating] %s starting update.", podcastKey);
 				    // Updated podcast is the currently showing podcast
 				    if(this.db.currentPodcast().key == podcastKey) {
@@ -181,7 +181,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 				    }
 				    break;
 			 case Podcast.PodcastUpdateSuccess:
-				    var podcastKey = command.target.key;
+				    var podcastKey = command.podcast.key;
 				    Mojo.Log.info("[MainAssistant.podcastUpdateSuccess] %s finished updating.", podcastKey);
 				    // Updated podcast is the currently showing podcast
 				    if(this.db.currentPodcast().key == podcastKey) {
@@ -193,7 +193,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 				    break;
 			 case Podcast.PodcastUpdateFailure:
 				    // Updated podcast is the currently showing podcast
-				    var podcastKey = command.target.key;
+				    var podcastKey = command.podcast.key;
 				    if(this.db.currentPodcast().key == podcastKey) {
 						  this.spinnerModel.spinning = false;
 						  this.controller.modelChanged(this.spinnerModel);

@@ -8,8 +8,8 @@ var Podcast = Class.create(PFeed, {
 			Object.extend(this, feedURL);
 		}
 		try {
-			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, "", Mojo.Controller.stageController.document);
-			this.podcastUpdateSuccess.target = this;
+			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
+			//this.podcastUpdateSuccess.target = this;
 		} catch(error) {
 			Mojo.Log.error("[Podcast] %s", error.message);
 		}
