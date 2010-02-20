@@ -37,41 +37,6 @@ var PFeed = Class.create({
         if(feedClass) {
             Object.extend(this, feedClass);
         }
-	delete feedClass;
+        delete feedClass;
     }
 });
-
-Ajax.getFeed = function(options) {
-		var feed = {};
-    if(options.url) {
-        var temp = new Ajax.Request(options.url, {
-            method: 'get',
-            onSuccess: function(transport) {
-                try {
-                    // Turn the XML response into a JSON Object
-                    var json = XMLObjectifier.xmlToJSON(transport.responseXML);
-                    feed = new PFeed(json);
-                    if(Object.isFunction(options.success)) {
-                        options.success(feed);
-                    }
-                } catch (error) {
-                    Mojo.Log.error("[Ajax.getFeed try catch error] %s", error.message);
-                }
-            },
-            onFailure: function(transport) {
-                Mojo.Log.error("[Ajax.getFeed Error] %j", transport);
-            },
-            onUninitialized: function() {
-                Mojo.Log.error("[Ajax.getFeed] onUninitialized");
-            },
-            onLoading: function() {
-                Mojo.Log.info("[Ajax.getFeed] onLoading");
-            },
-            onInteractive: function() {
-                Mojo.Log.info("[Ajax.getFeed] onInteractive");
-            }
-        });
-    } else {
-    	console.log("[Ajax.getFeed] URL is empty. Not perfroming request.");
-    }
-};

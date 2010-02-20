@@ -5,7 +5,7 @@ function MainAssistant(db) {
 	   that needs the scene controller should be done in the setup function below. */
 	   this.db = db;
 	   this.selectedRow = undefined;
-	   this.audioPlayer = new Audio();
+	   this.audioPlayer = {};
 	   this.videoPlayer = {};
 	   this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
 	   this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
@@ -52,57 +52,57 @@ MainAssistant.prototype.setup = function() {
 	   }
 	
 	   /* add event handlers to listen to events from widgets */
-	   // Wait for screen orientation changes
-	   this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
-	   this.controller.listen(document, "shakeend", this.handleShaking.bindAsEventListener(this));
-	   // Listen for user to flick the album-art to change podcasts
-	   this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
-	   this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
-	   this.controller.listen($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
-	   // Listen for podcast updates
-	   this.db.addEventListener(PodcastStorage.LoadingDatabaseSuccess, this.dbLoaded.bind(this));
-	   this.db.addEventListener(PodcastStorage.LoadingDatabaseFailure, this.dbLoaded.bind(this));
-	   
-	   this.db.addEventListener(PodcastStorage.PodcastStartUpdate, this.podcastUpdating.bind(this));
-	   this.db.addEventListener(PodcastStorage.PodcastUpdateSuccess, this.podcastUpdateSuccess.bind(this));
-	   this.db.addEventListener(PodcastStorage.PodcastUpdateFailure, this.podcastUpdateFailure.bind(this));
-	   
-	   this.db.addEventListener(PodcastStorage.PodcastListStartUpdate, this.updatingPodcasts.bind(this, 'start'));
-	   this.db.addEventListener(PodcastStorage.PodcastListFinishUpdate, this.updatingPodcasts.bind(this, 'finish'));
-	   
-	   //this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEvent.bindAsEventListener(this), false);
-	   //this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
-	   //this.audioPlayer.addEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.ERROR, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.LOADEDMETADATA, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.LOADSTART, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.PAUSE, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.PLAY, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.PROGRESS, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.SEEKED, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.SEEKING, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEvent.bindAsEventListener(this), false);
-	   this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEvent.bindAsEventListener(this), false);
-	   
-	   //this.db.addEventListener(PodcastStorage.SavingDatabaseSuccess, undefined);
-	   this.db.addEventListener(PodcastStorage.SavingDatabaseFailure, function() {
-			 Mojo.Controller.errorDialog("There was an error. %s", error.message);
-	   });
+	   try {
+			 // Listen for user to flick the album-art to change podcasts
+			 this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
+			 this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
+			 this.controller.listen($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
+			 // Listen for podcast updates
+			 this.db.addEventListener(PodcastStorage.LoadingDatabaseSuccess, this.dbLoaded.bind(this));
+			 this.db.addEventListener(PodcastStorage.LoadingDatabaseFailure, this.dbLoaded.bind(this));
+			 
+			 this.db.addEventListener(PodcastStorage.PodcastListStartUpdate, this.updatingPodcasts.bind(this, 'start'));
+			 this.db.addEventListener(PodcastStorage.PodcastListFinishUpdate, this.updatingPodcasts.bind(this, 'finish'));
+			 
+			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.ERROR, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.LOADEDMETADATA, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.LOADSTART, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.PAUSE, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.PLAY, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.PROGRESS, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.SEEKED, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.SEEKING, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEvent.bindAsEventListener(this), false);
+			 
+			 //this.db.addEventListener(PodcastStorage.SavingDatabaseSuccess, undefined);
+			 this.db.addEventListener(PodcastStorage.SavingDatabaseFailure, function() {
+				    Mojo.Controller.errorDialog("There was an error. %s", error.message);
+			 });
+	   } catch(eventErrors) {
+			 Mojo.Log.error("[MainAssistant.setup] %s", eventErrors.message);
+	   }
 }
 
 MainAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
+	   // Wait for screen orientation changes
+	   this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
+	   this.controller.listen(document, "shakeend", this.handleShaking.bindAsEventListener(this));
 	   
 	   // Begin loading the database
 	   this.db.loadDatabase();
@@ -117,7 +117,7 @@ MainAssistant.prototype.deactivate = function(event) {
 MainAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
-	   this.db.save();
+	   //this.db.save();
 }
 
 MainAssistant.prototype.refreshUI = function() {
@@ -131,7 +131,7 @@ MainAssistant.prototype.refreshUI = function() {
 				    height: '144px',
 				    width: '144px'
 			 }));
-			 $('podcastTitle').innerHTML = (currPodcast.title === undefined) ? "Loading..." : currPodcast.title;
+			 $('podcastTitle').innerHTML = (currPodcast.title === undefined) ? "" : currPodcast.title;
 			 this.episodeListModel.items = (currPodcast.items === undefined) ? [] : currPodcast.items;
 			 this.controller.modelChanged(this.episodeListModel);
 	   } catch(error) {
@@ -157,51 +157,51 @@ MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
 	   Mojo.Log.info("[MainAssistant.updatingPodcasts] Podcasts are %sing updates.", startOrFinish);
 	   this.refreshUI();
 	   if(startOrFinish == 'finish') {
-			 this.db.save();
+			 //this.db.save();
 	   }
 }
 
-MainAssistant.prototype.podcastUpdating = function(podcastKey) {
-	   Mojo.Log.info("[MainAssistant.podcastUpdating] %s starting update.", podcastKey);
-	   // Updated podcast is the currently showing podcast
-	   if(this.db.currentPodcast().key == podcastKey) {
-			 this.spinnerModel.spinning = true;
-			 this.controller.modelChanged(this.spinnerModel);
-			 $("updatingSpinner").setStyle({
-				    visibility: 'visible'
-			 });
-	   } else {
-			 // TODO Dashboard please...
-			 var title = undefined; //this.db.findPodcast(podcastKey).title;
-			 var message = (title === undefined) ? "Updating podcast..." : "Updating " + title;
-			 Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
-	   }
-}
-
-MainAssistant.prototype.podcastUpdateSuccess = function(podcastKey) {
-	   Mojo.Log.info("[MainAssistant.podcastUpdateSuccess] %s finished updating.", podcastKey);
-	   // Updated podcast is the currently showing podcast
-	   if(this.db.currentPodcast().key == podcastKey) {
-			 this.spinnerModel.spinning = false;
-			 this.controller.modelChanged(this.spinnerModel);
-			 $("updatingSpinner").show();
-			 $("updatingSpinner").setStyle({
-				    visibility: 'hidden'
-			 });
-			 
-			 this.refreshUI();
-	   }
-}
-
-MainAssistant.prototype.podcastUpdateFailure = function(podcastKey) {
-	   // Updated podcast is the currently showing podcast
-	   if(this.db.currentPodcast().key == podcastKey) {
-			 this.spinnerModel.spinning = false;
-			 this.controller.modelChanged(this.spinnerModel);
-			 $("updatingSpinner").show();
-			 $("updatingSpinner").setStyle({
-				    visibility: 'hidden'
-			 });
+/**
+ * Handle the commands that come from the objects that are created.
+ */
+MainAssistant.prototype.handleCommand = function(command) {
+	   switch(command.type) {
+			 case Podcast.PodcastStartUpdate:
+				    var podcastKey = command.target.key;
+				    Mojo.Log.info("[MainAssistant.podcastUpdating] %s starting update.", podcastKey);
+				    // Updated podcast is the currently showing podcast
+				    if(this.db.currentPodcast().key == podcastKey) {
+						  this.spinnerModel.spinning = true;
+						  this.controller.modelChanged(this.spinnerModel);
+				    } else {
+						  // TODO Dashboard please...
+						  var title = this.db.findPodcast(podcastKey).title;
+						  var message = (title === undefined) ? "Updating podcast..." : "Updating " + title;
+						  Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
+				    }
+				    break;
+			 case Podcast.PodcastUpdateSuccess:
+				    var podcastKey = command.target.key;
+				    Mojo.Log.info("[MainAssistant.podcastUpdateSuccess] %s finished updating.", podcastKey);
+				    // Updated podcast is the currently showing podcast
+				    if(this.db.currentPodcast().key == podcastKey) {
+						  this.spinnerModel.spinning = false;
+						  this.controller.modelChanged(this.spinnerModel);
+						  
+						  this.refreshUI();
+				    }
+				    break;
+			 case Podcast.PodcastUpdateFailure:
+				    // Updated podcast is the currently showing podcast
+				    var podcastKey = command.target.key;
+				    if(this.db.currentPodcast().key == podcastKey) {
+						  this.spinnerModel.spinning = false;
+						  this.controller.modelChanged(this.spinnerModel);
+				    }
+				    break;
+			 default:
+				    Mojo.Log.info("[MainAssistant.handleCommand] Not handling %s", command.type);
+				    break;
 	   }
 }
 

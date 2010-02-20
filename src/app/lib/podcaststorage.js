@@ -231,7 +231,7 @@ PodcastStorage.prototype.updatePodcasts = function() {
 		// Let listeners know that the podcast list has begun updating
 		this.doEvent(PodcastStorage.PodcastListStartUpdate);
 		// Update the first podcast in the list
-		this.listOfPodcasts[this.indexUpdating].updateFeed(this.onFeedUpdate.bind(this));
+		this.listOfPodcasts[this.indexUpdating].updateFeed();
 		// Let listeners know that update for the given podcast is starting
 		this.doEvent(PodcastStorage.PodcastStartUpdate, this.listOfPodcasts[this.indexUpdating].key);
 	} catch (error) {
@@ -274,11 +274,6 @@ PodcastStorage.prototype.removeEventListener = function(event, listener) {
 	this.callback[event] = this.callback[event].uniq(true);
 	Mojo.Log.info("[PodcastStorage.removeEventListener] %s has %i listener(s)", event, this.callback[event].size());
 };
-
-// Static properties of the PodcastStorage class
-PodcastStorage.PodcastStartUpdate = 'onStartPodcastUpdate';
-PodcastStorage.PodcastUpdateSuccess = 'onPodcastSuccess';
-PodcastStorage.PodcastUpdateFailure = 'onPodcastFailure';
 
 PodcastStorage.PodcastListStartUpdate = 'onStartPodcastListUpdate';
 PodcastStorage.PodcastListFinishUpdate = 'onFinishPodcastListUpdate';
