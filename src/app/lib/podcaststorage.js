@@ -252,6 +252,10 @@ PodcastStorage.prototype.handleCommand = function(command) {
 			break;
 		case Podcast.PodcastUpdateFailure:
 			break;
+		case Podcast.ImageCached:
+			Mojo.Log.info("[PodcastStorage.ImageCached] Saving.");
+			this.save();
+			break;
 		default:
 			Mojo.Log.info("[PodcastStorage.handleCommand] Not handling %s", command.type);
 			break;
