@@ -57,12 +57,6 @@ MainAssistant.prototype.setup = function() {
 			 this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
 			 this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
 			 this.controller.listen($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
-			 // Listen for podcast updates
-			 //this.db.addEventListener(PodcastStorage.LoadingDatabaseSuccess, this.dbLoaded.bind(this));
-			 //this.db.addEventListener(PodcastStorage.LoadingDatabaseFailure, this.dbLoaded.bind(this));
-			 
-			 //this.db.addEventListener(PodcastStorage.PodcastListStartUpdate, this.updatingPodcasts.bind(this, 'start'));
-			 //this.db.addEventListener(PodcastStorage.PodcastListFinishUpdate, this.updatingPodcasts.bind(this, 'finish'));
 			 
 			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEvent.bindAsEventListener(this), false);
 			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
@@ -87,11 +81,6 @@ MainAssistant.prototype.setup = function() {
 			 //this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEvent.bindAsEventListener(this), false);
 			 //this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEvent.bindAsEventListener(this), false);
 			 //this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEvent.bindAsEventListener(this), false);
-			 
-			 //this.db.addEventListener(PodcastStorage.SavingDatabaseSuccess, undefined);
-			 //this.db.addEventListener(PodcastStorage.SavingDatabaseFailure, function() {
-			//	    Mojo.Controller.errorDialog("There was an error. %s", error.message);
-			 //});
 	   } catch(eventErrors) {
 			 Mojo.Log.error("[MainAssistant.setup] %s", eventErrors.message);
 	   }
@@ -117,7 +106,7 @@ MainAssistant.prototype.deactivate = function(event) {
 MainAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
-	   //this.db.save();
+	   this.db.save();
 }
 
 MainAssistant.prototype.refreshUI = function() {
@@ -139,51 +128,49 @@ MainAssistant.prototype.refreshUI = function() {
 	   }
 }
 
-MainAssistant.prototype.dbLoaded = function(error) {
-	   
-}
-
-MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
-	   // Check to see whether the podcasts are starting to update or finishing
-	   Mojo.Log.info("[MainAssistant.updatingPodcasts] Podcasts are %sing updates.", startOrFinish);
-	   this.refreshUI();
-	   if(startOrFinish == 'finish') {
-			 //this.db.save();
-	   }
-}
-
 /**
  * Handle the commands that come from the objects that are created.
  */
 MainAssistant.prototype.handleCommand = function(command) {
 	   switch(command.type) {
+			 case PodcastStorage.PodcastListStartUpdate:
+				    Mojo.Log.info("[MainAssistant.PodcastListStartUpdate] Podcasts are starting updates.");
+				    this.refreshUI();
+				    break;
+			 case PodcastStorage.PodcastListFinishUpdate:
+				    Mojo.Log.info("[MainAssistant.PodcastListFinishUpdate] Podcasts are finishing updates.");
+				    this.db.save();
+				    break;
 			 case PodcastStorage.LoadingDatabaseSuccess:
-				    Mojo.Log.info("[MainAssistant.dbLoaded]");
+				    Mojo.Log.info("[MainAssistant.LoadingDatabaseSuccess]");
 				    this.refreshUI();
 				    if(this.db.requiresUpdate) {
 						  this.db.updatePodcasts();
 				    }
 				    break;
 			 case PodcastStorage.LoadingDatabaseFailure:
-				    Mojo.Log.error("[MainAssistant.dbLoaded] %s", error.message);
+				    Mojo.Log.error("[MainAssistant.LoadingDatabaseFailure] %s", command.error.message);
+				    break;
+			 case PodcastStorage.SavingDatabaseFailure:
+				    Mojo.Log.error("[MainAssistant.SavingDatabaseFailure] %s", command.error.message);
 				    break;
 			 case Podcast.PodcastStartUpdate:
 				    var podcastKey = command.podcast.key;
-				    Mojo.Log.info("[MainAssistant.podcastUpdating] %s starting update.", podcastKey);
+				    Mojo.Log.info("[MainAssistant.PodcastStartUpdate] %s starting update.", podcastKey);
 				    // Updated podcast is the currently showing podcast
 				    if(this.db.currentPodcast().key == podcastKey) {
 						  this.spinnerModel.spinning = true;
 						  this.controller.modelChanged(this.spinnerModel);
 				    } else {
 						  // TODO Dashboard please...
-						  var title = this.db.findPodcast(podcastKey).title;
+						  var title = command.podcast.title;
 						  var message = (title === undefined) ? "Updating podcast..." : "Updating " + title;
 						  Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
 				    }
 				    break;
 			 case Podcast.PodcastUpdateSuccess:
 				    var podcastKey = command.podcast.key;
-				    Mojo.Log.info("[MainAssistant.podcastUpdateSuccess] %s finished updating.", podcastKey);
+				    Mojo.Log.info("[MainAssistant.PodcastUpdateSuccess] %s finished updating.", podcastKey);
 				    // Updated podcast is the currently showing podcast
 				    if(this.db.currentPodcast().key == podcastKey) {
 						  this.spinnerModel.spinning = false;

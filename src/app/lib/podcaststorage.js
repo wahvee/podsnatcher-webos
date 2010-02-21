@@ -181,6 +181,7 @@ var PodcastStorage = Class.create({
 // Properites of each instance of PodcastStorage
 PodcastStorage.prototype._currentPodcast = 0;
 PodcastStorage.prototype.indexUpdating = 0;
+PodcastStorage.prototype.updatingAll = false;
 PodcastStorage.prototype.db = {};
 PodcastStorage.prototype.listOfPodcasts = [];
 PodcastStorage.prototype.callback = {};
@@ -206,13 +207,6 @@ PodcastStorage.prototype.previousPodcast = function() {
 	return this.currentPodcast();
 }
 
-PodcastStorage.prototype.findPodcast = function(feedKey) {
-	var podcastToUpdate = this.listOfPodcasts.detect(function(podcast) {
-		return podcast.key = feedKey;
-	});
-	return podcastToUpdate;
-};
-
 /**
  * Tells the Podcast at the array index of _currentPodcast
  * that it needs to update it's feed.
@@ -225,6 +219,8 @@ PodcastStorage.prototype.updatePodcasts = function() {
 	try {
 		// Reset the index that is currently updating
 		this.indexUpdating = 0;
+		// Set that we are updating all the podcasts
+		this.updatingAll = true;
 		// Let listeners know that the podcast list has begun updating
 		Mojo.Controller.stageController.sendEventToCommanders(this.podcastListStartUpdate);
 		// Update the first podcast in the list
@@ -234,40 +230,36 @@ PodcastStorage.prototype.updatePodcasts = function() {
 	}
 };
 
-PodcastStorage.prototype.onFeedUpdate = function(feedKey) {
-	// Increment the podcast number that is currently updating
-	this.indexUpdating++;
-	// Do event to notify that the podcast has updated
-	this.doEvent(PodcastStorage.PodcastUpdateSuccess, feedKey);
-	// Check to see if more podcasts need to be updated
-	if(this.indexUpdating == this.listOfPodcasts.size()) {
-		// If the are equal everything is done updating
-		this.doEvent(PodcastStorage.PodcastListFinishUpdate);
-	} else {
-		// Otherwise more podcasts need to be processesed
-		// Update the next podcast in the list
-		this.listOfPodcasts[this.indexUpdating].updateFeed(this.onFeedUpdate.bind(this));
-		// Let listeners know that update for the given podcast is starting
-		this.doEvent(PodcastStorage.PodcastStartUpdate, this.listOfPodcasts[this.indexUpdating].key);
-	}
-};
-
 PodcastStorage.prototype.handleCommand = function(command) {
-	   switch(command.type) {
-			 case Podcast.PodcastStartUpdate:
-				    var podcastKey = command.podcast.key;
-				    Mojo.Log.info("[PodcastStorage.podcastUpdating] %s starting update.", podcastKey);
-				    break;
-			 case Podcast.PodcastUpdateSuccess:
-				    var podcastKey = command.podcast.key;
-				    Mojo.Log.info("[PodcastStorage.podcastUpdateSuccess] %s finished updating.", podcastKey);
-				    break;
-			 case Podcast.PodcastUpdateFailure:
-				    break;
-			 default:
-				    Mojo.Log.info("[PodcastStorage.handleCommand] Not handling %s", command.type);
-				    break;
-	   }
+	switch(command.type) {
+		case Podcast.PodcastStartUpdate:
+			var podcastKey = command.podcast.key;
+			Mojo.Log.info("[PodcastStorage.podcastUpdating] %s starting update.", podcastKey);
+			break;
+		case Podcast.PodcastUpdateSuccess:
+			var podcastKey = command.podcast.key;
+			Mojo.Log.info("[PodcastStorage.podcastUpdateSuccess] %s finished updating.", command.podcast.title);
+			// Check to see if this is just one podcast updating or one in a series
+			if(this.updatingAll) {
+				// Increment the podcast number that is currently updating
+				this.indexUpdating++;
+				// Check to see if more podcasts need to be updated
+				if(this.indexUpdating == this.listOfPodcasts.size()) {
+					// If the are equal everything is done updating
+					Mojo.Controller.stageController.sendEventToCommanders(this.podcastListFinishUpdate);
+				} else {
+					// Otherwise more podcasts need to be processesed
+					// Update the next podcast in the list
+					this.listOfPodcasts[this.indexUpdating].updateFeed();
+				}
+			}
+			break;
+		case Podcast.PodcastUpdateFailure:
+			break;
+		default:
+			Mojo.Log.info("[PodcastStorage.handleCommand] Not handling %s", command.type);
+			break;
+	}
 }
 
 PodcastStorage.PodcastListStartUpdate = 'onStartPodcastListUpdate';

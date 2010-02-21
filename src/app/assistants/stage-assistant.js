@@ -64,7 +64,7 @@ StageAssistant.prototype.handleCommand = function(event) {
 			$('stageError').innerHTML = "[" + error.code + "] " + error.message;
 			break;
 		default:
-			Mojo.Log.info("[StageAssistant.handleCommand] Not handling %s", command.type);
+			Mojo.Log.info("[StageAssistant.handleCommand] Not handling %s", event.type);
 			break;
 	}
 };
