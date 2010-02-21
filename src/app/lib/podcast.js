@@ -11,6 +11,7 @@ var Podcast = Class.create(PFeed, {
 			this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
 			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
 			this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
+			this.imageCached = Mojo.Event.make(Podcast.ImageCached, {}, Mojo.Controller.stageController.document);
 		} catch(error) {
 			Mojo.Log.error("[Podcast] %s", error.message);
 		}
@@ -23,6 +24,12 @@ var Podcast = Class.create(PFeed, {
 		return (this.title === undefined || this.title.blank() || this.items === undefined || !Object.isArray(this.items));
 	},
 	getImage: function(feed) {
+		if(this.isImageCached()) {
+			return this.imgPath;
+		} else {
+			this.cacheImage();
+			return this.imgUrl;
+		}
 		return (this.imgPath !== undefined) ? this.imgPath : this.imgUrl;
 	},
 	cacheImage: function() {
@@ -37,8 +44,10 @@ var Podcast = Class.create(PFeed, {
 				},
 				onSuccess: function(response) {
 					if(response.returnValue) {
-						Mojo.Log.info("[Podcast.cacheImage] %s", response.target);
+						Mojo.Log.info("[Podcast.cacheImage] (%s) %s", response.ticket, response.target);
 						this.imgPath = response.target;
+						this.imgTicket = response.ticket;
+						Mojo.Controller.stageController.sendEventToCommanders(this.imageCached);
 					}
 				}.bind(this),
 				onFailure: function(e) {

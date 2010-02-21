@@ -53,7 +53,7 @@ var PodcastStorage = Class.create({
 		var onSuccess = function(response) {
 			// Return number of records found
 			var recordSize = (Object.isArray(response)) ? response.size() : Object.values(response).size();
-			Mojo.Log.info("[PodcastStorage.getPodcasts] %i podcast(s) loaded.", recordSize);
+			Mojo.Log.info("[PodcastStorage.loadDatabase] %i podcast(s) loaded.", recordSize);
 			if(recordSize == 0) { // Database has nothing in it.
 				this.populateInitialDB();
 			} else {
