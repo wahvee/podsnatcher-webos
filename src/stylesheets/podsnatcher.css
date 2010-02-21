@@ -3,19 +3,19 @@
 }
 
 #header {
-	position: fixed;
-	top: 0;
-	left: 0;
 	background: url(../images/background-top.png) no-repeat;
 	width: 100%;
 	height: 155px;
+	position: fixed;
+	top: 0;
+	left: 0;
 	z-index: 350;
 }
 
 #album-art-area {
+	background: url(../images/tabs.png) no-repeat;
 	width: 216px;
 	height: 111px;
-	background: url(../images/tabs.png) no-repeat;
 	margin: 0 auto;
 	position: relative;
 	top: -145px;
@@ -26,40 +26,38 @@
 	/* Album Art = 144x144px
 	   Border = 14px, 172x172px
 	   Actual "border.png" 14px, 200x200px */
+	background: url(../images/border.png) no-repeat;
 	width: 200px;
 	height: 200px;
-	/*border: 1px solid red;*/
-	background: url(../images/border.png) no-repeat;
 	margin: 0 auto;
 	position: relative;
 	top: 8px;
 	z-index: 1000;
+	/*border: 1px solid red;*/
 }
 
 img#image {
-	margin: 0px 28px 0px 28px;
-	position: relative;
-	top: -100px;
 	background-color: #caff42;
+	margin: 28px;
 }
 
 #updatingSpinner {
 	width: 128px;
 	height: 128px;
-	position: relative;
-	top: 36px;
-	margin: 0 auto;
+	position: absolute;
+	top: 44px;
+	left: 50%;
+	margin-left: -64px;
 	z-index: 2000;
 	/*border: 1px solid green;*/
 }
 
 #stripe {
-	position: absolute;
-	top: 155px;
-	left: 0;
 	background: url(../images/stripe.png) repeat-x;
 	width: 100%;
 	height: 27px;
+	position: absolute;
+	top: 155px;
 	z-index: 250;
 }
 

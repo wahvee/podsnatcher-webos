@@ -45,7 +45,7 @@ MainAssistant.prototype.setup = function() {
 			 //this.videoPlayer = VideoTag.extendElement(this.videoPlayer, this.controller);
 			 // Colorize the background of the scroller for this scene
 			 //this.controller.sceneScroller.addClassName('scrollerBg');
-			 //this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
+			 this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 			 this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
 	   } catch (func_error) {
 			 Mojo.Log.info("[Create Widgets] %s", func_error.message);
