@@ -284,7 +284,7 @@ MainAssistant.prototype.handleListClick = function(event) {
 				    //this.audioPlayer.src = event.item.enclosure
 				    break;
 			 default:
-				    Mojo.Log.error("[MainAssistant.handleListClick] Unknown file extension.");
+				    Mojo.Log.error("[MainAssistant.handleListClick] Unknown file extension. %s", event.item.enclosureType);
 				    break;			 
 	   }
 }
