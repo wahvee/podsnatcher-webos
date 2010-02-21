@@ -150,7 +150,7 @@ var PodcastStorage = Class.create({
 		};
 		
 		var initialList = [
-			//new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
+			new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
 			new Podcast('http://revision3.com/diggnation/feed/MP4-Large'),
 			new Podcast('http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595'),
 			new Podcast('http://feeds.feedburner.com/cnet/buzzreport?format=xml'),
@@ -177,7 +177,6 @@ var PodcastStorage = Class.create({
 		var tempArr = [];
 		this.listOfPodcasts.each(function(podcastItem, index) {
 			if(podcastItem instanceof Podcast) {
-				Mojo.Log.info("[PodcastStorage.savePodcast] Instance of Podcast.");
 				tempArr.push(podcastItem.simpleObject());
 			}
 		});
@@ -268,8 +267,10 @@ PodcastStorage.prototype.handleCommand = function(command) {
 		case Podcast.PodcastUpdateFailure:
 			break;
 		case Podcast.ImageCached:
-			Mojo.Log.info("[PodcastStorage.ImageCached] Saving.");
-			this.save();
+			if(this.updatingAll) {
+				Mojo.Log.info("[PodcastStorage.ImageCached] Saving.");
+				this.save();
+			}
 			break;
 		default:
 			Mojo.Log.info("[PodcastStorage.handleCommand] Not handling %s", command.type);
