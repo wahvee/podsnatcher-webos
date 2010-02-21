@@ -61,17 +61,21 @@ var PFeedItem = Class.create({
 	},
 	findID: function(feed) {
 		this.setPropertyFromFeed(feed, 'id', 'guid');
-	},
-	simpleObject: function() {
-		var clone = Object.clone(this);
-		var arrKeys = Object.keys(this);
-		arrKeys.each(function(key) {
-			if(Object.isFunction(clone[key]) || clone[key] instanceof Event) {
-				delete clone[key];
-			}
-		});
-		
-		return clone;
 	}
 });
 
+PFeedItem.simpleObject = function(instance) {
+	if(instance instanceof PFeedItem) {
+		Mojo.Log.info("[PFeedItem.simpleObject] Correct type.");
+		var arrKeys = Object.keys(this);
+		arrKeys.each(function(key) {
+			if(Object.isFunction(instance[key]) || instance[key] instanceof Event) {
+				delete instance[key];
+			} else if(Object.isString(instance[key]) && (instance[key].blank() || instance[key] === undefined)) {
+				delete instance[key];
+			} else if(Object.isArray(instance[key])) {
+				delete instance[key];
+			}
+		});
+	}
+}

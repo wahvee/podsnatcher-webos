@@ -35,7 +35,7 @@ var PodcastStorage = Class.create({
 		try {
 			// Connect/Create statement for the db
 			this.db = new Mojo.Depot({
-				replace: true,
+				//replace: true,
 				name: this.dbName,
 				version: "1",
 				displayName: "PodSnatcher Database",
@@ -178,10 +178,10 @@ var PodcastStorage = Class.create({
 		this.listOfPodcasts.each(function(podcastItem, index) {
 			if(podcastItem instanceof Podcast) {
 				Mojo.Log.info("[PodcastStorage.savePodcast] Instance of Podcast.");
-				podcastItem.simpleObject();
+				tempArr.push(podcastItem.simpleObject());
 			}
 		});
-		this.db.add("podcastList", this.listOfPodcasts, onSuccess.bind(this), this.onFailure.bind(this));
+		this.db.add("podcastList", tempArr, onSuccess.bind(this), this.onFailure.bind(this));
 	}
 });
 

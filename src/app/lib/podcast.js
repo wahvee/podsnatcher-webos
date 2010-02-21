@@ -86,32 +86,27 @@ Podcast.prototype.enclosureTicket = undefined;
  * saving or whatever the reason. Basically, strips
  * everything but the storage.
  */
-Podcast.addMethods({
-	simpleObject: function($super) {
-		$super();
-		var clone = Object.clone(this);
-		var arrKeys = Object.keys(this);
-		arrKeys.each(function(key) {
-			if(Object.isFunction(clone[key]) || clone[key] instanceof Event) {
-				delete clone[key];
-			}
-		});
-	   
-		// Each item should be an PRssItem or PAtomItem
-		var tempItems = [];
-		if(Object.isArray(clone.items)) {
-			clone.items.each(function(item, index) {
-				if(item instanceof PRssItem || item instanceof PAtomItem) {
-					Mojo.Log.info("[Podcast.simpleObject] Item is the right type to copy.");
-					tempItems.push(item.simpleObject());
-				}
-			});
+Podcast.prototype.simpleObject = function() {
+	var clone = Object.clone(this);
+	var arrKeys = Object.keys(this);
+	arrKeys.each(function(key) {
+		if(Object.isFunction(clone[key]) || clone[key] instanceof Event) {
+			delete clone[key];
+		} else if(Object.isString(clone[key]) && (clone[key].blank() || clone[key] === undefined)) {
+			delete clone[key];
 		}
-		delete clone.items;
-		Object.extend(clone.items, tempItems);
-		return clone;
-	}
-});
+	});
+   
+	// Each item should be an PRssItem or PAtomItem
+	//if(Object.isArray(clone.items)) {
+	//clone.items.each(function(item, index) {
+	//if(item instanceof PRssItem || item instanceof PAtomItem) {
+	//		PFeedItem.simpleObject(item);
+	//	}
+	//});
+	//}
+	return clone;
+}
 
 Podcast.prototype.updateFeed = function(newUrl) {
 	// Set to path to feed if specified
