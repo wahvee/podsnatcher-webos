@@ -170,7 +170,7 @@ var PodcastStorage = Class.create({
 			Mojo.Controller.stageController.sendEventToCommanders(this.savingDatabaseFailure);
 		};
 		
-		this.db.add("podcastList", this.listOfPodcasts, onSuccess.bind(this), this.onFailure);
+		this.db.add("podcastList", this.listOfPodcasts, onSuccess.bind(this), this.onFailure.bind(this));
 	}
 });
 
@@ -184,7 +184,7 @@ PodcastStorage.prototype.callback = {};
 PodcastStorage.prototype.stageController = undefined;
 
 PodcastStorage.prototype.currentPodcast = function() {
-	return Object.clone(this.listOfPodcasts[this._currentPodcast]);
+	return this.listOfPodcasts[this._currentPodcast];
 }
 
 PodcastStorage.prototype.nextPodcast = function() {
