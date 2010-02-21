@@ -1,7 +1,5 @@
 function StageAssistant() {
 	this.db = new PodcastStorage("podSnatcherDb", this);
-	this.db.addEventListener(PodcastStorage.ConnectionToDatabase, this.connectionToDatabase.bind(this));
-	this.db.addEventListener(PodcastStorage.FailedConnectionToDatabase, this.connectionToDatabaseFailed.bind(this));
 	this.standardMenuAttr = undefined;
 	this.standardMenuModel = undefined;
 }
@@ -31,44 +29,42 @@ StageAssistant.prototype.setup = function() {
 		]
 	};
 	
+	this.controller.pushCommander(this.db);
 	this.db.connectToDatabase();
-};
-
-StageAssistant.prototype.connectionToDatabase = function() {
-	Mojo.Log.info("[StageAssistant] Connection to DB.");
-	// The stage no longer needs to listen for updates to the database
-	this.db.removeEventListener(PodcastStorage.ConnectionToDatabase, this.connectionToDatabase.bind(this));
-	this.db.removeEventListener(PodcastStorage.FailedConnectionToDatabase, this.connectionToDatabaseFailed.bind(this));
-	// Start the scene
-	this.controller.pushScene({name: "main"}, this.db);
-	// Make screen rotatable
-	this.controller.setWindowOrientation("free");
-};
-
-StageAssistant.prototype.connectionToDatabaseFailed = function(error) {
-	Mojo.Log.error("[StageAssistant] Connection to DB not made.");
-	// The stage no longer needs to listen for updates to the database
-	this.db.removeEventListener(PodcastStorage.ConnectionToDatabase, this.connectionToDatabase.bind(this));
-	this.db.removeEventListener(PodcastStorage.FailedConnectionToDatabase, this.connectionToDatabaseFailed.bind(this));
-	//Mojo.Controller.errorDialog("[" + error.code + "] " + error.message);
-	$('stageError').innerHTML = "[" + error.code + "] " + error.message;
 };
 
 // handleCommand - Setup handlers for menus:
 StageAssistant.prototype.handleCommand = function(event) {
 	var currentScene = this.controller.activeScene();
-	if(event.type == Mojo.Event.command) {
-		switch(event.command) {
-			case 'do-refresh-all':
-				// Unload all scenes and then load the login scene
-				this.controller.popScenesTo(undefined, undefined, undefined);
+	switch(event.type) {
+		case Mojo.Event.command:
+			switch(event.command) {
+				case 'do-refresh-all':
+					// Unload all scenes and then load the login scene
+					this.controller.popScenesTo(undefined, undefined, undefined);
+					break;
+				case 'do-other-command':
+					Mojo.Log.error("Don't know how this is working!");	
+					break;
+				default:
+					Mojo.Log.error("There was an un-recognized app menu command.");
+					break;
+			}
 			break;
-			case 'do-other-command':
-				Mojo.Log.error("Don't know how this is working!");	
+		case PodcastStorage.ConnectionToDatabase:
+			Mojo.Log.info("[StageAssistant] Connection to DB.");
+			// Start the scene
+			this.controller.pushScene({name: "main"}, this.db);
+			// Make screen rotatable
+			this.controller.setWindowOrientation("free");
 			break;
-			default:
-				Mojo.Log.error("There was an un-recognized app menu command.");
+		case PodcastStorage.FailedConnectionToDatabase:
+			Mojo.Log.error("[StageAssistant] Connection to DB not made.");
+			//Mojo.Controller.errorDialog("[" + error.code + "] " + error.message);
+			$('stageError').innerHTML = "[" + error.code + "] " + error.message;
 			break;
-		}
+		default:
+			Mojo.Log.info("[StageAssistant.handleCommand] Not handling %s", command.type);
+			break;
 	}
 };

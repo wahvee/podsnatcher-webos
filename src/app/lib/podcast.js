@@ -8,8 +8,9 @@ var Podcast = Class.create(PFeed, {
 			Object.extend(this, feedURL);
 		}
 		try {
+			this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
 			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
-			//this.podcastUpdateSuccess.target = this;
+			this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
 		} catch(error) {
 			Mojo.Log.error("[Podcast] %s", error.message);
 		}
@@ -86,23 +87,22 @@ Podcast.prototype.updateFeed = function(newUrl) {
 					var json = XMLObjectifier.xmlToJSON(transport.responseXML);
 					this.parse(json);
 					// Do something now that the JSON object has been parsed
-					Mojo.Log.info("[Podcast.updateFeed] %s finished updating.", this.title);
 					Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
 				} catch (error) {
 					Mojo.Log.error("[Podcast.getFeed try catch error] %s", error.message);
+					Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 				}
 			}.bind(this),
 			onFailure: function(transport) {
 				Mojo.Log.error("[Podcast.getFeed Error] %j", transport);
-			},
-			onUninitialized: function() {
-				Mojo.Log.error("[Podcast.getFeed] onUninitialized");
+				Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 			},
 			onLoading: function() {
 				Mojo.Log.info("[Podcast.getFeed] onLoading");
+				Mojo.Controller.stageController.sendEventToCommanders(this.podcastStartUpdate);
 			},
 			onInteractive: function() {
-				Mojo.Log.info("[Podcast.getFeed] onInteractive");
+				//Mojo.Log.info("[Podcast.getFeed] onInteractive");
 			}
 		});
 	} else {

@@ -58,11 +58,11 @@ MainAssistant.prototype.setup = function() {
 			 this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
 			 this.controller.listen($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
 			 // Listen for podcast updates
-			 this.db.addEventListener(PodcastStorage.LoadingDatabaseSuccess, this.dbLoaded.bind(this));
-			 this.db.addEventListener(PodcastStorage.LoadingDatabaseFailure, this.dbLoaded.bind(this));
+			 //this.db.addEventListener(PodcastStorage.LoadingDatabaseSuccess, this.dbLoaded.bind(this));
+			 //this.db.addEventListener(PodcastStorage.LoadingDatabaseFailure, this.dbLoaded.bind(this));
 			 
-			 this.db.addEventListener(PodcastStorage.PodcastListStartUpdate, this.updatingPodcasts.bind(this, 'start'));
-			 this.db.addEventListener(PodcastStorage.PodcastListFinishUpdate, this.updatingPodcasts.bind(this, 'finish'));
+			 //this.db.addEventListener(PodcastStorage.PodcastListStartUpdate, this.updatingPodcasts.bind(this, 'start'));
+			 //this.db.addEventListener(PodcastStorage.PodcastListFinishUpdate, this.updatingPodcasts.bind(this, 'finish'));
 			 
 			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEvent.bindAsEventListener(this), false);
 			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
@@ -89,9 +89,9 @@ MainAssistant.prototype.setup = function() {
 			 //this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEvent.bindAsEventListener(this), false);
 			 
 			 //this.db.addEventListener(PodcastStorage.SavingDatabaseSuccess, undefined);
-			 this.db.addEventListener(PodcastStorage.SavingDatabaseFailure, function() {
-				    Mojo.Controller.errorDialog("There was an error. %s", error.message);
-			 });
+			 //this.db.addEventListener(PodcastStorage.SavingDatabaseFailure, function() {
+			//	    Mojo.Controller.errorDialog("There was an error. %s", error.message);
+			 //});
 	   } catch(eventErrors) {
 			 Mojo.Log.error("[MainAssistant.setup] %s", eventErrors.message);
 	   }
@@ -140,16 +140,7 @@ MainAssistant.prototype.refreshUI = function() {
 }
 
 MainAssistant.prototype.dbLoaded = function(error) {
-	   if(error !== undefined) {
-			 Mojo.Log.error("[MainAssistant.dbLoaded] %s", error.message);
-	   } else {
-			 Mojo.Log.info("[MainAssistant.dbLoaded]");
-			 if(this.db.requiresUpdate) {
-				    this.db.updatePodcasts();
-			 } else {
-				    this.refreshUI();
-			 }
-	   }
+	   
 }
 
 MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
@@ -166,6 +157,16 @@ MainAssistant.prototype.updatingPodcasts = function(startOrFinish) {
  */
 MainAssistant.prototype.handleCommand = function(command) {
 	   switch(command.type) {
+			 case PodcastStorage.LoadingDatabaseSuccess:
+				    Mojo.Log.info("[MainAssistant.dbLoaded]");
+				    this.refreshUI();
+				    if(this.db.requiresUpdate) {
+						  this.db.updatePodcasts();
+				    }
+				    break;
+			 case PodcastStorage.LoadingDatabaseFailure:
+				    Mojo.Log.error("[MainAssistant.dbLoaded] %s", error.message);
+				    break;
 			 case Podcast.PodcastStartUpdate:
 				    var podcastKey = command.podcast.key;
 				    Mojo.Log.info("[MainAssistant.podcastUpdating] %s starting update.", podcastKey);
