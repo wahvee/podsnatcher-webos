@@ -150,7 +150,7 @@ var PodcastStorage = Class.create({
 		};
 		
 		var initialList = [
-			new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
+			//new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
 			new Podcast('http://revision3.com/diggnation/feed/MP4-Large'),
 			new Podcast('http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595'),
 			new Podcast('http://feeds.feedburner.com/cnet/buzzreport?format=xml'),
@@ -174,7 +174,14 @@ var PodcastStorage = Class.create({
 			Mojo.Controller.stageController.sendEventToCommanders(this.savingDatabaseFailure);
 		};
 		
-		this.db.add("podcastList", this.listOfPodcasts, onSuccess.bind(this), this.onFailure.bind(this));
+		var tempArr = [];
+		this.listOfPodcasts.each(function(podcastItem, index) {
+			if(podcastItem instanceof Podcast) {
+				Mojo.Log.info("[PodcastStorage.savePodcast] Instance of Podcast.");
+				podcastItem.simpleObject();
+			}
+		});
+		//this.db.add("podcastList", this.listOfPodcasts, onSuccess.bind(this), this.onFailure.bind(this));
 	}
 });
 

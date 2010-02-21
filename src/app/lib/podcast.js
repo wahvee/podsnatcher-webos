@@ -33,6 +33,7 @@ var Podcast = Class.create(PFeed, {
 	},
 	cacheImage: function() {
 		try {
+			 if(this.imgUrl !== undefined && !this.imgUrl.blank()) {
 			var mojoController = Mojo.Controller.stageController.activeScene();
 			mojoController.serviceRequest('palm://com.palm.downloadmanager', {
 				method: 'download',
@@ -53,6 +54,7 @@ var Podcast = Class.create(PFeed, {
 					Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s")
 				}
 			});
+			 }
 		} catch(error) {
 			Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s", error.message);
 		}
@@ -78,6 +80,21 @@ Podcast.prototype.imgPath = undefined;
 Podcast.prototype.imgTicket = undefined;
 Podcast.prototype.enclosurePath = undefined;
 Podcast.prototype.enclosureTicket = undefined;
+
+/**
+ * Converts the Podcast to a simple Object for
+ * saving or whatever the reason. Basically, strips
+ * everything but the storage.
+ */
+Podcast.prototype.simpleObj = function() {
+	   
+	   var temp = $(this);
+	   
+	   // Each item should be an PRssItem or PAtomItem
+	   this.items.each(function(podcastItem, index) {
+			 
+	   });
+}
 
 Podcast.prototype.updateFeed = function(newUrl) {
 	// Set to path to feed if specified
