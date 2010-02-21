@@ -61,6 +61,10 @@ var PodcastStorage = Class.create({
 					var item = new Podcast(podcastItem);
 					if(item.isOutOfDate()) {
 						this.requiresUpdate = true;
+					} else {
+						if(!item.isImageCached()) {
+							item.cacheImage();
+						}
 					}
 					this.listOfPodcasts.push(item);
 				}, this);
@@ -241,13 +245,17 @@ PodcastStorage.prototype.handleCommand = function(command) {
 				this.indexUpdating++;
 				// Check to see if more podcasts need to be updated
 				if(this.indexUpdating == this.listOfPodcasts.size()) {
-					// If the are equal everything is done updating
+					// Not updating all anymore
+					this.updatingAll = false;
+					// If they are equal everything is done updating
 					Mojo.Controller.stageController.sendEventToCommanders(this.podcastListFinishUpdate);
 				} else {
 					// Otherwise more podcasts need to be processesed
 					// Update the next podcast in the list
 					this.listOfPodcasts[this.indexUpdating].updateFeed();
 				}
+			} else {
+				this.save();
 			}
 			break;
 		case Podcast.PodcastUpdateFailure:
