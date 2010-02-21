@@ -86,15 +86,32 @@ Podcast.prototype.enclosureTicket = undefined;
  * saving or whatever the reason. Basically, strips
  * everything but the storage.
  */
-Podcast.prototype.simpleObj = function() {
+Podcast.addMethods({
+	simpleObject: function($super) {
+		$super();
+		var clone = Object.clone(this);
+		var arrKeys = Object.keys(this);
+		arrKeys.each(function(key) {
+			if(Object.isFunction(clone[key]) || clone[key] instanceof Event) {
+				delete clone[key];
+			}
+		});
 	   
-	   var temp = $(this);
-	   
-	   // Each item should be an PRssItem or PAtomItem
-	   this.items.each(function(podcastItem, index) {
-			 
-	   });
-}
+		// Each item should be an PRssItem or PAtomItem
+		var tempItems = [];
+		if(Object.isArray(clone.items)) {
+			clone.items.each(function(item, index) {
+				if(item instanceof PRssItem || item instanceof PAtomItem) {
+					Mojo.Log.info("[Podcast.simpleObject] Item is the right type to copy.");
+					tempItems.push(item.simpleObject());
+				}
+			});
+		}
+		delete clone.items;
+		Object.extend(clone.items, tempItems);
+		return clone;
+	}
+});
 
 Podcast.prototype.updateFeed = function(newUrl) {
 	// Set to path to feed if specified

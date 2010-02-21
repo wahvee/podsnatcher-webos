@@ -61,6 +61,17 @@ var PFeedItem = Class.create({
 	},
 	findID: function(feed) {
 		this.setPropertyFromFeed(feed, 'id', 'guid');
+	},
+	simpleObject: function() {
+		var clone = Object.clone(this);
+		var arrKeys = Object.keys(this);
+		arrKeys.each(function(key) {
+			if(Object.isFunction(clone[key]) || clone[key] instanceof Event) {
+				delete clone[key];
+			}
+		});
+		
+		return clone;
 	}
 });
 
