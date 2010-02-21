@@ -23,14 +23,13 @@ var Podcast = Class.create(PFeed, {
 		// that the items db is an array
 		return (this.title === undefined || this.title.blank() || this.items === undefined || !Object.isArray(this.items));
 	},
-	getImage: function(feed) {
+	getImage: function() {
 		if(this.isImageCached()) {
 			return this.imgPath;
 		} else {
 			this.cacheImage();
 			return this.imgUrl;
 		}
-		return (this.imgPath !== undefined) ? this.imgPath : this.imgUrl;
 	},
 	cacheImage: function() {
 		try {
