@@ -5,7 +5,9 @@ function MainAssistant(db) {
 	   that needs the scene controller should be done in the setup function below. */
 	   this.db = db;
 	   this.selectedRow = undefined;
-	   this.audioPlayer = {};
+	   this.audioPlayer = undefined;
+	   this.audioPlayerCanPlay = false;
+	   this.audioPlayerIsPlaying = false;
 	   this.videoPlayer = {};
 	   this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
 	   this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
@@ -24,9 +26,9 @@ function MainAssistant(db) {
 	   this.episodeListAttributes = {
 			 listTemplate: "main/episodeListTemplate",
 			 itemTemplate: "main/episodeListItemTemplate",
-			 swipeToDelete: false,
-			 renderLimit: 15,
-			 reorderable: false
+			 swipeToDelete: true,
+			 uniquenessProperty: 'key',
+			 onItemRendered: this.listItemRender.bindAsEventListener(this)
 	   };
 	   
 	   this.episodeListModel = {
@@ -43,8 +45,7 @@ MainAssistant.prototype.setup = function() {
 	   try {
 			 //this.videoPlayer = $('video-object');
 			 //this.videoPlayer = VideoTag.extendElement(this.videoPlayer, this.controller);
-			 // Colorize the background of the scroller for this scene
-			 //this.controller.sceneScroller.addClassName('scrollerBg');
+			 this.audioPlayer = new Audio();
 			 this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 			 this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
 	   } catch (func_error) {
@@ -54,35 +55,21 @@ MainAssistant.prototype.setup = function() {
 	   /* add event handlers to listen to events from widgets */
 	   try {
 			 // Listen for user to flick the album-art to change podcasts
+			 this.controller.listen($('album-art-area-right'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
+			 this.controller.listen($('album-art-area-left'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
 			 this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
 			 this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
 			 this.controller.listen($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
-			 
-			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.ERROR, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.LOADEDMETADATA, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.LOADSTART, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.PAUSE, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.PLAY, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.PROGRESS, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.SEEKED, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.SEEKING, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEvent.bindAsEventListener(this), false);
+			 this.controller.listen($('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
 	   } catch(eventErrors) {
 			 Mojo.Log.error("[MainAssistant.setup] %s", eventErrors.message);
+	   }
+	   
+	   try {
+			 // Begin loading the database
+			 this.db.loadDatabase();
+	   } catch(dbLoadErrors) {
+			 Mojo.Log.error("[MainAssistant.setup loadDB] %s", dbLoadErrors.message);
 	   }
 }
 
@@ -93,8 +80,33 @@ MainAssistant.prototype.activate = function(event) {
 	   this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
 	   this.controller.listen(document, "shakeend", this.handleShaking.bindAsEventListener(this));
 	   
-	   // Begin loading the database
-	   this.db.loadDatabase();
+	   try {			 
+			 this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.ERROR, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.LOADEDMETADATA, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.LOADSTART, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.PAUSE, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.PLAY, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.PROGRESS, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.SEEKED, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.SEEKING, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEvent.bindAsEventListener(this), false);
+	   } catch(eventErrors) {
+			 Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
+	   }
 }
 
 
@@ -108,6 +120,19 @@ MainAssistant.prototype.cleanup = function(event) {
 	   a result of being popped off the scene stack */
 }
 
+MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNode) {
+}
+
+/**
+ * After user swipes to delete.
+ * Call the current podcast being displayed and tell it to
+ * delete the item that was sent.
+ */
+MainAssistant.prototype.handleListDelete = function(event) {
+	   // event.item.key
+	   this.db.currentPodcast().deleteItem(event.item.key);
+}
+
 MainAssistant.prototype.refreshUI = function() {
 	   try {
 			 var currPodcast = this.db.currentPodcast();
@@ -119,6 +144,7 @@ MainAssistant.prototype.refreshUI = function() {
 				    height: '144px',
 				    width: '144px'
 			 }));
+			 //$('episodeList').mojo.revealItem(0, true);
 			 $('podcastTitle').innerHTML = (currPodcast.title === undefined) ? "" : currPodcast.title;
 			 this.episodeListModel.items = (currPodcast.items === undefined) ? [] : currPodcast.items;
 			 this.controller.modelChanged(this.episodeListModel);
@@ -232,6 +258,14 @@ MainAssistant.prototype.handleAlbumArtFlick = function(event) {
 	   }
 }
 
+MainAssistant.prototype.albumArtAreaLeftOrRight = function(event) {
+	   if(event.id === 'album-art-area-right') {
+			 this.switchPodcast('next');
+	   } else {
+			 this.switchPodcast('previous');
+	   }
+}
+
 MainAssistant.prototype.switchPodcast = function(next) {
 	   // Calculate the start and ending positions of the animations
 	   var start = (next === 'next') ? -this.animationFinish : this.animationFinish;
@@ -258,8 +292,10 @@ MainAssistant.prototype.switchPodcast = function(next) {
 }
 
 MainAssistant.prototype.handleListClick = function(event) {
-	   Mojo.Log.info("[MainAssistant.handleListClick] %s", event.item.enclosure);
-	   this.selectedRow = $(event.item.key);
+	   Mojo.Log.info("[MainAssistant.handleListClick](%i) %s", event.index, event.item.enclosure);
+	   // Get the selected row
+	   this.selectedRow = event.target.mojo.getNodeByIndex(event.index);
+	   //this.selectedRow.addClassName('video');
 	   switch(event.item.enclosureType) {
 			 case 'video/mp4':
 			 case 'video/x-m4v':
@@ -267,6 +303,13 @@ MainAssistant.prototype.handleListClick = function(event) {
 				    Mojo.Log.info("[MainAssistant.handleListClick] Playing Video");
 				    //$('video-object').toggleClassName('video');
 				    //this.videoPlayer.src = event.item.enclosure;
+				    // Make sure the audio stops then play some videos
+				    while(this.audioPlayerIsPlaying) {
+						  this.audioPlayer.pause();
+						  this.audioPlayer.src = null;
+						  this.audioPlayer.load();
+						  this.audioPlayerIsPlaying = false;
+				    }
 				    var args = {
 						  appId: "com.palm.app.videoplayer",
 						  name: "nowplaying"
@@ -278,9 +321,21 @@ MainAssistant.prototype.handleListClick = function(event) {
 				    };
 				    this.controller.stageController.pushScene(args, params);
 				    break;
+			 case 'audio/mp3':
 			 case 'audio/mpeg':
 				    Mojo.Log.info("[MainAssistant.handleListClick] Playing Audio");
-				    //this.audioPlayer.src = event.item.enclosure
+				    if(this.audioPlayerCanPlay) {
+						  // If currently playing then stop what is currently playing
+						  if(this.audioPlayerIsPlaying) {
+								this.audioPlayer.pause();
+								this.audioPlayer.src = null;
+								this.audioPlayer.load();
+						  }
+						  this.audioPlayer.src = event.item.enclosure;
+						  this.audioPlayerIsPlaying = true;
+				    } else {
+						  this.audioPlayerIsPlaying = false;
+				    }
 				    break;
 			 default:
 				    Mojo.Log.error("[MainAssistant.handleListClick] Unknown file extension. %s", event.item.enclosureType);
@@ -289,6 +344,25 @@ MainAssistant.prototype.handleListClick = function(event) {
 }
 
 MainAssistant.prototype.audioEvent = function(event) {
-	   Mojo.Log.error("[MainAssistant.audioEvent] %s", event.type);
+	   switch(event.type) {
+			 case Media.Event.X_PALM_CONNECT:
+				    this.audioPlayerCanPlay = true;
+				    break;
+			 case Media.Event.X_PALM_DISCONNECT:
+				    this.audioPlayerCanPlay = false;
+				    break;
+			 case Media.Event.PROGRESS:
+				    
+				    break;
+			 case Media.Event.PLAY:
+				    this.audioPlayerIsPlaying = true;
+				    break;
+			 case Media.Event.PAUSE:
+				    this.audioPlayerIsPlaying = false;
+				    break;
+			 default:
+				    Mojo.Log.error("[MainAssistant.audioEvent] %s", event.type);
+				    break;
+	   }
 }
 

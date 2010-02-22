@@ -8,6 +8,7 @@ var PFeedItem = Class.create({
 	enclosure: '',
 	enclosureType: '',
 	enclosureLength: '',
+	listened: '',
 	initialize: function(feed) {
 		if(feed) {
 			this.findTitle(feed);
@@ -61,6 +62,12 @@ var PFeedItem = Class.create({
 	},
 	findID: function(feed) {
 		this.setPropertyFromFeed(feed, 'id', 'guid');
+	},
+	markAsOld: function() {
+	   this.listened = true;
+	},
+	markAsNew: function() {
+	   this.listened = false;
 	}
 });
 

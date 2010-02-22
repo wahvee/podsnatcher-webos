@@ -121,14 +121,14 @@ img#image {
 	height: 110px;
 	width: 100px;
 	float: right;
-	border: 1px solid red;
+	/*border: 1px solid red;*/
 	z-index: 1000;
 }
 #album-art-area-left {
 	height: 110px;
 	width: 100px;
 	float: left;
-	border: 1px solid green;
+	/*border: 1px solid green;*/
 	z-index: 1000;
 }
 /******************/

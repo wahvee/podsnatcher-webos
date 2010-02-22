@@ -267,7 +267,7 @@ PodcastStorage.prototype.handleCommand = function(command) {
 		case Podcast.PodcastUpdateFailure:
 			break;
 		case Podcast.ImageCached:
-			if(this.updatingAll) {
+			if(!this.updatingAll) {
 				Mojo.Log.info("[PodcastStorage.ImageCached] Saving.");
 				this.save();
 			}

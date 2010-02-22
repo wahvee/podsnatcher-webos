@@ -81,6 +81,21 @@ Podcast.prototype.imgTicket = undefined;
 Podcast.prototype.enclosurePath = undefined;
 Podcast.prototype.enclosureTicket = undefined;
 
+Podcast.prototype.deleteItem = function(key) {
+	   var itemToDelete = this.items.detect(function(item, index) {
+			 return item.key === key;
+	   });
+	   
+	   if(itemToDelete !== undefined) {
+			 Mojo.Log.info("[Podcast.deleteItem] Deleting %s", itemToDelete.title);
+			 if(itemToDelete instanceof PFeedItem) {
+				    itemToDelete.markAsOld();
+			 }
+			 // Do something now that the JSON object has been parsed
+			 Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
+	   }
+}
+
 /**
  * Converts the Podcast to a simple Object for
  * saving or whatever the reason. Basically, strips
