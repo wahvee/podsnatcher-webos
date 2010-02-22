@@ -85,9 +85,9 @@ MainAssistant.prototype.activate = function(event) {
 			 this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
 			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEvent.bindAsEventListener(this), false);
 			 this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEvent.bindAsEventListener(this), false);
 			 this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
 			 this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEvent.bindAsEventListener(this), false);
 			 this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEvent.bindAsEventListener(this), false);
 			 this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEvent.bindAsEventListener(this), false);
@@ -227,7 +227,12 @@ MainAssistant.prototype.handleOrientation = function(event) {
 }
 
 MainAssistant.prototype.handleShaking = function(event) {
-	Mojo.Log.info("[MainAssistant.handleShaking] %s", event.magnitude);
+	//Mojo.Log.info("[MainAssistant.handleShaking] %s", event.magnitude);
+	//if(this.audioPlayerIsPlaying) {
+	//   this.audioPlayer.pause();
+	//} else {
+	//   this.audioPlayer.play();
+	//}
 }
 
 MainAssistant.prototype.handleAlbumArtHold = function(event) {
@@ -292,7 +297,7 @@ MainAssistant.prototype.switchPodcast = function(next) {
 }
 
 MainAssistant.prototype.handleListClick = function(event) {
-	   Mojo.Log.info("[MainAssistant.handleListClick](%i) %s", event.index, event.item.enclosure);
+	   Mojo.Log.info("[MainAssistant.handleListClick] (%i) %s", event.index, event.item.enclosure);
 	   // Get the selected row
 	   this.selectedRow = event.target.mojo.getNodeByIndex(event.index);
 	   //this.selectedRow.addClassName('video');
@@ -344,6 +349,7 @@ MainAssistant.prototype.handleListClick = function(event) {
 }
 
 MainAssistant.prototype.audioEvent = function(event) {
+	   //this.audioPlayer.currentTime/this.audioPlayer.duration;
 	   switch(event.type) {
 			 case Media.Event.X_PALM_CONNECT:
 				    this.audioPlayerCanPlay = true;
@@ -351,18 +357,55 @@ MainAssistant.prototype.audioEvent = function(event) {
 			 case Media.Event.X_PALM_DISCONNECT:
 				    this.audioPlayerCanPlay = false;
 				    break;
+			 case Media.Event.LOADSTART:
+				    Mojo.Log.info("[Media.LOADSTART]");
+				    this.selectedRow.select('.status')[0].addClassName('downloading');
+				    break;
+			 case Media.Event.LOAD:
+				    this.selectedRow.select('.status')[0].removeClassName('downloading');
+				    this.selectedRow.select('.status')[0].setStyle({
+						  width: "0%"
+				    });
+				    break;
 			 case Media.Event.PROGRESS:
+				    var totalBytes = event.target.mojo._media.totalBytes;
+				    var bufferedBytes = event.target.mojo._media.bufferedBytes.end(0);
+				    var percent = 0.00;
+				    //var buffered = event.target.mojo._media.buffered;
 				    
+				    if(bufferedBytes !== undefined) {
+						  if(!isNaN(totalBytes) && !isNaN(bufferedBytes) && totalBytes != 0) {
+								percent = ((bufferedBytes / totalBytes) * 100).toFixed(2);
+								this.selectedRow.select('.status')[0].setStyle({
+									   width: percent + "%"
+								});
+								//Mojo.Log.info("[]")
+						  }
+				    }				    
+				    //var test = this.selectedRow.select('.episodeLength');
+				    //test[0].innerHTML = this.millisecondsToDuration(event.target.currentTime);
 				    break;
 			 case Media.Event.PLAY:
 				    this.audioPlayerIsPlaying = true;
 				    break;
 			 case Media.Event.PAUSE:
-				    this.audioPlayerIsPlaying = false;
+				    // Toggle if it was playing or not
+				    this.audioPlayerIsPlaying = !this.audioPlayerIsPlaying;
 				    break;
 			 default:
 				    Mojo.Log.error("[MainAssistant.audioEvent] %s", event.type);
 				    break;
 	   }
+}
+
+MainAssistant.prototype.millisecondsToDuration = function(seconds) {
+	   // divide your field by seconds per hour (60*60) => hrs
+	   var hour = Math.floor(seconds / 3600).toPaddedString(2);
+	   // divide rest by seconds per minute (60) => mins
+	   var min = Math.floor(seconds / 60).toPaddedString(2);
+	   // divide rest by seconds per second (1) => secs
+	   var sec = Math.floor(seconds % 60).toPaddedString(2);
+	   
+	   return hour + ":" + min + ":" + sec;
 }
 
