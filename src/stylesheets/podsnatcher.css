@@ -78,6 +78,20 @@ img#image {
 	z-index: 0;
 }
 
+.status {
+	background-repeat: repeat-x;
+	height: 46px;
+	width: 0%;
+}
+
+.playing {
+	background-image: url(../images/background-now-playing.png);
+}
+
+.downloading {
+	background-image: url(../images/background-now-downloading.png);
+}
+
 .listItem.palm-row {
 	margin: 0 auto;
 	margin-bottom: 4px; 
@@ -114,6 +128,10 @@ img#image {
 	overflow: hidden;
 	position: relative;
 	bottom: -4px;
+}
+
+.newEpisode {
+	font-weight: bold;
 }
 
 /* CLICKABLE AREA */
