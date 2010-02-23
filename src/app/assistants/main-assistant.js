@@ -205,16 +205,26 @@ MainAssistant.prototype.itemDisplayUpdate = function() {
 	   // Check if we have a selected item
 	   try {
 			 if(this.selectedRow !== undefined && Object.isElement(this.selectedRow)) {
+				    // Select the progress bar layer
+				    var statusDiv = this.selectedRow.select('.status')[0];
+				    // Update the current time in the UI
+				    var currentTimeDiv = this.selectedRow.select('.episodeLength')[0];
 				    if(!this.audioPlayer.paused) {
-						  // Update the current time in the UI
-						  var currentTimeDiv = this.selectedRow.select('.episodeLength')[0];
 						  currentTimeDiv.innerHTML = this.millisecondsToDuration(this.audioPlayer.currentTime);
+						  
+						  // Check to see that downloading is not going on
+						  if(!this.audioPlayerLoading) {
+								if(!statusDiv.hasClassName('playing')) {
+									   statusDiv.addClassName('playing')
+								}
+								statusDiv.setStyle({
+									   width: ((this.audioPlayer.currentTime / this.audioPlayer.duration) * 100).toFixed(2) + "%"
+								});
+						  }
 				    }
 				    
 				    // Check that the audio file is loading
 				    if(this.audioPlayerLoading) {
-						  // Select the progress bar layer
-						  var statusDiv = this.selectedRow.select('.status')[0];
 						  // Make sure the selection was not empty
 						  if(statusDiv !== undefined && Object.isElement(statusDiv)) {
 								// Turn on the downloading class if it was not already on
@@ -427,7 +437,6 @@ MainAssistant.prototype.handleListClick = function(event) {
 }
 
 MainAssistant.prototype.audioEvent = function(event) {
-	   //this.audioPlayer.currentTime/this.audioPlayer.duration;
 	   switch(event.type) {
 			 case Media.Event.X_PALM_CONNECT:
 				    this.audioPlayerCanPlay = true;
