@@ -134,6 +134,15 @@ img#image {
 	font-weight: bold;
 }
 
+.downloadButton {
+	background-image: url(../images/download.png);
+	background-repeat: no-repeat;
+	width: 18px;
+	height: 18px;
+	float: left;
+	margin: 1px 4px 3px 4px;
+}
+
 /* CLICKABLE AREA */
 #album-art-area-right {
 	height: 110px;
