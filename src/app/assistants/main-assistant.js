@@ -30,7 +30,7 @@ function MainAssistant(db) {
 			 itemTemplate: "main/episodeListItemTemplate",
 			 swipeToDelete: true,
 			 uniquenessProperty: 'key',
-			 onItemRendered: this.listItemRender.bindAsEventListener(this)
+			 onItemRendered: this.listItemRender.bind(this)
 	   };
 	   
 	   this.episodeListModel = {
@@ -123,36 +123,41 @@ MainAssistant.prototype.cleanup = function(event) {
 	   this.stop();
 	   
 	   try {			 
-			 this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.ERROR, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.LOADEDMETADATA, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.LOADSTART, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.PAUSE, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.PLAY, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.PROGRESS, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.SEEKED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.SEEKING, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.X_PALM_CONNECT, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.removeEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.ABORT, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.removeEventListener(Media.Event.CANPLAY, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.removeEventListener(Media.Event.CANPLAYTHROUGH, this.audioEvent.bindAsEventListener(this), false);
+			 //this.audioPlayer.removeEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.DURATIONCHANGE, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.EMPTIED, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.ENDED, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.ERROR, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.LOAD, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.LOADEDMETADATA, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.LOADSTART, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.PAUSE, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.PLAY, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.PROGRESS, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.SEEKED, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.SEEKING, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.STALLED, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.TIMEUPDATE, this.audioEvent.bindAsEventListener(this), false);
+			 this.audioPlayer.removeEventListener(Media.Event.WAITING, this.audioEvent.bindAsEventListener(this), false);
 	   } catch(eventErrors) {
 			 Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
 	   }
 }
 
 MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNode) {
-	   Mojo.Log.logProperties(itemNode);
+	   // If playing and the key matches the playing key set this item as the
+	   // user's selected row. Should keep the UI up to date!!
+	   // !!! VERY IMPORTANT !!!
+	   if(this.audioPlayerIsPlaying && itemModel.key === this.audioPlayingKey) {
+			 this.selectedRow = itemNode;
+	   }
 }
 
 /**
