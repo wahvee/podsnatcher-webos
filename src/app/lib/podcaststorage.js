@@ -253,6 +253,8 @@ PodcastStorage.prototype.handleCommand = function(command) {
 				if(this.indexUpdating == this.listOfPodcasts.size()) {
 					// Not updating all anymore
 					this.updatingAll = false;
+					// Save the database since updates are done
+					this.save();
 					// If they are equal everything is done updating
 					Mojo.Controller.stageController.sendEventToCommanders(this.podcastListFinishUpdate);
 				} else {
