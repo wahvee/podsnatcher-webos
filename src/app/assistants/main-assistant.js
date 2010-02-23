@@ -8,7 +8,8 @@ function MainAssistant(db) {
 	   this.selectedRow = undefined;
 	   this.audioPlayer = undefined;
 	   this.audioPlayerCanPlay = false;
-	   this.audioPlayerIsPlaying = false;
+	   this.audioPlayerLoading = false;
+	   this.audioBufferedPercent = 0.00;
 	   this.audioPlayingKey = '';
 	   this.videoPlayer = {};
 	   this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
@@ -47,7 +48,7 @@ MainAssistant.prototype.setup = function() {
 	   try {
 			 //this.videoPlayer = $('video-object');
 			 //this.videoPlayer = VideoTag.extendElement(this.videoPlayer, this.controller);
-			 this.audioPlayer = new Audio();
+			 this.audioPlayer = AudioTag.extendElement($("audio-object"));
 			 this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 			 this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
 	   } catch (func_error) {
@@ -155,8 +156,12 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 	   // If playing and the key matches the playing key set this item as the
 	   // user's selected row. Should keep the UI up to date!!
 	   // !!! VERY IMPORTANT !!!
-	   if(this.audioPlayerIsPlaying && itemModel.key === this.audioPlayingKey) {
-			 this.selectedRow = itemNode;
+	   try {
+			 if(!this.audioPlayer.paused && itemModel.key === this.audioPlayingKey) {
+				    this.selectedRow = itemNode;
+			 }
+	   } catch(error) {
+			 Mojo.Log.error("[MainAssistant.listItemRender] %s", error.message);
 	   }
 }
 
@@ -200,11 +205,28 @@ MainAssistant.prototype.itemDisplayUpdate = function() {
 	   // Check if we have a selected item
 	   try {
 			 if(this.selectedRow !== undefined && Object.isElement(this.selectedRow)) {
-				    if(this.audioPlayerIsPlaying) {
-						  var currentPosDisplay = this.selectedRow.select('.episodeLength')[0];
-						  currentPosDisplay.innerHTML = this.millisecondsToDuration(this.audioPlayer.currentTime);
-				    } else {
-						  Mojo.Log.error("[MainAssistant.itemDisplayUpdate] Nothing is playing. Why are you calling me?");
+				    if(!this.audioPlayer.paused) {
+						  // Update the current time in the UI
+						  var currentTimeDiv = this.selectedRow.select('.episodeLength')[0];
+						  currentTimeDiv.innerHTML = this.millisecondsToDuration(this.audioPlayer.currentTime);
+				    }
+				    
+				    // Check that the audio file is loading
+				    if(this.audioPlayerLoading) {
+						  // Select the progress bar layer
+						  var statusDiv = this.selectedRow.select('.status')[0];
+						  // Make sure the selection was not empty
+						  if(statusDiv !== undefined && Object.isElement(statusDiv)) {
+								// Turn on the downloading class if it was not already on
+								if(!statusDiv.hasClassName('downloading')) {
+									   statusDiv.addClassName('downloading');
+								}
+								
+								// Set the percentage width for the download
+								statusDiv.setStyle({
+									   width: this.audioBufferedPercent + "%"
+								});
+						  }
 				    }
 			 } else {
 				    Mojo.Log.error("[MainAssistant.itemDisplayUpdate] Nothing is selected. Why are you calling me?");
@@ -347,14 +369,14 @@ MainAssistant.prototype.handleListClick = function(event) {
 	   // Get the selected row
 	   this.selectedRow = event.target.mojo.getNodeByIndex(event.index);
 	   
-	   // Check if we should pause (this.audioPlayerIsPlaying && this.audioPlayingKey === event.item.key)
-	   if(this.audioPlayerIsPlaying && this.audioPlayingKey === event.item.key) {
+	   // Check if we should pause (!this.audioPlayer.paused && this.audioPlayingKey === event.item.key)
+	   if(!this.audioPlayer.paused && this.audioPlayingKey === event.item.key) {
 			 // Pause the player since it is the same item and we clicked
 			 Mojo.Log.info("[MainAssistant.handleListClick] Pausing %s", event.item.key);
 			 this.audioPlayer.pause();
 			 
-	   // Check if we should resume (!this.audioPlayerIsPlaying && this.audioPlayingKey === event.item.key)
-	   } else if(!this.audioPlayerIsPlaying && this.audioPlayingKey === event.item.key) {
+	   // Check if we should resume (this.audioPlayer.paused && this.audioPlayingKey === event.item.key)
+	   } else if(this.audioPlayer.paused && this.audioPlayingKey === event.item.key) {
 			 // The player needs to start playing since it was paused
 			 Mojo.Log.info("[MainAssistant.handleListClick] Resuming %s", event.item.key);
 			 this.audioPlayer.play();
@@ -370,7 +392,7 @@ MainAssistant.prototype.handleListClick = function(event) {
 						  //$('video-object').toggleClassName('video');
 						  //this.videoPlayer.src = event.item.enclosure;
 						  // Make sure the audio stops then play some videos
-						  while(this.audioPlayerIsPlaying) {
+						  while(!this.audioPlayer.paused) {
 								this.stop();
 						  }
 						  var args = {
@@ -390,14 +412,11 @@ MainAssistant.prototype.handleListClick = function(event) {
 						  // Check if the scene can play audio
 						  if(this.audioPlayerCanPlay) {
 								// If currently playing then stop what is currently playing
-								while(this.audioPlayerIsPlaying) {
+								while(!this.audioPlayer.paused) {
 									   this.stop();
 								}
 								this.audioPlayingKey = event.item.key;
 								this.audioPlayer.src = event.item.enclosure;
-						  } else {
-								Mojo.Log.error("[PLAYER IS NOT PLAYING]");
-								this.audioPlayerIsPlaying = false;
 						  }
 						  break;
 				    default:
@@ -417,25 +436,26 @@ MainAssistant.prototype.audioEvent = function(event) {
 				    this.audioPlayerCanPlay = false;
 				    break;
 			 case Media.Event.LOADSTART:
+				    this.audioPlayerLoading = true;
 				    this.selectedRow.select('.status')[0].addClassName('downloading');
 				    break;
 			 case Media.Event.LOAD:
+				    this.audioPlayerLoading = false;
 				    this.selectedRow.select('.status')[0].removeClassName('downloading');
 				    this.selectedRow.select('.status')[0].setStyle({
 						  width: "0%"
 				    });
 				    break;
 			 case Media.Event.PROGRESS:
-				    var totalBytes = event.target.mojo._media.totalBytes;
-				    var bufferedBytes = event.target.mojo._media.bufferedBytes.end(0);
-				    var percent = 0.00;
+				    var totalBytes = event.target.totalBytes;
+				    var bufferedBytes = event.target.bufferedBytes.end(0);
 				    //var buffered = event.target.mojo._media.buffered;
 				    
 				    if(bufferedBytes !== undefined) {
 						  if(!isNaN(totalBytes) && !isNaN(bufferedBytes) && totalBytes != 0) {
-								percent = ((bufferedBytes / totalBytes) * 100).toFixed(2);
+								this.audioBufferedPercent = ((bufferedBytes / totalBytes) * 100).toFixed(2);
 								this.selectedRow.select('.status')[0].setStyle({
-									   width: percent + "%"
+									   width: this.audioBufferedPercent + "%"
 								});
 						  }
 				    }
@@ -444,6 +464,7 @@ MainAssistant.prototype.audioEvent = function(event) {
 				    this.play();
 				    break;
 			 case Media.Event.PAUSE:
+				    Mojo.Log.info("[Media.Event.PAUSE] %s", this.audioPlayer.paused);
 				    this.pause();
 				    break;
 			 case Media.Event.ENDED:
@@ -458,12 +479,10 @@ MainAssistant.prototype.audioEvent = function(event) {
 MainAssistant.prototype.play = function() {
 	   // Start timer
 	   this.timerHandler('start');
-	   this.audioPlayerIsPlaying = true;
 }
 
 MainAssistant.prototype.pause = function() {
 	   this.timerHandler('stop');
-	   this.audioPlayerIsPlaying = false;
 }
 
 MainAssistant.prototype.stop = function() {
