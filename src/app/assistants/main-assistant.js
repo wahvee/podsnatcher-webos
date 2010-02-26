@@ -49,6 +49,7 @@ MainAssistant.prototype.setup = function() {
 			 //this.videoPlayer = $('video-object');
 			 //this.videoPlayer = VideoTag.extendElement(this.videoPlayer, this.controller);
 			 this.audioPlayer = AudioTag.extendElement($("audio-object"));
+			 this.audioPlayer.palm.audioClass = "media";
 			 this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 			 this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
 	   } catch (func_error) {
