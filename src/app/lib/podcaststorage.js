@@ -139,22 +139,20 @@ var PodcastStorage = Class.create({
 		Mojo.Log.error("[PodcastStorage] Failed to open the database on disk. %s", error.message);
 	},
 	populateInitialDB: function() {
+		//http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595
 		//http://www.wdwradio.com/xml/wdwradio.xml
 		//http://revision3.com/diggnation/feed/MP4-Large
-		//http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595
 		//http://buzzreportpodcast.cnettv.com
-		//http://mailbagpodcast.cnettv.com
 		
 		var onSuccess = function() {
 			this.loadDatabase();
 		};
 		
 		var initialList = [
+			new Podcast('http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595'),
 			new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
 			new Podcast('http://revision3.com/diggnation/feed/MP4-Large'),
-			new Podcast('http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595'),
 			new Podcast('http://feeds.feedburner.com/cnet/buzzreport?format=xml'),
-			new Podcast('http://feeds.feedburner.com/cnet/mailbag?format=xml')
 		];
 		
 		// Perform the addition of the list in the initial app
@@ -274,6 +272,9 @@ PodcastStorage.prototype.handleCommand = function(command) {
 				this.save();
 			}
 			break;
+		case PFeedItem.EnclosureCached:
+			Mojo.Log.info("[PodcastStorage.EnclosureCached] Saving.");
+			this.save();
 		default:
 			Mojo.Log.info("[PodcastStorage.handleCommand] Not handling %s", command.type);
 			break;
