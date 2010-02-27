@@ -27,16 +27,21 @@ function MainAssistant(db) {
 	   };
 	   
 	   this.episodeListAttributes = {
-			 listTemplate: "main/episodeListTemplate",
+			 //listTemplate: "main/episodeListTemplate",
 			 itemTemplate: "main/episodeListItemTemplate",
 			 swipeToDelete: true,
 			 uniquenessProperty: 'key',
-			 onItemRendered: this.listItemRender.bind(this)
+			 onItemRendered: this.listItemRender.bind(this),
+			 onItemRemoved: this.listItemRemoved.bind(this)
 	   };
 	   
 	   this.episodeListModel = {
 			 items: []
 	   };
+	   
+	   // Setting up the event listener callbacks
+	   this.downloadFunction = this.handleListDelete.bind(this);
+	   this.audioEventListener = this.audioEvent.bindAsEventListener(this);
 }
 
 MainAssistant.prototype.setup = function() {
@@ -80,34 +85,35 @@ MainAssistant.prototype.setup = function() {
 MainAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
-	   // Wait for screen orientation changes
-	   this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
-	   this.controller.listen(document, "shakeend", this.handleShaking.bindAsEventListener(this));
 	   
-	   try {			 
-			 this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.ERROR, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.LOADEDMETADATA, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.LOADSTART, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.PAUSE, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.PLAY, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.PROGRESS, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.SEEKED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.SEEKING, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEvent.bindAsEventListener(this), false);
+	   try {
+			 // Wait for screen orientation changes
+			 this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
+			 this.controller.listen(document, "shakeend", this.handleShaking.bindAsEventListener(this));
+			 // Audio events
+			 this.controller.listen(this.audioPlayer, Media.Event.X_PALM_CONNECT, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.X_PALM_DISCONNECT, this.audioEventListener, false);
+			 //this.controller.listen(this.audioPlayer, Media.Event.X_PALM_WATCHDOG, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.ABORT, this.audioEventListener, false);
+			 //this.controller.listen(this.audioPlayer, Media.Event.CANPLAY, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.CANPLAYTHROUGH, this.audioEventListener, false);
+			 //this.controller.listen(this.audioPlayer, Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener, false);
+			 //this.controller.listen(this.audioPlayer, Media.Event.DURATIONCHANGE, this.audioEventListener, false);
+			 //this.controller.listen(this.audioPlayer, Media.Event.EMPTIED, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.ENDED, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.ERROR, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.LOAD, this.audioEventListener, false);
+			 //this.controller.listen(this.audioPlayer, Media.Event.LOADEDFIRSTFRAME, this.audioEventListener, false);
+			 //this.controller.listen(this.audioPlayer, Media.Event.LOADEDMETADATA, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.LOADSTART, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.PAUSE, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.PLAY, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.PROGRESS, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.SEEKED, this.audioEventListener, false);
+			 this.controller.listen(this.audioPlayer, Media.Event.SEEKING, this.audioEventListener, false);
+			 //this.controller.listen(this.audioPlayer, Media.Event.STALLED, this.audioEventListener, false);
+			 //this.controller.listen(this.audioPlayer, Media.Event.TIMEUPDATE, this.audioEventListener, false);
+			 //this.controller.listen(this.audioPlayer, Media.Event.WAITING, this.audioEventListener, false);
 	   } catch(eventErrors) {
 			 Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
 	   }
@@ -124,30 +130,40 @@ MainAssistant.prototype.cleanup = function(event) {
 	   a result of being popped off the scene stack */
 	   this.stop();
 	   
-	   try {			 
-			 this.audioPlayer.removeEventListener(Media.Event.X_PALM_CONNECT, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.removeEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.ABORT, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.removeEventListener(Media.Event.CANPLAY, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.removeEventListener(Media.Event.CANPLAYTHROUGH, this.audioEvent.bindAsEventListener(this), false);
-			 //this.audioPlayer.removeEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.DURATIONCHANGE, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.EMPTIED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.ENDED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.ERROR, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.LOAD, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.LOADEDMETADATA, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.LOADSTART, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.PAUSE, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.PLAY, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.PROGRESS, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.SEEKED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.SEEKING, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.STALLED, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.TIMEUPDATE, this.audioEvent.bindAsEventListener(this), false);
-			 this.audioPlayer.removeEventListener(Media.Event.WAITING, this.audioEvent.bindAsEventListener(this), false);
+	   try {
+			 this.controller.stopListening(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
+			 this.controller.stopListening(document, "shakeend", this.handleShaking.bindAsEventListener(this));
+			 
+			 this.controller.stopListening($('album-art-area-right'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
+			 this.controller.stopListening($('album-art-area-left'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
+			 this.controller.stopListening($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
+			 this.controller.stopListening($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
+			 this.controller.stopListening($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
+			 this.controller.stopListening($('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
+			 
+			 this.controller.stopListening(this.audioPlayer, Media.Event.X_PALM_CONNECT, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.X_PALM_DISCONNECT, this.audioEventListener, false);
+			 //this.controller.stopListening(this.audioPlayer, Media.Event.X_PALM_WATCHDOG, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.ABORT, this.audioEventListener, false);
+			 //this.controller.stopListening(this.audioPlayer, Media.Event.CANPLAY, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.CANPLAYTHROUGH, this.audioEventListener, false);
+			 //this.controller.stopListening(this.audioPlayer, Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener, false);
+			 //this.controller.stopListening(this.audioPlayer, Media.Event.DURATIONCHANGE, this.audioEventListener, false);
+			 //this.controller.stopListening(this.audioPlayer, Media.Event.EMPTIED, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.ENDED, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.ERROR, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.LOAD, this.audioEventListener, false);
+			 //this.controller.stopListening(this.audioPlayer, Media.Event.LOADEDFIRSTFRAME, this.audioEventListener, false);
+			 //this.controller.stopListening(this.audioPlayer, Media.Event.LOADEDMETADATA, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.LOADSTART, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.PAUSE, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.PLAY, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.PROGRESS, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.SEEKED, this.audioEventListener, false);
+			 this.controller.stopListening(this.audioPlayer, Media.Event.SEEKING, this.audioEventListener, false);
+			 //this.controller.stopListening(this.audioPlayer, Media.Event.STALLED, this.audioEventListener, false);
+			 //this.controller.stopListening(this.audioPlayer, Media.Event.TIMEUPDATE, this.audioEventListener, false);
+			 //this.controller.stopListening(this.audioPlayer, Media.Event.WAITING, this.audioEventListener, false);
 	   } catch(eventErrors) {
 			 Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
 	   }
@@ -161,8 +177,22 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 			 if(!this.audioPlayer.paused && itemModel.key === this.audioPlayingKey) {
 				    this.selectedRow = itemNode;
 			 }
+			 
+			 // Setup the download btn listener
+			 var downloadBtn = itemNode.select('.downloadButton')[0];
+			 if(downloadBtn) {
+				    downloadBtn.addEventListener(Mojo.Event.tap, this.downloadFunction);
+			 }
 	   } catch(error) {
 			 Mojo.Log.error("[MainAssistant.listItemRender] %s", error.message);
+	   }
+}
+
+MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNode) {
+	   // Should remove all events from this item...it's being removed from DOM anyway
+	   itemNode.stopObserving();
+	   if(this.selectedRow !== undefined && itemModel.key === this.audioPlayingKey) {
+			 this.selectedRow = undefined;
 	   }
 }
 
@@ -174,6 +204,13 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 MainAssistant.prototype.handleListDelete = function(event) {
 	   // event.item.key
 	   this.db.currentPodcast().deleteItem(event.item.key);
+}
+
+MainAssistant.prototype.handleItemDownload = function(event) {
+	   // Stop the Mojo.Event.listTap from propigating
+	   event.stop();
+	   Mojo.Log.error("[Download clicked!]");
+	   Mojo.Log.logProperties(event.target);
 }
 
 /**
