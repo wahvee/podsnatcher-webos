@@ -367,7 +367,7 @@ MainAssistant.prototype.handleAlbumArtFlick = function(event) {
 				    to: this.animationFinish,
 				    duration: this.animationDuration,
 				    curve: this.animationType,
-				    onComplete: this.switchPodcast.bind(this, 'next')
+				    onComplete: this.switchPodcast.bind(this, 'previous')
 			 });
 	   } else if(event.velocity.x <= - 500) {
 			 Mojo.Animation.animateStyle($("album-art"), 'left', 'bezier', {
@@ -375,7 +375,7 @@ MainAssistant.prototype.handleAlbumArtFlick = function(event) {
 				    to: -this.animationFinish,
 				    duration: this.animationDuration,
 				    curve: this.animationType,
-				    onComplete: this.switchPodcast.bind(this, 'previous')
+				    onComplete: this.switchPodcast.bind(this, 'next')
 			 });
 	   }
 }
@@ -390,7 +390,7 @@ MainAssistant.prototype.albumArtAreaLeftOrRight = function(event) {
 
 MainAssistant.prototype.switchPodcast = function(next) {
 	   // Calculate the start and ending positions of the animations
-	   var start = (next === 'next') ? -this.animationFinish : this.animationFinish;
+	   var start = (next === 'next') ? this.animationFinish : -this.animationFinish;
 	   var finish = 0;
 	   // Actually perform loading or changing to next podcast
 	   if(next === 'next') {
