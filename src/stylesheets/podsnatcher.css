@@ -80,8 +80,10 @@ img#image {
 
 .status {
 	background-repeat: repeat-x;
-	height: 46px;
 	width: 0%;
+	height: 46px !important;
+	margin: 0px !important;
+	float: none !important;
 }
 
 .playing {
@@ -92,9 +94,18 @@ img#image {
 	background-image: url(../images/background-now-downloading.png);
 }
 
+.downloadButton {
+	background-image: url(../images/download.png);
+	background-repeat: no-repeat;
+	width: 18px;
+	height: 18px;
+	float: left;
+	margin: 1px 4px 3px 4px;
+}
+
 .listItem.palm-row {
 	margin: 0 auto;
-	margin-bottom: 4px; 
+	margin-bottom: 4px;
 	background-image: none !important;
 	background-color: #88abc2 !important;
 	border: 4px solid #acc9dd !important;
@@ -134,14 +145,7 @@ img#image {
 	font-weight: bold;
 }
 
-.downloadButton {
-	background-image: url(../images/download.png);
-	background-repeat: no-repeat;
-	width: 18px;
-	height: 18px;
-	float: left;
-	margin: 1px 4px 3px 4px;
-}
+
 
 /* CLICKABLE AREA */
 #album-art-area-right {
