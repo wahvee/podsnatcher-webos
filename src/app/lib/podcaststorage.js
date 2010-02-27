@@ -54,7 +54,7 @@ var PodcastStorage = Class.create({
 			// Return number of records found
 			var recordSize = (Object.isArray(response)) ? response.size() : Object.values(response).size();
 			Mojo.Log.info("[PodcastStorage.loadDatabase] %i podcast(s) loaded.", recordSize);
-			if(recordSize == 0) { // Database has nothing in it.
+			if(recordSize === 0) { // Database has nothing in it.
 				this.populateInitialDB();
 			} else {
 				response.each(function(podcastItem, index) {
@@ -92,7 +92,7 @@ var PodcastStorage = Class.create({
 		}
 	},
 	getPodcastList: function() {
-		var temp = new Array();
+		var temp = [];
 		this.listOfPodcasts.each(function(podcast, index) {
 			temp.push(podcast.toListItem());
 		});
@@ -152,7 +152,7 @@ var PodcastStorage = Class.create({
 			new Podcast('http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595'),
 			new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
 			new Podcast('http://revision3.com/diggnation/feed/MP4-Large'),
-			new Podcast('http://feeds.feedburner.com/cnet/buzzreport?format=xml'),
+			new Podcast('http://feeds.feedburner.com/cnet/buzzreport?format=xml')
 		];
 		
 		// Perform the addition of the list in the initial app
@@ -193,7 +193,7 @@ PodcastStorage.prototype.stageController = undefined;
 
 PodcastStorage.prototype.currentPodcast = function() {
 	return this.listOfPodcasts[this._currentPodcast];
-}
+};
 
 PodcastStorage.prototype.nextPodcast = function() {
 	this._currentPodcast++;
@@ -201,7 +201,7 @@ PodcastStorage.prototype.nextPodcast = function() {
 		this._currentPodcast = 0;
 	}
 	return this.currentPodcast();
-}
+};
 
 PodcastStorage.prototype.previousPodcast = function() {
 	this._currentPodcast--;
@@ -209,7 +209,7 @@ PodcastStorage.prototype.previousPodcast = function() {
 		this._currentPodcast = this.listOfPodcasts.size() - 1;
 	}
 	return this.currentPodcast();
-}
+};
 
 /**
  * Tells the Podcast at the array index of _currentPodcast
@@ -217,7 +217,7 @@ PodcastStorage.prototype.previousPodcast = function() {
  */
 PodcastStorage.prototype.updateCurrent = function() {
 	this.listOfPodcasts[this._currentPodcast].updateFeed();
-}
+};
 
 PodcastStorage.prototype.updatePodcasts = function() {
 	try {
@@ -235,14 +235,17 @@ PodcastStorage.prototype.updatePodcasts = function() {
 };
 
 PodcastStorage.prototype.handleCommand = function(command) {
+	var podcastKey = undefined;
+	if(command.podcast) {
+		podcastKey = command.podcast.key;
+	}
 	switch(command.type) {
 		case Podcast.PodcastStartUpdate:
-			var podcastKey = command.podcast.key;
 			Mojo.Log.info("[PodcastStorage.podcastUpdating] %s starting update.", podcastKey);
 			break;
+		case Podcast.PodcastUpdateFailure:
 		case Podcast.PodcastUpdateSuccess:
-			var podcastKey = command.podcast.key;
-			Mojo.Log.info("[PodcastStorage.podcastUpdateSuccess] %s finished updating.", command.podcast.title);
+			Mojo.Log.info("[PodcastStorage.%s] %s finished updating.", command.type, command.podcast.title);
 			// Check to see if this is just one podcast updating or one in a series
 			if(this.updatingAll) {
 				// Increment the podcast number that is currently updating
@@ -264,8 +267,6 @@ PodcastStorage.prototype.handleCommand = function(command) {
 				this.save();
 			}
 			break;
-		case Podcast.PodcastUpdateFailure:
-			break;
 		case Podcast.ImageCached:
 			if(!this.updatingAll) {
 				Mojo.Log.info("[PodcastStorage.ImageCached] Saving.");
@@ -275,11 +276,12 @@ PodcastStorage.prototype.handleCommand = function(command) {
 		case PFeedItem.EnclosureCached:
 			Mojo.Log.info("[PodcastStorage.EnclosureCached] Saving.");
 			this.save();
+			break;
 		default:
 			Mojo.Log.info("[PodcastStorage.handleCommand] Not handling %s", command.type);
 			break;
 	}
-}
+};
 
 PodcastStorage.PodcastListStartUpdate = 'onStartPodcastListUpdate';
 PodcastStorage.PodcastListFinishUpdate = 'onFinishPodcastListUpdate';
