@@ -180,9 +180,10 @@ PFeedItem.EnclosureDeleted = 'onEnclosureDeleted';
 PFeedItem.simpleObject = function(instance) {
 	if(instance instanceof PFeedItem) {
 		Mojo.Log.info("[PFeedItem.simpleObject] Correct type.");
-		var arrKeys = Object.keys(this);
+		var arrKeys = Object.keys(instance);
 		arrKeys.each(function(key) {
-			if(!(Object.isString(instance[key]) || Object.isNumber(instance[key]))) {
+			if(!(Object.isString(instance[key]) || Object.isNumber(instance[key])) ||
+					(Object.isString(instance[key]) && !instance[key].blank())) {
 				delete instance[key];
 			}
 		});
