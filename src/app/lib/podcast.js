@@ -165,6 +165,7 @@ Podcast.prototype.deleteItem = function(key) {
 		Mojo.Log.info("[Podcast.deleteItem] Deleting %s", itemToDelete.title);
 		if(itemToDelete instanceof PFeedItem) {
 			itemToDelete.markAsOld();
+			itemToDelete.removeCache();
 		}
 		// Do something now that the JSON object has been parsed
 		Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);

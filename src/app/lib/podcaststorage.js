@@ -277,6 +277,10 @@ PodcastStorage.prototype.handleCommand = function(command) {
 			Mojo.Log.info("[PodcastStorage.EnclosureCached] Saving.");
 			this.save();
 			break;
+		case PFeedItem.EnclosureDeleted:
+			Mojo.Log.info("[PodcastStorage.EnclosureDeleted] Saving.");
+			this.save();
+			break;
 		default:
 			Mojo.Log.info("[PodcastStorage.handleCommand] Not handling %s", command.type);
 			break;

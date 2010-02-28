@@ -40,6 +40,7 @@ var PFeedItem = Class.create({
 	   );
 	   this.cacheError = Mojo.Event.make(PFeedItem.CacheError, {key: this.key}, Mojo.Controller.stageController.document);
 	   this.cacheComplete = Mojo.Event.make(PFeedItem.EnclosureCached, {key: this.key}, Mojo.Controller.stageController.document);
+	   this.cacheDeleted = Mojo.Event.make(PFeedItem.EnclosureDeleted, {key: this.key}, Mojo.Controller.stageController.document);
 	},
 	setPropertyFromFeed: function(feed, propToSet, sourceProp) {
 		// Get the first item if it is an array, otherwise it's an object
@@ -93,7 +94,28 @@ var PFeedItem = Class.create({
 	   return ((this.isEnclosureCached()) ? this.enclosurePath : this.enclosure);
 	},
 	removeCache: function() {
-	   
+	   var mojoController = Mojo.Controller.stageController.activeScene();
+	   if(this.enclosureTicket !== 0) {
+			 mojoController.serviceRequest('palm://com.palm.downloadmanager', {
+				    method: 'deleteDownloadedFile',
+				    parameters: {
+						  ticket: this.enclosureTicket
+				    },
+				    onSuccess: function(response) {
+						  if(response.returnValue) {
+								this.enclosurePath = '';
+								this.enclosureTicket = 0;
+						  }
+						  this.cacheDeleted.key = this.key;
+						  Mojo.Controller.stageController.sendEventToCommanders(this.cacheDeleted);
+				    }.bind(this),
+				    onFailure: function(response) {
+						  this.enclosurePath = '';
+						  this.enclosureTicket = 0;
+						  Mojo.Log.error("[PFeedItem.removeCache] (%i) Failed to delete ticket. %s", response.ticket, this.enclosurePath);
+				    }.bind(this)
+			 });				    
+	   }
 	},
 	cacheEnclosure: function() {
 	   var mojoController = Mojo.Controller.stageController.activeScene();
@@ -112,7 +134,7 @@ var PFeedItem = Class.create({
 						  Mojo.Log.logProperties(error);
 						  Mojo.Log.error("[PFeedItem.cacheEnclosure] Failed downloading enclosure.");
 						  Mojo.Controller.stageController.sendEventToCommanders(this.cacheError);
-				    }						  
+				    }.bind(this)
 			 });
 	   } else {
 			 Mojo.Log.error("[PFeedItem.cacheEnclosure] There is no enclosure path. What am I supposed to do?");
