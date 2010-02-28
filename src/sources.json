@@ -10,6 +10,7 @@
     {"source": "app/lib/podcaststorage.js"},
     {"source": "app/lib/util/md5-min.js"},
     {"source": "app/lib/util/mylist.js"},
+    {"source": "app/lib/util/built-in-extensions.js"},
     {"source": "/usr/palm/frameworks/media/media.js"},
     {"source": "app/assistants/stage-assistant.js"},
     {

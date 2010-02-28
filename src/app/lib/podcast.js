@@ -1,21 +1,55 @@
+/**
+ * Self-contained object used to manipulate and parse podcast
+ * feeds from XML.
+ * @extends PFeed
+ */
 var Podcast = Class.create(PFeed, {
-	initialize: function($super, feedURL) {
-		$super();				// Call the initialize method of it's extended object
-		if(Object.isString(feedURL)) {
-			this.url = feedURL;		// Store path to feed URL
-			this.key = hex_md5(this.url);	// MD5 Hash of feed URL (unique cookie ID)
-		} else {
-			Object.extend(this, feedURL);
-		}
-		try {
-			this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
-			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
-			this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
-			this.imageCached = Mojo.Event.make(Podcast.ImageCached, {}, Mojo.Controller.stageController.document);
-		} catch(error) {
-			Mojo.Log.error("[Podcast] %s", error.message);
-		}
-	},
+	   /**
+	    *@private
+	    *@constructor
+	    * Extends the initialize method of PFeed.
+	    * Basically looks to see if a feed url was given (String)
+	    * or if a Object was sent. If a string is sent then set the url
+	    * and key (MD5 Hash of url). Podcast will be out-of-date.
+	    * Otherwise extend this instance with the variables from the object
+	    * passed in.
+	    * @param {string, object} Either a string, that is a path to a URL; or an object with podcast data.
+	    */
+	   initialize: function($super, feedURL) {
+			 try {
+				    $super();				// Call the initialize method of it's extended object
+				    if(Object.isString(feedURL)) {
+						  this.url = feedURL;		// Store path to feed URL
+						  this.key = hex_md5(this.url);	// MD5 Hash of feed URL (unique cookie ID)
+				    } else {
+						  Object.extend(this, feedURL);
+						  delete this.items;
+						  this.items = [];
+						  if(feedURL.items) {
+								feedURL.items.each(function(item) {
+									   var temp = new PFeedItem();
+									   this.items.push(temp);
+									   Object.extend(temp, item);
+								}, this);
+						  }
+				    }
+				    
+				    this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
+				    this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
+				    this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
+				    this.imageCached = Mojo.Event.make(Podcast.ImageCached, {}, Mojo.Controller.stageController.document);
+			 } catch(error) {
+				    Mojo.Log.error("[Podcast] %s", error.message);
+			 }
+	   },
+	/**
+	 * Checks to make see if the current podcast is out-of-date.
+	 * The basic check is to see if title is not blank, that the
+	 * items db has been defined, and that there are items db
+	 * is an array. If any one of them fail it marks the podcast
+	 * out-of-date.
+	 * @returns {boolean} True represents out-of-date, false is up-to-date.
+	 */
 	isOutOfDate: function() {
 		// Check to see if the title has been set,
 		// title is not blank (empty),
@@ -23,6 +57,14 @@ var Podcast = Class.create(PFeed, {
 		// that the items db is an array
 		return (this.title === undefined || this.title.blank() || this.items === undefined || !Object.isArray(this.items));
 	},
+	/**
+	 * Call this method to get the podcasts album-art or image. The method,
+	 * prefers the img stored locally over remote images. Therefore, if the
+	 * image has been cached it is returned. If it has not been cached, it
+	 * requests that the img be cached and returns the remote path in the mean
+	 * time.
+	 * @returns {string} A path to the album-art image. Either local or remote.
+	 */
 	getImage: function() {
 		if(this.isImageCached()) {
 			return this.imgPath;
@@ -30,6 +72,40 @@ var Podcast = Class.create(PFeed, {
 			this.cacheImage();
 			return this.imgUrl;
 		}
+	},
+	/**
+	 * Given an item key (unique id) it returns the item. Undefined if not found.
+	 * @param key {string} The MD5 hash of the item to be found.
+	 * @returns {PFeedItem} Instance of PFeedItem that matches the passed in key, undefined if not found.
+	 */
+	getItem: function(key) {
+	   try {
+			 var itemToDelete = this.items.detect(function(item, index) {
+				    return item.key === key;
+			 });
+			 
+			 return itemToDelete;
+	   } catch(error) {
+			 Mojo.Log.error("[Podcast.getItem] %s", error.message);
+			 return undefined;
+	   }
+	},
+	/**
+	 * Call this method to start downloading an item from the podcast. Feedback
+	 * is handled by Events.
+	 * @see PFeedItem#CacheProgress
+	 * @see PFeedItem#CacheError
+	 * @see PFeedItem#EnclosureCached
+	 * @see PFeedItem#EnclosureDeleted
+	 * @param key {string} The key to a podcast item that should be downloaded.
+	 */
+	cacheEnclosure: function(key) {
+	   var itemToCache = this.getItem(key);
+	   if(itemToCache) {
+			 itemToCache.cacheEnclosure();
+	   } else {
+			 Mojo.Log.error("[Podcast.cacheEnclosure] Cannot find key: %s", key);
+	   }
 	},
 	cacheImage: function() {
 		try {
@@ -51,7 +127,7 @@ var Podcast = Class.create(PFeed, {
 					}
 				}.bind(this),
 				onFailure: function(e) {
-					Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s")
+					Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s");
 				}
 			});
 			 }
@@ -71,30 +147,29 @@ Podcast.PodcastUpdateSuccess = 'onPodcastSuccess';
 Podcast.PodcastUpdateFailure = 'onPodcastFailure';
 Podcast.ImageCached = 'onImageCached';
 Podcast.ImageDeleted = 'onImageDeleted';
-Podcast.EnclosureCached = 'onEnclosureCached';
-Podcast.EnclosureDeleted = 'onEnclosureDeleted';
 
 Podcast.prototype.url = undefined;
 Podcast.prototype.key = undefined;
 Podcast.prototype.imgPath = undefined;
 Podcast.prototype.imgTicket = undefined;
-Podcast.prototype.enclosurePath = undefined;
-Podcast.prototype.enclosureTicket = undefined;
 
+/**
+* Deletes a podcast item. This includes removing any cached info for the
+* given podcast item, and marking it as listened.
+* @param {string} The key that represents a specific item.
+*/
 Podcast.prototype.deleteItem = function(key) {
-	   var itemToDelete = this.items.detect(function(item, index) {
-			 return item.key === key;
-	   });
-	   
-	   if(itemToDelete !== undefined) {
-			 Mojo.Log.info("[Podcast.deleteItem] Deleting %s", itemToDelete.title);
-			 if(itemToDelete instanceof PFeedItem) {
-				    itemToDelete.markAsOld();
-			 }
-			 // Do something now that the JSON object has been parsed
-			 Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
-	   }
-}
+	var itemToDelete = this.getItem(key);
+	
+	if(itemToDelete !== undefined) {
+		Mojo.Log.info("[Podcast.deleteItem] Deleting %s", itemToDelete.title);
+		if(itemToDelete instanceof PFeedItem) {
+			itemToDelete.markAsOld();
+		}
+		// Do something now that the JSON object has been parsed
+		Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
+	}
+};
 
 /**
  * Converts the Podcast to a simple Object for
@@ -121,8 +196,11 @@ Podcast.prototype.simpleObject = function() {
 	//});
 	//}
 	return clone;
-}
+};
 
+/**
+ * Actually, performs the updating of the XML feed.
+ */
 Podcast.prototype.updateFeed = function(newUrl) {
 	// Set to path to feed if specified
 	if(Object.isString(newUrl) && !newUrl.blank()) {
@@ -135,13 +213,19 @@ Podcast.prototype.updateFeed = function(newUrl) {
 			method: 'get',
 			onSuccess: function(transport) {
 				try {
-					// Turn the XML response into a JSON Object
-					var json = XMLObjectifier.xmlToJSON(transport.responseXML);
-					this.parse(json);
-					// Do something now that the JSON object has been parsed
-					Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
+					if(!Object.isUndefined(transport.responseXML) && transport.status === 200) {
+						// Turn the XML response into a JSON Object
+						var json = XMLObjectifier.xmlToJSON(transport.responseXML);
+						this.parse(json);
+						// Do something now that the JSON object has been parsed
+						Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
+					} else {
+						Object.extend(this.podcastUpdateFailure, {message: "XML was empty!"});
+						Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
+					}
 				} catch (error) {
 					Mojo.Log.error("[Podcast.getFeed try catch error] %s", error.message);
+					Object.extend(this.podcastUpdateFailure, error);
 					Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 				}
 			}.bind(this),

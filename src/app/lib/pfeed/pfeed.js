@@ -3,17 +3,6 @@
  * Dual licensed under the MIT (MIT-license.txt)
  * and GPL (GPL-license.txt) licenses.
  */
-
-// Returns true if property exists, false otherwise.
-if(typeof Object.hasOwnProperty !== 'function') {
-	console.log("[Object.hasOwnProperty] is not defined.");
-	Object.prototype.hasOwnProperty = function(property) {
-	    return typeof(this[property]) !== 'undefined';
-	};
-} else {
-	console.log("[Object.hasOwnProperty] is defined.");
-}
-
 var PFeed = Class.create({
     type: '',
     initialize: function(jsonObj) {
@@ -37,6 +26,5 @@ var PFeed = Class.create({
         if(feedClass) {
             Object.extend(this, feedClass);
         }
-        delete feedClass;
     }
 });

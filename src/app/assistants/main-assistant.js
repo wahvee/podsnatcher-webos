@@ -40,7 +40,7 @@ function MainAssistant(db) {
 	   };
 	   
 	   // Setting up the event listener callbacks
-	   this.downloadFunction = this.handleListDelete.bind(this);
+	   this.downloadFunction = this.handleItemDownload.bind(this);
 	   this.audioEventListener = this.audioEvent.bindAsEventListener(this);
 }
 
@@ -80,7 +80,7 @@ MainAssistant.prototype.setup = function() {
 	   } catch(dbLoadErrors) {
 			 Mojo.Log.error("[MainAssistant.setup loadDB] %s", dbLoadErrors.message);
 	   }
-}
+};
 
 MainAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
@@ -117,13 +117,13 @@ MainAssistant.prototype.activate = function(event) {
 	   } catch(eventErrors) {
 			 Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
 	   }
-}
+};
 
 
 MainAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
-}
+};
 
 MainAssistant.prototype.cleanup = function(event) {
 	   /* this function should do any cleanup needed before the scene is destroyed as 
@@ -167,7 +167,7 @@ MainAssistant.prototype.cleanup = function(event) {
 	   } catch(eventErrors) {
 			 Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
 	   }
-}
+};
 
 MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNode) {
 	   // If playing and the key matches the playing key set this item as the
@@ -180,13 +180,17 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 			 
 			 // Setup the download btn listener
 			 var downloadBtn = itemNode.select('.downloadButton')[0];
-			 if(downloadBtn) {
+			 // Check to make sure the item is not already downloaded
+			 // if it is remove the download button
+			 if(itemModel.isEnclosureCached() && downloadBtn) {
+				    downloadBtn.remove();
+			 } else if(downloadBtn) {
 				    downloadBtn.addEventListener(Mojo.Event.tap, this.downloadFunction);
 			 }
 	   } catch(error) {
 			 Mojo.Log.error("[MainAssistant.listItemRender] %s", error.message);
 	   }
-}
+};
 
 MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNode) {
 	   // Should remove all events from this item...it's being removed from DOM anyway
@@ -194,7 +198,7 @@ MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNo
 	   if(this.selectedRow !== undefined && itemModel.key === this.audioPlayingKey) {
 			 this.selectedRow = undefined;
 	   }
-}
+};
 
 /**
  * After user swipes to delete.
@@ -204,14 +208,21 @@ MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNo
 MainAssistant.prototype.handleListDelete = function(event) {
 	   // event.item.key
 	   this.db.currentPodcast().deleteItem(event.item.key);
-}
+};
 
 MainAssistant.prototype.handleItemDownload = function(event) {
 	   // Stop the Mojo.Event.listTap from propigating
 	   event.stop();
-	   Mojo.Log.error("[Download clicked!]");
-	   Mojo.Log.logProperties(event.target);
-}
+	   // Get the node from the list
+	   var node = event.target.parentNode;
+	   // If found
+	   if(node) {
+			 // Get the model for the item in the list
+			 var itemModel = $('episodeList').mojo.getItemByNode(node);
+			 // Tell the current podcast to download the podcast
+			 this.db.currentPodcast().cacheEnclosure(itemModel.key);
+	   }
+};
 
 /**
  * Refreshes the list, updates the album-art displayed on the screen,
@@ -237,9 +248,9 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 	   } catch(error) {
 			 Mojo.Log.error("[MainAssistant.podcastDisplayUpdate] %s", error.message);
 	   }
-}
+};
 
-MainAssistant.prototype.itemDisplayUpdate = function() {
+MainAssistant.prototype.itemDisplayUpdate = function(key, percentage) {
 	   // Check if we have a selected item
 	   try {
 			 if(this.selectedRow !== undefined && Object.isElement(this.selectedRow)) {
@@ -253,7 +264,7 @@ MainAssistant.prototype.itemDisplayUpdate = function() {
 						  // Check to see that downloading is not going on
 						  if(!this.audioPlayerLoading) {
 								if(!statusDiv.hasClassName('playing')) {
-									   statusDiv.addClassName('playing')
+									   statusDiv.addClassName('playing');
 								}
 								statusDiv.setStyle({
 									   width: ((this.audioPlayer.currentTime / this.audioPlayer.duration) * 100).toFixed(2) + "%"
@@ -276,18 +287,57 @@ MainAssistant.prototype.itemDisplayUpdate = function() {
 								});
 						  }
 				    }
-			 } else {
-				    Mojo.Log.error("[MainAssistant.itemDisplayUpdate] Nothing is selected. Why are you calling me?");
+			 }
+			 
+			 // If the user is downloading something in the background this method
+			 // will be passed a key and percentage
+			 if(!Object.isUndefined(key)) {
+				    // Get the item that finished downloading
+				    var itemDownloading = $(key);
+				    // Make sure it is displayed in the scene
+				    if(itemDownloading) {
+						  statusDiv = itemDownloading.select('.status')[0];
+						  // Make sure the selection was not empty
+						  if(statusDiv !== undefined && Object.isElement(statusDiv)) {
+								// Check if percentage is undefined if so remove downloading
+								if(Object.isUndefined(percentage)) {
+									   statusDiv.removeClassName('downloading');
+									   
+								// Turn on the downloading class if it was not already on
+								} else if(!statusDiv.hasClassName('downloading')) {
+									   statusDiv.addClassName('downloading');
+								}
+								
+								// Set the percentage width for the download
+								statusDiv.setStyle({
+									   width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"
+								});
+						  }
+						  
+						  // Setup the download btn listener
+						  var downloadBtn = itemDownloading.select('.downloadButton')[0];
+						  // Get the item model from the node
+						  var itemModel = $('episodeList').mojo.getItemByNode(itemDownloading);
+						  // Check to make sure the item is downloaded
+						  // if it is remove the download button
+						  if(itemModel.isEnclosureCached() && downloadBtn) {
+								downloadBtn.remove();
+						  }
+				    }
 			 }
 	   } catch(error) {
 			 Mojo.Log.error("[MainAssistant.itemDisplayUpdate] %s", error.message);
 	   }
-}
+};
 
 /**
  * Handle the commands that come from the objects that are created.
  */
 MainAssistant.prototype.handleCommand = function(command) {
+	   var podcastKey = undefined;
+	   if(command.podcast) {
+			 podcastKey = command.podcast.key;
+	   }
 	   switch(command.type) {
 			 case PodcastStorage.LoadingDatabaseSuccess:
 				    Mojo.Log.info("[MainAssistant.LoadingDatabaseSuccess]");
@@ -302,8 +352,9 @@ MainAssistant.prototype.handleCommand = function(command) {
 			 case PodcastStorage.SavingDatabaseFailure:
 				    Mojo.Log.error("[MainAssistant.SavingDatabaseFailure] %s", command.error.message);
 				    break;
+			 case PodcastStorage.SavingDatabaseSuccess:
+				    break;
 			 case Podcast.PodcastStartUpdate:
-				    var podcastKey = command.podcast.key;
 				    Mojo.Log.info("[MainAssistant.PodcastStartUpdate] %s starting update.", podcastKey);
 				    // Updated podcast is the currently showing podcast
 				    if(this.db.currentPodcast().key == podcastKey) {
@@ -317,7 +368,6 @@ MainAssistant.prototype.handleCommand = function(command) {
 				    }
 				    break;
 			 case Podcast.PodcastUpdateSuccess:
-				    var podcastKey = command.podcast.key;
 				    Mojo.Log.info("[MainAssistant.PodcastUpdateSuccess] %s finished updating.", podcastKey);
 				    // Updated podcast is the currently showing podcast
 				    if(this.db.currentPodcast().key == podcastKey) {
@@ -328,18 +378,35 @@ MainAssistant.prototype.handleCommand = function(command) {
 				    }
 				    break;
 			 case Podcast.PodcastUpdateFailure:
-				    // Updated podcast is the currently showing podcast
-				    var podcastKey = command.podcast.key;
-				    if(this.db.currentPodcast().key == podcastKey) {
-						  this.spinnerModel.spinning = false;
-						  this.controller.modelChanged(this.spinnerModel);
+				    try {
+						  // Updated podcast is the currently showing podcast
+						  if(this.db.currentPodcast().key == podcastKey) {
+								this.spinnerModel.spinning = false;
+								this.controller.modelChanged(this.spinnerModel);
+						  }
+						  var msg = "Update of " + command.podcast.key + " failed. " + command.message;
+						  Mojo.Controller.errorDialog(msg);
+				    } catch(error) {
+						  Mojo.Log.error("[MainAssistant.PodcastUpdateFailure] %s", error.message);
 				    }
+				    break;
+			 case PFeedItem.CacheProgress:
+				    // Update the downloading
+				    this.itemDisplayUpdate(command.key, command.percentage);
+				    break;
+			 case PFeedItem.CacheError:
+				    // Something went wrong
+				    var msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed."
+				    Mojo.Controller.errorDialog(msg);
+				    break;
+			 case PFeedItem.EnclosureCached:
+				    this.itemDisplayUpdate(command.key);
 				    break;
 			 default:
 				    Mojo.Log.info("[MainAssistant.handleCommand] Not handling %s", command.type);
 				    break;
 	   }
-}
+};
 
 /**
  *	Make sure the screen size is always correct for whatever orientation
@@ -347,14 +414,14 @@ MainAssistant.prototype.handleCommand = function(command) {
  */
 MainAssistant.prototype.handleOrientation = function(event) {
 	
-}
+};
 
 MainAssistant.prototype.handleShaking = function(event) {
-}
+};
 
 MainAssistant.prototype.handleAlbumArtHold = function(event) {
 	   this.db.updateCurrent();
-}
+};
 
 /**
  * If the user flicks the album art to switch to the next podcast.
@@ -378,7 +445,7 @@ MainAssistant.prototype.handleAlbumArtFlick = function(event) {
 				    onComplete: this.switchPodcast.bind(this, 'next')
 			 });
 	   }
-}
+};
 
 MainAssistant.prototype.albumArtAreaLeftOrRight = function(event) {
 	   if(event.id === 'album-art-area-right') {
@@ -386,7 +453,7 @@ MainAssistant.prototype.albumArtAreaLeftOrRight = function(event) {
 	   } else {
 			 this.switchPodcast('previous');
 	   }
-}
+};
 
 MainAssistant.prototype.switchPodcast = function(next) {
 	   // Calculate the start and ending positions of the animations
@@ -411,7 +478,7 @@ MainAssistant.prototype.switchPodcast = function(next) {
 			 duration: this.animationDuration,
 			 curve: this.animationType
 	   });
-}
+};
 
 MainAssistant.prototype.handleListClick = function(event) {
 	   // Get the selected row
@@ -448,7 +515,7 @@ MainAssistant.prototype.handleListClick = function(event) {
 								name: "nowplaying"
 						  };
 						  var params = {
-								target: event.item.enclosure,
+								target: event.item.getEnclosure(),
 								title: event.item.title,
 								thumbUrl: this.db.currentPodcast().getImage()
 						  };
@@ -464,7 +531,7 @@ MainAssistant.prototype.handleListClick = function(event) {
 									   this.stop();
 								}
 								this.audioPlayingKey = event.item.key;
-								this.audioPlayer.src = event.item.enclosure;
+								this.audioPlayer.src = event.item.getEnclosure();
 						  }
 						  break;
 				    default:
@@ -472,7 +539,7 @@ MainAssistant.prototype.handleListClick = function(event) {
 						  break;			 
 			 }
 	   }
-}
+};
 
 MainAssistant.prototype.audioEvent = function(event) {
 	   switch(event.type) {
@@ -499,7 +566,7 @@ MainAssistant.prototype.audioEvent = function(event) {
 				    //var buffered = event.target.mojo._media.buffered;
 				    
 				    if(bufferedBytes !== undefined) {
-						  if(!isNaN(totalBytes) && !isNaN(bufferedBytes) && totalBytes != 0) {
+						  if(!isNaN(totalBytes) && !isNaN(bufferedBytes) && totalBytes !== 0) {
 								this.audioBufferedPercent = ((bufferedBytes / totalBytes) * 100).toFixed(2);
 								this.selectedRow.select('.status')[0].setStyle({
 									   width: this.audioBufferedPercent + "%"
@@ -521,23 +588,23 @@ MainAssistant.prototype.audioEvent = function(event) {
 				    Mojo.Log.error("[MainAssistant.audioEvent] %s", event.type);
 				    break;
 	   }
-}
+};
 
 MainAssistant.prototype.play = function() {
 	   // Start timer
 	   this.timerHandler('start');
-}
+};
 
 MainAssistant.prototype.pause = function() {
 	   this.timerHandler('stop');
-}
+};
 
 MainAssistant.prototype.stop = function() {
 	   this.timerHandler('stop');
 	   this.audioPlayingKey = '';
 	   this.audioPlayer.src = null;
 	   this.audioPlayer.load();
-}
+};
 
 MainAssistant.prototype.timerHandler = function(action) {
 	   try {
@@ -552,7 +619,7 @@ MainAssistant.prototype.timerHandler = function(action) {
 	   } catch(error) {
 			 Mojo.Log.error("[MainAssistant.timerHandler] %s", error.message);
 	   }
-}
+};
 
 MainAssistant.prototype.millisecondsToDuration = function(seconds) {
 	   // divide your field by seconds per hour (60*60) => hrs
@@ -563,5 +630,5 @@ MainAssistant.prototype.millisecondsToDuration = function(seconds) {
 	   var sec = Math.floor(seconds % 60).toPaddedString(2);
 	   
 	   return hour + ":" + min + ":" + sec;
-}
+};
 
