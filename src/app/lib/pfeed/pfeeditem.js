@@ -182,11 +182,7 @@ PFeedItem.simpleObject = function(instance) {
 		Mojo.Log.info("[PFeedItem.simpleObject] Correct type.");
 		var arrKeys = Object.keys(this);
 		arrKeys.each(function(key) {
-			if(Object.isFunction(instance[key]) || instance[key] instanceof Event) {
-				delete instance[key];
-			} else if(Object.isString(instance[key]) && (instance[key].blank() || instance[key] === undefined)) {
-				delete instance[key];
-			} else if(Object.isArray(instance[key])) {
+			if(!(Object.isString(instance[key]) || Object.isNumber(instance[key]))) {
 				delete instance[key];
 			}
 		});

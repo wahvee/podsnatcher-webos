@@ -189,13 +189,19 @@ Podcast.prototype.simpleObject = function() {
 	});
    
 	// Each item should be an PRssItem or PAtomItem
-	//if(Object.isArray(clone.items)) {
-	//clone.items.each(function(item, index) {
-	//if(item instanceof PRssItem || item instanceof PAtomItem) {
-	//		PFeedItem.simpleObject(item);
-	//	}
-	//});
-	//}
+	if(Object.isArray(clone.items)) {
+		// Temporary copy of array
+		var tempArray = clone.items.clone();
+		// Delete the messy array
+		delete clone.items;
+		// Create a new blank one
+		Object.extend(clone, {items: []});
+		// Loop through each item
+		tempArray.each(function(item, index) {
+			PFeedItem.simpleObject(item);
+			clone.items.push(item);
+		});
+	}
 	return clone;
 };
 
