@@ -183,7 +183,7 @@ PFeedItem.simpleObject = function(instance) {
 		var arrKeys = Object.keys(instance);
 		arrKeys.each(function(key) {
 			if(!(Object.isString(instance[key]) || Object.isNumber(instance[key])) ||
-					(Object.isString(instance[key]) && !instance[key].blank())) {
+					(Object.isString(instance[key]) && instance[key].blank())) {
 				delete instance[key];
 			}
 		});
