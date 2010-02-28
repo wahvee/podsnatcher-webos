@@ -128,9 +128,9 @@ MainAssistant.prototype.deactivate = function(event) {
 MainAssistant.prototype.cleanup = function(event) {
 	   /* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
-	   this.stop();
 	   
 	   try {
+			 this.stop();
 			 this.controller.stopListening(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
 			 this.controller.stopListening(document, "shakeend", this.handleShaking.bindAsEventListener(this));
 			 
@@ -165,7 +165,7 @@ MainAssistant.prototype.cleanup = function(event) {
 			 //this.controller.stopListening(this.audioPlayer, Media.Event.TIMEUPDATE, this.audioEventListener, false);
 			 //this.controller.stopListening(this.audioPlayer, Media.Event.WAITING, this.audioEventListener, false);
 	   } catch(eventErrors) {
-			 Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
+			 Mojo.Log.error("[MainAssistant.cleanup] %s", eventErrors.message);
 	   }
 };
 
@@ -601,9 +601,11 @@ MainAssistant.prototype.pause = function() {
 
 MainAssistant.prototype.stop = function() {
 	   this.timerHandler('stop');
-	   this.audioPlayingKey = '';
-	   this.audioPlayer.src = null;
-	   this.audioPlayer.load();
+	   if(this.audioPlayerCanPlay) {
+			 this.audioPlayingKey = '';
+			 this.audioPlayer.src = null;
+			 this.audioPlayer.load();
+	   }
 };
 
 MainAssistant.prototype.timerHandler = function(action) {
