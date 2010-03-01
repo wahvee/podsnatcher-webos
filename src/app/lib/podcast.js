@@ -222,19 +222,19 @@ Podcast.prototype.updateFeed = function(newUrl) {
 				try {
 					if(!Object.isUndefined(transport.responseXML) && transport.status === 200) {
 						// Turn the XML response into a JSON Object
-						var json = XMLObjectifier.xmlToJSON(transport.responseXML);
+						//var json = XMLObjectifier.xmlToJSON(transport.responseXML);
 						// PFeed method
-						this.parse(json);
+						this.parse(transport.responseXML);
 						// Do something now that the JSON object has been parsed
-						Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
+						//Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
 					} else {
 						Object.extend(this.podcastUpdateFailure, {message: "XML was empty!"});
 						Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 					}
 				} catch (error) {
 					Mojo.Log.error("[Podcast.getFeed try catch error] %s", error.message);
-					Object.extend(this.podcastUpdateFailure, error);
-					Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
+					//Object.extend(this.podcastUpdateFailure, error);
+					//Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 				}
 			}.bind(this),
 			onFailure: function(transport) {

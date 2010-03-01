@@ -155,8 +155,15 @@ var PodcastStorage = Class.create({
 			new Podcast('http://feeds.feedburner.com/cnet/buzzreport?format=xml')
 		];
 		
+		var tempArr = [];
+		initialList.each(function(podcastItem, index) {
+			if(podcastItem instanceof Podcast) {
+				tempArr.push(podcastItem.simpleObject());
+			}
+		});
+		
 		// Perform the addition of the list in the initial app
-		this.db.add("podcastList", initialList, onSuccess.bind(this), this.onFailure);
+		this.db.add("podcastList", tempArr, onSuccess.bind(this), this.onFailure);
 	},
 	save: function() {
 		var onSuccess = function() {
