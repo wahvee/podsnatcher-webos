@@ -53,12 +53,12 @@ MainAssistant.prototype.setup = function() {
 	   try {
 			 //this.videoPlayer = $('video-object');
 			 //this.videoPlayer = VideoTag.extendElement(this.videoPlayer, this.controller);
-			 this.audioPlayer = AudioTag.extendElement($("audio-object"));
+			 this.audioPlayer = AudioTag.extendElement($("audio-object"), this.controller);
 			 this.audioPlayer.palm.audioClass = "media";
 			 this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 			 this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
 	   } catch (func_error) {
-			 Mojo.Log.info("[Create Widgets] %s", func_error.message);
+			 Mojo.Log.error("[Create Widgets] %s", func_error.message);
 	   }
 	
 	   /* add event handlers to listen to events from widgets */
