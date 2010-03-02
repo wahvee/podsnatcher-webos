@@ -222,7 +222,6 @@ Podcast.prototype.updateFeed = function(newUrl) {
 				try {
 					if(!Object.isUndefined(transport.responseXML) && transport.status === 200) {
 						// Turn the XML response into a JSON Object
-						//var json = XMLObjectifier.xmlToJSON(transport.responseXML);
 						// PFeed method
 						this.parse(transport.responseXML);
 						// Do something now that the JSON object has been parsed

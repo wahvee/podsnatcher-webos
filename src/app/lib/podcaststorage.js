@@ -149,10 +149,11 @@ var PodcastStorage = Class.create({
 		};
 		
 		var initialList = [
-			new Podcast('http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595'),
-			new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
-			new Podcast('http://revision3.com/diggnation/feed/MP4-Large'),
-			new Podcast('http://feeds.feedburner.com/cnet/buzzreport?format=xml')
+			new Podcast('http://68.110.131.208/atom.xml'),
+			new Podcast('http://68.110.131.208/rss-20.xml'),
+			new Podcast('http://68.110.131.208/rss-091.xml'),
+			new Podcast('http://68.110.131.208/rss-092.xml'),
+			new Podcast('http://68.110.131.208/rss-10.xml')
 		];
 		
 		var tempArr = [];
