@@ -8,6 +8,8 @@ if(typeof Object.hasOwnProperty !== 'function') {
 	console.log("[Object.hasOwnProperty] is defined.");
 }
 
+function isNull(val){return(val==null);}
+
 function createUUID() {
 	// http://www.ietf.org/rfc/rfc4122.txt
 	var s = [];

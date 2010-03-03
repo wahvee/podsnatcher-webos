@@ -70,7 +70,7 @@ var Podcast = Class.create(PFeed, {
 			return this.imgPath;
 		} else {
 			this.cacheImage();
-			return this.imgUrl;
+			return this.imgURL;
 		}
 	},
 	/**
@@ -109,12 +109,12 @@ var Podcast = Class.create(PFeed, {
 	},
 	cacheImage: function() {
 		try {
-			 if(this.imgUrl !== undefined && !this.imgUrl.blank()) {
+			 if(this.imgURL !== undefined && !this.imgURL.blank()) {
 			var mojoController = Mojo.Controller.stageController.activeScene();
 			mojoController.serviceRequest('palm://com.palm.downloadmanager', {
 				method: 'download',
 				parameters: {
-					target: this.imgUrl,
+					target: this.imgURL,
 					targetDir: "/media/internal/PodSnatcher/cache",
 					keepFilenameOnRedirect: true
 				},
@@ -217,23 +217,31 @@ Podcast.prototype.updateFeed = function(newUrl) {
 	// Make sure the URL is not blank, and is set
 	if(Object.isString(this.url) && !this.url.blank()) {
 		var temp = new Ajax.Request(this.url, {
-			method: 'get',
+			method: 'post',
 			onSuccess: function(transport) {
 				try {
-					if(!Object.isUndefined(transport.responseXML) && transport.status === 200) {
+					if(!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML) && transport.status === 200) {
 						// Turn the XML response into a JSON Object
 						// PFeed method
 						this.parse(transport.responseXML);
 						// Do something now that the JSON object has been parsed
-						//Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
+						Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
 					} else {
-						Object.extend(this.podcastUpdateFailure, {message: "XML was empty!"});
-						Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
+						// Check if we should be redirecting
+						// FIX FOR REDIRECTION ISSUE!
+						var redirect = transport.getHeader("Location");
+						if(!isNull(redirect)) {
+							Mojo.Log.info("[Podcast.updateFeed] Need to redirect %s", redirect);
+							this.updateFeed(redirect);
+						} else {
+							Object.extend(this.podcastUpdateFailure, {message: "(" + transport.status + ") XML was empty!"});
+							Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
+						}
 					}
 				} catch (error) {
 					Mojo.Log.error("[Podcast.getFeed try catch error] %s", error.message);
-					//Object.extend(this.podcastUpdateFailure, error);
-					//Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
+					Object.extend(this.podcastUpdateFailure, error);
+					Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 				}
 			}.bind(this),
 			onFailure: function(transport) {

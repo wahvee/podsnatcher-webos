@@ -6,11 +6,11 @@ var PAtomItem = Class.create(PFeedItem, {
 	author: '',
 	link: '',
 	initialize: function($super, elementItem) {
+		// Initiate PFeedItem
+		$super(elementItem);
 		if(Object.isElement(elementItem)) {
 			this.parse(elementItem);
 		}
-		// At the end call the parent objects initialize
-		$super(elementItem);
 	},
 	parse: function(elementItem) {
 		this.id = document.evaluate("./Atom:id/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;

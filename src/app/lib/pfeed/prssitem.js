@@ -1,17 +1,30 @@
 var PRssItem = Class.create(PFeedItem, {
+	id: '',
+	title: '',
+	description: '',
+	published: '',
+	updated: '',
 	author: '',
-	initialize: function($super, entryItem) {
-		$super(entryItem);
+	link: '',
+	initialize: function($super, elementItem) {
+		// Initialize PFeedItem
+		$super(elementItem);
+		if(Object.isElement(elementItem)) {
+			this.parse(elementItem);
+		}
 	},
-	findID: function(feed) {
-		// Over-ride the default findID inherited from PFeedItem
-		this.setPropertyFromFeed(feed, 'id', 'guid');
-	},
-	findDescription: function(feed) {
-		// Over-ride the default findDescription inherited from PFeedItem
-		this.setPropertyFromFeed(feed, 'description', 'description');
-	},
-	findAuthor: function(feed) {
-		this.setPropertyFromFeed(feed, 'author', 'author');
+	parse: function(elementItem) {
+		this.id = document.evaluate("./guid/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.title = document.evaluate("./title/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.description = document.evaluate("./description/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.published = document.evaluate("./pubDate/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.updated = document.evaluate("./pubDate/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.author = document.evaluate("./author/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.link = document.evaluate("./link/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		
+		// PODCAST ENCLOSURES
+		this.enclosure = document.evaluate("./enclosure/@url", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.enclosureLength = document.evaluate("./enclosure/@length", elementItem, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+		this.enclosureType = document.evaluate("./enclosure/@type", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 	}
 });

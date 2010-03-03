@@ -14,10 +14,10 @@ var PFeedItem = Class.create({
 		}
 		// Make sure key is set
 		if(this.key.blank()) {
-			this.key = (!this.enclosure.blank()) ? hex_md5(this.enclosure) : hex_md5(this.id);
-			if(this.key.blank()) {
-				this.key = (!this.link.blank()) ? hex_md5(this.link) : hex_md5(createUUID());
-			}
+			if(this.key.blank()) { this.key = (!this.enclosure.blank()) ? hex_md5(this.enclosure) : ''; }
+			if(this.key.blank()) { this.key = (!this.id.blank()) ? hex_md5(this.id) : ''; }
+			if(this.key.blank()) { this.key = (!this.link.blank()) ? hex_md5(this.link) : ''; }
+			if(this.key.blank()) { this.key = hex_md5(createUUID()); }
 		}
 		// Make the events
 		this.cacheProgress = Mojo.Event.make(

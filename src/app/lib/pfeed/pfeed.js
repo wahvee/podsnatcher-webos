@@ -12,20 +12,17 @@ var PFeed = Class.create({
 	title: '',
 	author: '',
 	description: '',
-	subtitle: '',
-	summary: '',
 	category: '',
 	language: 'en-us',
 	copyright: '',
-	image: undefined,
+	imgURL: '',
 	items: [],
 	initialize: function() {
 	},
 	parse: function(xmlObj) {
 		// Determine if this is RSS or Atom
 		// see if the top element is an rss element
-		var topNode = xmlObj.evaluate("name(/*)", xmlObj, null, XPathResult.STRING_TYPE, null);
-		this.type = topNode.stringValue.toLowerCase();
+		this.type = xmlObj.evaluate("name(/*)", xmlObj, null, XPathResult.STRING_TYPE, null).stringValue.toLowerCase();
 		switch(this.type) {
 			case 'rss':
 				Mojo.Log.info("[PFeed.parse] RSS");
@@ -36,13 +33,35 @@ var PFeed = Class.create({
 				this.type = 'atom';
 				this.parseAtom(xmlObj);
 				break;
+			default:
+				Mojo.Log.error("[PFeed.parse] Uknown type: %s", this.type);
+				break;
 		}
 	},
 	parseRSS: function(xmlObj) {
-		var version = xmlObj.evaluate("string(rss/@version)", xmlObj, null, XPathResult.STRING_TYPE, null).stringValue;
-		this.title = xmlObj.evaluate("string(rss/channel/title/text())", xmlObj, null, XPathResult.STRING_TYPE, null).stringValue;
-		this.description = xmlObj.evaluate("string(rss/channel/description/text())", xmlObj, null, XPathResult.STRING_TYPE, null).stringValue;
-		this.language = xmlObj.evaluate("string(rss/channel/language/text())", xmlObj, null, XPathResult.STRING_TYPE, null).stringValue;
+		this.version = xmlObj.evaluate("string(rss/@version)", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.title = xmlObj.evaluate("rss/channel/title/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.description = xmlObj.evaluate("rss/channel/description/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.language = xmlObj.evaluate("rss/channel/language/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.author = xmlObj.evaluate("rss/channel/itunes:author/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.category = xmlObj.evaluate("rss/channel/category/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.copyright = xmlObj.evaluate("rss/channel/copyright/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.imgURL = xmlObj.evaluate("rss/channel/image/url/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.imgTitle = xmlObj.evaluate("rss/channel/image/title/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.imgWidth = xmlObj.evaluate("rss/channel/image/width/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.imgHeight = xmlObj.evaluate("rss/channel/image/height/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		
+		var numElements = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+		Mojo.Log.info("[PFeed.parseRSS] %s has %i item(s).", this.title, numElements);
+		// Get the list of nodes
+		var elementIterator = xmlObj.evaluate("rss/channel//item", xmlObj, this.nsResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+		// Get first node
+		var thisNode = elementIterator.iterateNext();
+		// Loop over all nodes.
+		while(thisNode) {
+			this.items.push(new PRssItem(thisNode));
+			thisNode = elementIterator.iterateNext();
+		}
 	},
 	parseAtom: function(xmlObj) {
 		this.version = '1.0';
@@ -70,27 +89,10 @@ var PFeed = Class.create({
 	nsResolver: function(prefix) {
 		prefix = prefix.toLowerCase();
 		var ns = {
-			"atom": "http://www.w3.org/2005/Atom"
+			"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+			"atom": "http://www.w3.org/2005/Atom",
+			"itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd"
 		}
 		return ns[prefix] || null;
-	},
-	getXPathForElement: function (el, xml) {  
-		var xpath = '';
-		var pos, tempitem2;
-		while(el !== xml.documentElement) {
-			pos = 0;
-			tempitem2 = el;
-			while(tempitem2) {
-				if (tempitem2.nodeType === 1 && tempitem2.nodeName === el.nodeName) { // If it is ELEMENT_NODE of the same name
-					pos += 1;
-				}
-				tempitem2 = tempitem2.previousSibling;
-			}
-			xpath = "*[name()='"+el.nodeName+"' and namespace-uri()='"+(el.namespaceURI===null?'':el.namespaceURI)+"']["+pos+']'+'/'+xpath;
-			el = el.parentNode;
-		}
-		xpath = '/*'+"[name()='"+xml.documentElement.nodeName+"' and namespace-uri()='"+(el.namespaceURI===null?'':el.namespaceURI)+"']"+'/'+xpath;
-		xpath = xpath.replace(/\/$/, '');
-		return xpath;
 	}
 });
