@@ -41,6 +41,18 @@ img#image {
 	margin: 28px;
 }
 
+#podcast-count {
+	width: 144px;
+	color: #49708A;
+	font-size: 10px;
+	text-align: center;
+	position: absolute;
+	left: 50%;
+	margin-left: -72px;
+	bottom: 0px;
+	margin-bottom: 15px;
+}
+
 #updatingSpinner {
 	width: 128px;
 	height: 128px;
@@ -97,10 +109,13 @@ img#image {
 .downloadButton {
 	background-image: url(../images/download.png);
 	background-repeat: no-repeat;
-	width: 18px;
-	height: 18px;
+	width: 32px;
+	height: 32px;
 	float: left;
-	margin: 1px 4px 3px 4px;
+	margin: 6px 0px 0px 0px;
+}
+.cancel {
+	background-image: url(../images/cancel.png) !important;
 }
 
 .listItem.palm-row {
@@ -124,21 +139,24 @@ img#image {
 
 .episodeTitle {
 	width: 100%;
+	height: 23px;
 	float: left;
-	margin: 0px;
-	padding: 0px 4px 0px 4px;
-	font-size: 16px;
+	text-align: left;
+	padding: 2px 4px 0px 4px;
+	font-size: 14px;
 }
 .episodeLength {
-	width: 75%;
+	width: 100%;
+	height: 23px;
 	float: right;
 	text-align: right;
-	margin: 0px;
-	padding-right: 4px;
-	font-size: 14px;
-	overflow: hidden;
-	position: relative;
-	bottom: -4px;
+	padding: 0px 4px 0px 4px;
+	font-size: 12px;
+}
+
+.withButton {
+	width: 82% !important;
+	padding-left: 0px !important;
 }
 
 .newEpisode {
