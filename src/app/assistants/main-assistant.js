@@ -170,26 +170,31 @@ MainAssistant.prototype.cleanup = function(event) {
 };
 
 MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNode) {
-	   // If playing and the key matches the playing key set this item as the
-	   // user's selected row. Should keep the UI up to date!!
-	   // !!! VERY IMPORTANT !!!
-	   try {
-			 if(!this.audioPlayer.paused && itemModel.key === this.audioPlayingKey) {
-				    this.selectedRow = itemNode;
-			 }
-			 
-			 // Setup the download btn listener
-			 var downloadBtn = itemNode.select('.downloadButton')[0];
-			 // Check to make sure the item is not already downloaded
-			 // if it is remove the download button
-			 if(itemModel.isEnclosureCached() && downloadBtn) {
-				    downloadBtn.remove();
-			 } else if(downloadBtn) {
-				    downloadBtn.addEventListener(Mojo.Event.tap, this.downloadFunction);
-			 }
-	   } catch(error) {
-			 Mojo.Log.error("[MainAssistant.listItemRender] %s", error.message);
-	   }
+	// If playing and the key matches the playing key set this item as the
+	// user's selected row. Should keep the UI up to date!!
+	// !!! VERY IMPORTANT !!!
+	try {
+		if(!this.audioPlayer.paused && itemModel.key === this.audioPlayingKey) {
+			this.selectedRow = itemNode;
+		}
+		
+		// Setup the download btn listener
+		var downloadBtn = itemNode.select('.downloadButton')[0];
+		var episodeTitle = itemNode.select('.episodeTitle')[0];
+		var episodeLength = itemNode.select('.episodeLength')[0];
+		// Check to make sure the item is not already downloaded
+		// if it is remove the download button
+		if(itemModel.isEnclosureCached() && downloadBtn && episodeTitle && episodeLength) {
+			// Remove the download button from the scene
+			episodeTitle.removeClassName('withButton');
+			episodeLength.removeClassName('withButton');
+			downloadBtn.remove();
+		} else if(downloadBtn) {
+			downloadBtn.addEventListener(Mojo.Event.tap, this.downloadFunction);
+		}
+	} catch(error) {
+		Mojo.Log.error("[MainAssistant.listItemRender] %s", error.message);
+	}
 };
 
 MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNode) {
@@ -211,17 +216,25 @@ MainAssistant.prototype.handleListDelete = function(event) {
 };
 
 MainAssistant.prototype.handleItemDownload = function(event) {
-	   // Stop the Mojo.Event.listTap from propigating
-	   event.stop();
-	   // Get the node from the list
-	   var node = event.target.parentNode;
-	   // If found
-	   if(node) {
-			 // Get the model for the item in the list
-			 var itemModel = $('episodeList').mojo.getItemByNode(node);
-			 // Tell the current podcast to download the podcast
-			 this.db.currentPodcast().cacheEnclosure(itemModel.key);
-	   }
+	// Stop the Mojo.Event.listTap from propigating
+	event.stop();
+	// Get the node from the list
+	var node = event.target.parentNode;
+	// If found
+	if(node) {
+		// Get the model for the item in the list
+		var itemModel = $('episodeList').mojo.getItemByNode(node);
+		// Check if podcast is currently dowloading
+		if(itemModel.isCaching()) {
+			// If we are currently caching, cancel it
+			this.db.currentPodcast().cancelCache(itemModel.key);
+		} else {
+			// Tell the current podcast to download the podcast
+			this.db.currentPodcast().cacheEnclosure(itemModel.key);
+		}
+		// Refresh the onscreen progress bars
+		this.itemDisplayUpdate(itemModel.key);
+	}
 };
 
 /**
@@ -251,83 +264,95 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 };
 
 MainAssistant.prototype.itemDisplayUpdate = function(key, percentage) {
-	   // Check if we have a selected item
-	   try {
-			 if(this.selectedRow !== undefined && Object.isElement(this.selectedRow)) {
-				    // Select the progress bar layer
-				    var statusDiv = this.selectedRow.select('.status')[0];
-				    // Update the current time in the UI
-				    var currentTimeDiv = this.selectedRow.select('.episodeLength')[0];
-				    if(!this.audioPlayer.paused) {
-						  currentTimeDiv.innerHTML = this.millisecondsToDuration(this.audioPlayer.currentTime);
-						  
-						  // Check to see that downloading is not going on
-						  if(!this.audioPlayerLoading) {
-								if(!statusDiv.hasClassName('playing')) {
-									   statusDiv.addClassName('playing');
-								}
-								statusDiv.setStyle({
-									   width: ((this.audioPlayer.currentTime / this.audioPlayer.duration) * 100).toFixed(2) + "%"
-								});
-						  }
-				    }
-				    
-				    // Check that the audio file is loading
-				    if(this.audioPlayerLoading) {
-						  // Make sure the selection was not empty
-						  if(statusDiv !== undefined && Object.isElement(statusDiv)) {
-								// Turn on the downloading class if it was not already on
-								if(!statusDiv.hasClassName('downloading')) {
-									   statusDiv.addClassName('downloading');
-								}
-								
-								// Set the percentage width for the download
-								statusDiv.setStyle({
-									   width: this.audioBufferedPercent + "%"
-								});
-						  }
-				    }
-			 }
-			 
-			 // If the user is downloading something in the background this method
-			 // will be passed a key and percentage
-			 if(!Object.isUndefined(key)) {
-				    // Get the item that finished downloading
-				    var itemDownloading = $(key);
-				    // Make sure it is displayed in the scene
-				    if(itemDownloading) {
-						  statusDiv = itemDownloading.select('.status')[0];
-						  // Make sure the selection was not empty
-						  if(statusDiv !== undefined && Object.isElement(statusDiv)) {
-								// Check if percentage is undefined if so remove downloading
-								if(Object.isUndefined(percentage)) {
-									   statusDiv.removeClassName('downloading');
-									   
-								// Turn on the downloading class if it was not already on
-								} else if(!statusDiv.hasClassName('downloading')) {
-									   statusDiv.addClassName('downloading');
-								}
-								
-								// Set the percentage width for the download
-								statusDiv.setStyle({
-									   width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"
-								});
-						  }
-						  
-						  // Setup the download btn listener
-						  var downloadBtn = itemDownloading.select('.downloadButton')[0];
-						  // Get the item model from the node
-						  var itemModel = $('episodeList').mojo.getItemByNode(itemDownloading);
-						  // Check to make sure the item is downloaded
-						  // if it is remove the download button
-						  if(itemModel.isEnclosureCached() && downloadBtn) {
-								downloadBtn.remove();
-						  }
-				    }
-			 }
-	   } catch(error) {
-			 Mojo.Log.error("[MainAssistant.itemDisplayUpdate] %s", error.message);
-	   }
+	// Check if we have a selected item
+	try {
+		if(this.selectedRow !== undefined && Object.isElement(this.selectedRow)) {
+			// Select the progress bar layer
+			var statusDiv = this.selectedRow.select('.status')[0];
+			// Update the current time in the UI
+			var currentTimeDiv = this.selectedRow.select('.episodeLength')[0];
+			if(!this.audioPlayer.paused) {
+				currentTimeDiv.innerHTML = this.millisecondsToDuration(this.audioPlayer.currentTime);
+		
+				// Check to see that downloading is not going on
+				if(!this.audioPlayerLoading) {
+					if(!statusDiv.hasClassName('playing')) {
+						statusDiv.addClassName('playing');
+					}
+					statusDiv.setStyle({
+						width: ((this.audioPlayer.currentTime / this.audioPlayer.duration) * 100).toFixed(2) + "%"
+					});
+				}
+			}
+		
+			// Check that the audio file is loading
+			if(this.audioPlayerLoading) {
+				// Make sure the selection was not empty
+				if(statusDiv !== undefined && Object.isElement(statusDiv)) {
+					// Turn on the downloading class if it was not already on
+					if(!statusDiv.hasClassName('downloading')) {
+						statusDiv.addClassName('downloading');
+					}
+		
+					// Set the percentage width for the download
+					statusDiv.setStyle({
+						width: this.audioBufferedPercent + "%"
+					});
+				}
+			}
+		}
+		
+		// If the user is downloading something in the background this method
+		// will be passed a key and percentage
+		if(!Object.isUndefined(key)) {
+			// Get the item that finished downloading
+			var node = $(key);
+			// Make sure it is displayed in the scene
+			if(node) {
+				// Get the model for the item in the list
+				var itemModel = $('episodeList').mojo.getItemByNode(node);
+				// Check to see if in one of three states:
+				// 1. Default => itemModel.isEnclosureCached() == false && itemModel.isCaching() == false
+				// 2. Downloaded => itemModel.isEnclosureCache() == true
+				// 3. Downloading => itemModel.isCaching() == true
+				statusDiv = node.select('.status')[0];
+				episodeLength = node.select('.episodeLength')[0];
+				episodeTitle = node.select('.episodeTitle')[0];
+				downloadBtn = node.select('.downloadButton')[0];
+				// Case 1. Default
+				if(!itemModel.isEnclosureCached() && !itemModel.isCaching()) {
+					if(downloadBtn === undefined) {
+						// TODO: Need to re-add the download button
+					} else {
+						downloadBtn.removeClassName('cancel');
+					}
+					episodeLength.addClassName('withButton');
+					episodeTitle.addClassName('withButton');
+					statusDiv.removeClassName('playing');
+					statusDiv.removeClassName('downloading');
+					statusDiv.setStyle({width: '0%'});
+				// Case 2. Downloaded
+				} else if(itemModel.isEnclosureCached()) {
+					// Remove event listener, preventing memory leaks
+					downloadBtn.stopObserving();
+					episodeLength.removeClassName('withButton');
+					episodeTitle.removeClassName('withButton');
+					// Reset the status div
+					statusDiv.removeClassName('playing');
+					statusDIv.removeClassName('downloading');
+					statusDiv.setStyle({width: '0%'});
+				// Case 3. Downloading
+				} else if(itemModel.isCaching()) {
+					downloadBtn.addClassName('cancel');
+					statusDiv.removeClassName('playing');
+					statusDiv.addClassName('downloading');
+					statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
+				}
+			}
+		}
+	} catch(error) {
+		Mojo.Log.error("[MainAssistant.itemDisplayUpdate] %s", error.message);
+	}
 };
 
 /**
@@ -390,6 +415,10 @@ MainAssistant.prototype.handleCommand = function(command) {
 						  Mojo.Log.error("[MainAssistant.PodcastUpdateFailure] %s", error.message);
 				    }
 				    break;
+			 case PFeedItem.CacheCanceled:
+			      // Remove the canceled button
+			      this.itemDisplayUpdate(command.key);
+			      break;
 			 case PFeedItem.CacheProgress:
 				    // Update the downloading
 				    this.itemDisplayUpdate(command.key, command.percentage);

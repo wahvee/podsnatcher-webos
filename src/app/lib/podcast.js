@@ -107,6 +107,14 @@ var Podcast = Class.create(PFeed, {
 			 Mojo.Log.error("[Podcast.cacheEnclosure] Cannot find key: %s", key);
 	   }
 	},
+	cancelCache: function(key) {
+		var itemToCache = this.getItem(key);
+		if(itemToCache) {
+			itemToCache.cancelCache();
+		} else {
+			Mojo.Log.error("[Podcast.cancelCache] Cannot find key: %s", key);
+		}
+	},
 	cacheImage: function() {
 		try {
 			 if(this.imgURL !== undefined && !this.imgURL.blank()) {

@@ -8,6 +8,7 @@ var PFeedItem = Class.create({
 	enclosureType: '',
 	enclosureLength: '',
 	listened: '',
+	currPosition: 0,
 	initialize: function(itemElement) {
 		if(Object.isElement(itemElement)) {
 			// DO SOMETHING IF NEEDED
@@ -33,6 +34,10 @@ var PFeedItem = Class.create({
 		this.cacheError = Mojo.Event.make(PFeedItem.CacheError, {key: this.key}, Mojo.Controller.stageController.document);
 		this.cacheComplete = Mojo.Event.make(PFeedItem.EnclosureCached, {key: this.key}, Mojo.Controller.stageController.document);
 		this.cacheDeleted = Mojo.Event.make(PFeedItem.EnclosureDeleted, {key: this.key}, Mojo.Controller.stageController.document);
+		this.cacheCanceled = Mojo.Event.make(PFeedItem.CacheCanceled, {key: this.key}, Mojo.Controller.stageController.document);
+	},
+	savePosition: function(newPosition) {
+		this.currPosition = newPosition;
 	},
 	markAsOld: function() {
 		this.listened = true;
@@ -40,6 +45,18 @@ var PFeedItem = Class.create({
 	markAsNew: function() {
 		this.listened = false;
 	},
+	/**
+	 * Check to see if the current podcast is already in progress
+	 * to be downloading.
+	 * @returns {boolean} True if downloading, false if not.
+	 */
+	isCaching: function() {
+		return this.enclosureTicket !== 0 && !this.isEnclosureCached();
+	},
+	/**
+	 * Checks if the enclosure is stored locally.
+	 * @returns {boolean} True if already stored locally, false otherwise.
+	 */
 	isEnclosureCached: function() {
 		// Returns true if enclosure is stored locally
 		return (this.enclosurePath !== undefined && !this.enclosurePath.blank());
@@ -72,6 +89,7 @@ var PFeedItem = Class.create({
 		}
 	},
 	cacheEnclosure: function() {
+		//Mojo.Log.error("[PFeedItem.cacheEnclosure] %s", this.key);
 		var mojoController = Mojo.Controller.stageController.activeScene();
 		if(this.enclosure !== undefined && !this.enclosure.blank()) {
 			mojoController.serviceRequest('palm://com.palm.downloadmanager', {
@@ -87,6 +105,7 @@ var PFeedItem = Class.create({
 				onFailure: function(error) {
 					Mojo.Log.logProperties(error);
 					Mojo.Log.error("[PFeedItem.cacheEnclosure] Failed downloading enclosure.");
+					this.cacheError.key = this.key;
 					Mojo.Controller.stageController.sendEventToCommanders(this.cacheError);
 				}.bind(this)
 			});
@@ -95,10 +114,34 @@ var PFeedItem = Class.create({
 			Mojo.Controller.stageController.sendEventToCommanders(this.cacheError);
 		}
 	},
+	cancelCache: function() {
+		//Mojo.Log.error("[PFeedItem.cancelCache] %s", this.key);
+		var mojoController = Mojo.Controller.stageController.activeScene();
+		mojoController.serviceRequest('palm://com.palm.downloadmanager/', {
+			method: 'cancelDownload',
+			parameters: {
+				"ticket" : this.enclosureTicket
+			},
+			onSuccess : function (response) {
+				Mojo.Log.info("[PFeedItem.cancelCache] %i canceled.", this.enclosureTicket);
+				if(response.returnValue) {
+					this.enclosureTicket = 0;
+					this.cacheCanceled.key = this.key;
+					Mojo.Controller.stageController.sendEventToCommanders(this.cacheCanceled);
+				}
+			}.bind(this),
+			onFailure : function (error){
+				this.enclosureTicket = 0;
+				Mojo.Log.error("[PFeedItem.cancelCache] %s", error.message);
+			}.bind(this)
+		});
+	},
 	cacheUpdate: function(response) {
 		// If completed is false or undefined...still in the middle
 		if(response.completed === undefined || !response.completed) {
 				//Mojo.Log.info("[PFeedItem.cacheUpdate] %s, %s", response.amountReceived, response.amountTotal);
+				// Used to tell if in progress
+				this.enclosureTicket = response.ticket;
 				// Calculate the event parameters
 				var percent = (response.amountReceived / response.amountTotal) * 100;
 				this.cacheProgress.key = this.key;
@@ -126,6 +169,7 @@ var PFeedItem = Class.create({
 	}
 });
 
+PFeedItem.CacheCanceled = 'onEnclosureCacheCanceled';
 PFeedItem.CacheProgress = 'onEnclosureCacheProgress';
 PFeedItem.CacheError = 'onEnclosureCacheError';
 PFeedItem.EnclosureCached = 'onEnclosureCached';
