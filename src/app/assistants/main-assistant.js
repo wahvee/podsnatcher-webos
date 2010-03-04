@@ -335,11 +335,12 @@ MainAssistant.prototype.itemDisplayUpdate = function(key, percentage) {
 				} else if(itemModel.isEnclosureCached()) {
 					// Remove event listener, preventing memory leaks
 					downloadBtn.stopObserving();
+					downloadBtn.remove();
 					episodeLength.removeClassName('withButton');
 					episodeTitle.removeClassName('withButton');
 					// Reset the status div
 					statusDiv.removeClassName('playing');
-					statusDIv.removeClassName('downloading');
+					statusDiv.removeClassName('downloading');
 					statusDiv.setStyle({width: '0%'});
 				// Case 3. Downloading
 				} else if(itemModel.isCaching()) {
