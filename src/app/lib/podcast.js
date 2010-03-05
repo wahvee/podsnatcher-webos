@@ -33,7 +33,7 @@ var Podcast = Class.create(PFeed, {
 								}, this);
 						  }
 				    }
-				    
+
 				    this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
 				    this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
 				    this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
@@ -83,7 +83,7 @@ var Podcast = Class.create(PFeed, {
 			 var itemToDelete = this.items.detect(function(item, index) {
 				    return item.key === key;
 			 });
-			 
+
 			 return itemToDelete;
 	   } catch(error) {
 			 Mojo.Log.error("[Podcast.getItem] %s", error.message);
@@ -168,7 +168,7 @@ Podcast.prototype.imgTicket = undefined;
 */
 Podcast.prototype.deleteItem = function(key) {
 	var itemToDelete = this.getItem(key);
-	
+
 	if(itemToDelete !== undefined) {
 		Mojo.Log.info("[Podcast.deleteItem] Deleting %s", itemToDelete.title);
 		if(itemToDelete instanceof PFeedItem) {
@@ -195,7 +195,7 @@ Podcast.prototype.simpleObject = function() {
 			delete clone[key];
 		}
 	});
-   
+
 	// Each item should be an PRssItem or PAtomItem
 	if(Object.isArray(clone.items)) {
 		// Temporary copy of array
