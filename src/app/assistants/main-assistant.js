@@ -1,47 +1,47 @@
 function MainAssistant(db) {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
-	   this.db = db;
-	   this.uiUpdateTimer = undefined;
-	   this.selectedRow = undefined;
-	   this.audioPlayer = undefined;
-	   this.audioPlayerCanPlay = false;
-	   this.audioPlayerLoading = false;
-	   this.audioBufferedPercent = 0.00;
-	   this.audioPlayingKey = '';
-	   this.videoPlayer = {};
-	   this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
-	   this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
-	   this.animationFinish = 500;
-	   this.animationDuration = 0.25;
-	   this.animationType = 'ease-in';
-	   
-	   this.spinnerAttributes = {
-			 spinnerSize: Mojo.Widget.spinnerLarge
-	   };
-	   
-	   this.spinnerModel = {
-			 spinning: false
-	   };
-	   
-	   this.episodeListAttributes = {
-			 //listTemplate: "main/episodeListTemplate",
-			 itemTemplate: "main/episodeListItemTemplate",
-			 swipeToDelete: true,
-			 uniquenessProperty: 'key',
-			 onItemRendered: this.listItemRender.bind(this),
-			 onItemRemoved: this.listItemRemoved.bind(this)
-	   };
-	   
-	   this.episodeListModel = {
-			 items: []
-	   };
-	   
-	   // Setting up the event listener callbacks
-	   this.downloadFunction = this.handleItemDownload.bind(this);
-	   this.audioEventListener = this.audioEvent.bindAsEventListener(this);
+	 * additional parameters (after the scene name) that were passed to pushScene. The reference
+	 * to the scene controller (this.controller) has not be established yet, so any initialization
+	 * that needs the scene controller should be done in the setup function below. */
+	this.db = db;
+	this.uiUpdateTimer = undefined;
+	this.selectedRow = undefined;
+	this.audioPlayer = undefined;
+	this.audioPlayerCanPlay = false;
+	this.audioPlayerLoading = false;
+	this.audioBufferedPercent = 0.00;
+	this.audioPlayingKey = '';
+	this.videoPlayer = {};
+	this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
+	this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
+	this.animationFinish = 500;
+	this.animationDuration = 0.25;
+	this.animationType = 'ease-in';
+	
+	this.spinnerAttributes = {
+	spinnerSize: Mojo.Widget.spinnerLarge
+	};
+	
+	this.spinnerModel = {
+	spinning: false
+	};
+	
+	this.episodeListAttributes = {
+	//listTemplate: "main/episodeListTemplate",
+	itemTemplate: "main/episodeListItemTemplate",
+	swipeToDelete: true,
+	uniquenessProperty: 'key',
+	onItemRendered: this.listItemRender.bind(this),
+	onItemRemoved: this.listItemRemoved.bind(this)
+	};
+	
+	this.episodeListModel = {
+	items: []
+	};
+	
+	// Setting up the event listener callbacks
+	this.downloadFunction = this.handleItemDownload.bind(this);
+	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
 }
 
 MainAssistant.prototype.setup = function() {
@@ -232,8 +232,6 @@ MainAssistant.prototype.handleItemDownload = function(event) {
 			// Tell the current podcast to download the podcast
 			this.db.currentPodcast().cacheEnclosure(itemModel.key);
 		}
-		// Refresh the onscreen progress bars
-		this.itemDisplayUpdate(itemModel.key);
 	}
 };
 
@@ -572,52 +570,40 @@ MainAssistant.prototype.handleListClick = function(event) {
 };
 
 MainAssistant.prototype.audioEvent = function(event) {
-	   switch(event.type) {
-			 case Media.Event.X_PALM_CONNECT:
-				    this.audioPlayerCanPlay = true;
-				    break;
-			 case Media.Event.X_PALM_DISCONNECT:
-				    this.audioPlayerCanPlay = false;
-				    break;
-			 case Media.Event.LOADSTART:
-				    this.audioPlayerLoading = true;
-				    this.selectedRow.select('.status')[0].addClassName('downloading');
-				    break;
-			 case Media.Event.LOAD:
-				    this.audioPlayerLoading = false;
-				    this.selectedRow.select('.status')[0].removeClassName('downloading');
-				    this.selectedRow.select('.status')[0].setStyle({
-						  width: "0%"
-				    });
-				    break;
-			 case Media.Event.PROGRESS:
-				    var totalBytes = event.target.totalBytes;
-				    var bufferedBytes = event.target.bufferedBytes.end(0);
-				    //var buffered = event.target.mojo._media.buffered;
-				    
-				    if(bufferedBytes !== undefined) {
-						  if(!isNaN(totalBytes) && !isNaN(bufferedBytes) && totalBytes !== 0) {
-								this.audioBufferedPercent = ((bufferedBytes / totalBytes) * 100).toFixed(2);
-								this.selectedRow.select('.status')[0].setStyle({
-									   width: this.audioBufferedPercent + "%"
-								});
-						  }
-				    }
-				    break;
-			 case Media.Event.PLAY:
-				    this.play();
-				    break;
-			 case Media.Event.PAUSE:
-				    Mojo.Log.info("[Media.Event.PAUSE] %s", this.audioPlayer.paused);
-				    this.pause();
-				    break;
-			 case Media.Event.ENDED:
-				    this.stop();
-				    break;
-			 default:
-				    Mojo.Log.error("[MainAssistant.audioEvent] %s", event.type);
-				    break;
-	   }
+	switch(event.type) {
+		case Media.Event.X_PALM_CONNECT:
+			this.audioPlayerCanPlay = true;
+			break;
+		case Media.Event.X_PALM_DISCONNECT:
+			this.audioPlayerCanPlay = false;
+			break;
+		case Media.Event.LOADSTART:
+			this.audioPlayerLoading = true;
+			break;
+		case Media.Event.LOAD:
+			this.audioPlayerLoading = false;
+			break;
+		case Media.Event.PROGRESS:
+			var totalBytes = event.target.totalBytes;
+			var bufferedBytes = event.target.bufferedBytes.end(0);
+			if(bufferedBytes !== undefined) {
+				this.audioBufferedPercent = (!isNaN(totalBytes) && !isNaN(bufferedBytes) && totalBytes !== 0) ? ((bufferedBytes / totalBytes) * 100).toFixed(2) : 0;
+			}
+			break;
+		case Media.Event.PLAY:
+			this.play();
+			break;
+		case Media.Event.PAUSE:
+			Mojo.Log.info("[Media.Event.PAUSE] %s", this.audioPlayer.paused);
+			this.pause();
+			break;
+		case Media.Event.ENDED:
+			this.stop();
+			break;
+		default:
+			Mojo.Log.error("[MainAssistant.audioEvent] %s", event.type);
+			break;
+	}
 };
 
 MainAssistant.prototype.play = function() {
