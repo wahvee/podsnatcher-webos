@@ -223,6 +223,7 @@ PodcastStorage.prototype.getItem = function(key) {
 		pfeeditem = podcast.getItem(key);
 		return pfeeditem !== undefined;
 	});
+	return pfeeditem;
 };
 
 /**

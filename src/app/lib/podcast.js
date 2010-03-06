@@ -165,8 +165,7 @@ Podcast.prototype.getNewItems = function () {
 	var arr = [];
 	// Loop all of the items
 	this.items.each(function(item, index) {
-		var temp = PFeedItem.simpleObject(item.value)
-		if(!item.value.listened) { arr.push(temp); }
+		if(!item.value.listened) { arr.push( {key: item.value.key, title: item.value.title, currentTime: item.value.currentTime } ); }
 	});
 	return arr;
 }
@@ -182,7 +181,7 @@ Podcast.prototype.getDownloadedItems = function () {
 	// Loop all of the items
 	this.items.each(function(item, index) {
 		var temp = PFeedItem.simpleObject(item.value)
-		if(item.value.isEnclosureCached()) { arr.push(temp); }
+		if(item.value.isEnclosureCached()) { arr.push( {key: item.value.key, title: item.value.title, currentTime: item.value.currentTime } ); }
 	});
 	return arr;
 }
@@ -198,7 +197,7 @@ Podcast.prototype.getListenedItems = function () {
 	// Loop all of the items
 	this.items.each(function(item, index) {
 		var temp = PFeedItem.simpleObject(item.value)
-		if(item.value.listened) { arr.push(temp); }
+		if(item.value.listened) { arr.push( {key: item.value.key, title: item.value.title, currentTime: item.value.currentTime } ); }
 	});
 	return arr;
 }

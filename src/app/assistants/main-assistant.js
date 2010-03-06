@@ -181,22 +181,26 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 		var downloadBtn = itemNode.select('.downloadButton')[0];
 		var episodeTitle = itemNode.select('.episodeTitle')[0];
 		var episodeLength = itemNode.select('.episodeLength')[0];
+		// Get the PFeedItem that is being represented by this itemModel
+		var pfeedItem = this.db.getItem(itemModel.key);
 		// Check to make sure the item is not already downloaded
 		// if it is remove the download button
-		if(itemModel.isEnclosureCached() && downloadBtn && episodeTitle && episodeLength) {
-			// Remove the download button from the scene
-			episodeTitle.removeClassName('withButton');
-			episodeLength.removeClassName('withButton');
-			downloadBtn.remove();
-		} else if(itemModel.isCaching() && downloadBtn && episodeTitle && episodeLength) {
-			// Give the downloadBtn the cancel class
-			downloadBtn.addClassName('cancel');
-			statusDiv.addClassName('downloading');
-			statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
-			// Clean-up
-			statusDiv.removeClassName('playing');
-			episodeTitle.addClassName('withButton');
-			currentTimeDiv.addClassName('withButton');
+		if(pfeedItem) {
+			if(pfeedItem.isEnclosureCached() && downloadBtn && episodeTitle && episodeLength) {
+				// Remove the download button from the scene
+				episodeTitle.removeClassName('withButton');
+				episodeLength.removeClassName('withButton');
+				downloadBtn.remove();
+			} else if(pfeedItem.isCaching() && downloadBtn && episodeTitle && episodeLength) {
+				// Give the downloadBtn the cancel class
+				downloadBtn.addClassName('cancel');
+				statusDiv.addClassName('downloading');
+				statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
+				// Clean-up
+				statusDiv.removeClassName('playing');
+				episodeTitle.addClassName('withButton');
+				currentTimeDiv.addClassName('withButton');
+			}
 		}
 
 		if(downloadBtn) {
