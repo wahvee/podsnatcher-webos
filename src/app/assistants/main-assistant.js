@@ -198,7 +198,7 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 			episodeTitle.addClassName('withButton');
 			currentTimeDiv.addClassName('withButton');
 		}
-		
+
 		if(downloadBtn) {
 			downloadBtn.addEventListener(Mojo.Event.tap, this.downloadFunction);
 		}
@@ -247,9 +247,9 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 				});
 				// Set the current playing time
 				if(!this.audioPlayer.paused) {
-					currentTimeDiv.nodeValue = this.millisecondsToDuration(this.audioPlayer.currentTime);
+					currentTimeDiv.nodeValue = this.audioPlayer.currentTime.secondsToDuration();
 				} else {
-					currentTimeDiv.nodeValue = this.millisecondsToDuration(0);
+					currentTimeDiv.nodeValue = (0).secondsToDuration();
 				}
 				// Clean-up make sure not playing
 				statusDiv.removeClassName('playing');
@@ -265,7 +265,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 			// Case 2: Playing
 			} else if(!this.audioPlayer.paused && this.actionItems.nowPlayingModel && this.actionItems.nowPlayingModel.key) {
 				// Set the current playing time
-				currentTimeDiv.nodeValue = this.millisecondsToDuration(this.audioPlayer.currentTime);
+				currentTimeDiv.nodeValue = this.audioPlayer.currentTime.secondsToDuration();
 				// Make sure that the status div is in 'playing' mode
 				if(!statusDiv.hasClassName('playing')) {
 					statusDiv.addClassName('playing');
@@ -384,7 +384,7 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 		}));
 		//$('episodeList').mojo.revealItem(0, true);
 		$('podcastTitle').nodeValue = (currPodcast.title === undefined) ? "" : currPodcast.title;
-		
+
 		// Populate the list dependant upon the list mode
 		switch(this.mode) {
 			//default:
@@ -701,17 +701,6 @@ MainAssistant.prototype.timerHandler = function(action) {
 	} catch(error) {
 		Mojo.Log.error("[MainAssistant.timerHandler] %s", error.message);
 	}
-};
-
-MainAssistant.prototype.millisecondsToDuration = function(seconds) {
-	// divide your field by seconds per hour (60*60) => hrs
-	var hour = Math.floor(seconds / 3600).toPaddedString(2);
-	// divide rest by seconds per minute (60) => mins
-	var min = Math.floor(seconds / 60).toPaddedString(2);
-	// divide rest by seconds per second (1) => secs
-	var sec = Math.floor(seconds % 60).toPaddedString(2);
-
-	return hour + ":" + min + ":" + sec;
 };
 
 MainAssistant.ListMode = {};
