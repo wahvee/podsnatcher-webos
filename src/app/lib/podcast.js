@@ -32,6 +32,8 @@ var Podcast = Class.create(PFeed, {
 					feedURL.items.each(function(item) {
 						var temp = new PFeedItem();
 						Object.extend(temp, item);
+						// Make sure key is up-to-date
+						temp.generateKey();
 						this.items.set(temp.key, temp);
 					}, this);
 				}
