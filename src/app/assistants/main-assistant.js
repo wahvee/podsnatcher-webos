@@ -186,7 +186,18 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 			episodeTitle.removeClassName('withButton');
 			episodeLength.removeClassName('withButton');
 			downloadBtn.remove();
-		} else if(downloadBtn) {
+		} else if(itemModel.isCaching() && downloadBtn && episodeTitle && episodeLength) {
+			// Give the downloadBtn the cancel class
+			downloadBtn.addClassName('cancel');
+			statusDiv.addClassName('downloading');
+			statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
+			// Clean-up
+			statusDiv.removeClassName('playing');
+			episodeTitle.addClassName('withButton');
+			currentTimeDiv.addClassName('withButton');
+		}
+		
+		if(downloadBtn) {
 			downloadBtn.addEventListener(Mojo.Event.tap, this.downloadFunction);
 		}
 	} catch(error) {
