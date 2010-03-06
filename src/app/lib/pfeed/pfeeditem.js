@@ -7,6 +7,7 @@ var PFeedItem = Class.create({
 	enclosureTicket: 0,
 	enclosureType: '',
 	enclosureLength: '',
+	caching: false,
 	listened: '',
 	currPosition: 0,
 	initialize: function(itemElement) {
@@ -52,7 +53,7 @@ var PFeedItem = Class.create({
 	 * @returns {boolean} True if downloading, false if not.
 	 */
 	isCaching: function() {
-		return this.enclosureTicket !== 0 && !this.isEnclosureCached();
+		return this.caching;
 	},
 	/**
 	 * Checks if the enclosure is stored locally.
@@ -104,6 +105,7 @@ var PFeedItem = Class.create({
 				},
 				onSuccess: this.cacheUpdate.bind(this),
 				onFailure: function(error) {
+					this.caching = false;
 					Mojo.Log.logProperties(error);
 					Mojo.Log.error("[PFeedItem.cacheEnclosure] Failed downloading enclosure.");
 					this.cacheError.key = this.key;
@@ -126,12 +128,14 @@ var PFeedItem = Class.create({
 			onSuccess : function (response) {
 				Mojo.Log.info("[PFeedItem.cancelCache] %i canceled.", this.enclosureTicket);
 				if(response.returnValue) {
+					this.caching = false;
 					this.enclosureTicket = 0;
 					this.cacheCanceled.key = this.key;
 					Mojo.Controller.stageController.sendEventToCommanders(this.cacheCanceled);
 				}
 			}.bind(this),
 			onFailure : function (error){
+				this.caching = false;
 				this.enclosureTicket = 0;
 				Mojo.Log.error("[PFeedItem.cancelCache] %s", error.message);
 			}.bind(this)
@@ -141,6 +145,7 @@ var PFeedItem = Class.create({
 		// If completed is false or undefined...still in the middle
 		if(response.completed === undefined || !response.completed) {
 				//Mojo.Log.info("[PFeedItem.cacheUpdate] %s, %s", response.amountReceived, response.amountTotal);
+				this.caching = true;
 				// Used to tell if in progress
 				this.enclosureTicket = response.ticket;
 				// Calculate the event parameters
@@ -154,6 +159,7 @@ var PFeedItem = Class.create({
 
 		// Otherwise, we are completed and everything is ok.
 		} else if(response.completed && response.completionStatusCode == 200) {
+			this.caching = false;
 			this.cacheComplete.key = this.key;
 			this.cacheProgress.key = this.key;
 			this.cacheProgress.amountReceived = 0;
@@ -163,6 +169,7 @@ var PFeedItem = Class.create({
 			this.enclosureTicket = response.ticket;
 			Mojo.Controller.stageController.sendEventToCommanders(this.cacheComplete);
 		} else {
+			this.caching = false;
 			Mojo.Log.error("[PFeedItem.cacheUpdate] Something un-expected happened.");
 			Object.extend(this.cacheError, response);
 			Mojo.Controller.stageController.sendEventToCommanders(this.cacheError);
