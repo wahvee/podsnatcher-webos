@@ -244,6 +244,8 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 			if(!this.audioPlayerLoading && this.actionItems.nowPlayingModel && key === this.actionItems.nowPlayingModel.key) {
 				// Turn on the downloading class if it was not already on
 				statusDiv.addClassName('downloading');
+				// Make the inset appear
+				node.addClassName('clicked');
 
 				// Set the percentage width for the download
 				statusDiv.setStyle({
@@ -268,6 +270,8 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 
 			// Case 2: Playing
 			} else if(!this.audioPlayer.paused && this.actionItems.nowPlayingModel && this.actionItems.nowPlayingModel.key) {
+				// Make the inset appear
+				node.addClassName('clicked');
 				// Set the current playing time
 				currentTimeDiv.nodeValue = this.audioPlayer.currentTime.secondsToDuration();
 				// Make sure that the status div is in 'playing' mode
@@ -294,6 +298,8 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 
 			// Case 3: Downloading
 			} else if(itemModel && itemModel.isCaching()) {
+				// Make the inset appear
+				node.addClassName('clicked');
 				// Give the downloadBtn the cancel class
 				downloadBtn.addClassName('cancel');
 				statusDiv.addClassName('downloading');
@@ -314,6 +320,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 				statusDiv.removeClassName('playing');
 				statusDiv.removeClassName('downloading');
 				statusDiv.setStyle({width: '0%'});
+				node.removeClassName('clicked');
 			// Case 5: Default
 			} else {
 				if(downloadBtn === undefined) {
@@ -325,6 +332,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 				episodeTitle.addClassName('withButton');
 				statusDiv.removeClassName('playing');
 				statusDiv.removeClassName('downloading');
+				node.removeClassName('clicked');
 				statusDiv.setStyle({width: '0%'});
 			}
 		}
