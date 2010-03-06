@@ -74,23 +74,6 @@ var Podcast = Class.create(PFeed, {
 		}
 	},
 	/**
-	 * Given an item key (unique id) it returns the item. Undefined if not found.
-	 * @param key {string} The MD5 hash of the item to be found.
-	 * @returns {PFeedItem} Instance of PFeedItem that matches the passed in key, undefined if not found.
-	 */
-	getItem: function(key) {
-	   try {
-			 var itemToDelete = this.items.detect(function(item, index) {
-				    return item.key === key;
-			 });
-
-			 return itemToDelete;
-	   } catch(error) {
-			 Mojo.Log.error("[Podcast.getItem] %s", error.message);
-			 return undefined;
-	   }
-	},
-	/**
 	 * Call this method to start downloading an item from the podcast. Feedback
 	 * is handled by Events.
 	 * @see PFeedItem#CacheProgress
@@ -225,7 +208,7 @@ Podcast.prototype.updateFeed = function(newUrl) {
 	// Make sure the URL is not blank, and is set
 	if(Object.isString(this.url) && !this.url.blank()) {
 		var temp = new Ajax.Request(this.url, {
-			method: 'post',
+			method: 'get',
 			onSuccess: function(transport) {
 				try {
 					if(!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML) && transport.status === 200) {

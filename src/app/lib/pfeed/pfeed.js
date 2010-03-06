@@ -16,9 +16,16 @@ var PFeed = Class.create({
 	language: 'en-us',
 	copyright: '',
 	imgURL: '',
-	items: [],
+	items: new Hash(),
 	initialize: function() {
 	},
+     /**
+      * Parse the XML DOM to find out what type of Feed this is.
+      * Supported feeds: Atom, RSS 2.0, RSS 0.92, and RSS 0.91.
+      * RSS 1.0 uses an RDF namespace, which I am not supporting
+      * at this time.
+      * @param xmlObj {Document} Requeres the XML document returned in responseXML.
+      */
 	parse: function(xmlObj) {
 		// Determine if this is RSS or Atom
 		// see if the top element is an rss element
@@ -59,7 +66,18 @@ var PFeed = Class.create({
 		var thisNode = elementIterator.iterateNext();
 		// Loop over all nodes.
 		while(thisNode) {
-			this.items.push(new PRssItem(thisNode));
+			// Create a PRssItem from the feed
+			var loadedPRssItem = new PRssItem(thisNode);
+			// Check to see if it is already in the db
+			if(this.hasItem(loadedPRssItem.key)) {
+				// Get the item from the db
+				var loadedItem = this.items.get(loadedPRssItem.key);
+				// Update it
+				loadedItem.parse(thisNode);
+			} else {
+				this.items.set(loadedPRssItem.key, loadedPRssItem);
+			}
+			// Go to the next node
 			thisNode = elementIterator.iterateNext();
 		}
 	},
@@ -85,6 +103,31 @@ var PFeed = Class.create({
 			this.items.push(new PAtomItem(thisNode));
 			thisNode = elementIterator.iterateNext();
 		}
+	},
+     /**
+      * Uses Enumerable#detect method to determine if the Hash contains
+      * a reference to the feed item.
+      * @param key {String} Hash key of the podcast item to be found.
+      * @returns {Boolean} True if has the key, false otherwise.
+      */
+     hasItem: function(key) {
+            return this.items.any(function(item, index) { });
+     },
+     /**
+      * @deprecated
+	 * Given an item key (unique id) it returns the item. Undefined if not found.
+	 * This method is just a wrapper for the Hash#get() method. Use the Hash#get
+	 * method from now on.
+	 * @param key {string} The MD5 hash of the item to be found.
+	 * @returns {PFeedItem} Instance of PFeedItem that matches the passed in key, undefined if not found.
+	 */
+	getItem: function(key) {
+	   try {
+			 return this.items.get(key);
+	   } catch(error) {
+			 Mojo.Log.error("[PFeed.getItem] %s", error.message);
+			 return undefined;
+	   }
 	},
 	nsResolver: function(prefix) {
 		prefix = prefix.toLowerCase();

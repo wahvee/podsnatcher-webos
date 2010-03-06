@@ -2,16 +2,16 @@ var PodcastStorage = Class.create({
 	initialize: function(name) {
 		this.dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 		this.requiresUpdate = false;
-		
+
 		this.podcastListStartUpdate = Mojo.Event.make(PodcastStorage.PodcastListStartUpdate, {}, Mojo.Controller.stageController.document);
 		this.podcastListFinishUpdate = Mojo.Event.make(PodcastStorage.PodcastListFinishUpdate, {}, Mojo.Controller.stageController.document);
-		
+
 		this.connectToDatabaseEvent = Mojo.Event.make(PodcastStorage.ConnectionToDatabase, {message: this}, Mojo.Controller.stageController.document);
 		this.failedConnectionToDatabaseEvent = Mojo.Event.make(PodcastStorage.FailedConnectionToDatabase, {error: undefined}, Mojo.Controller.stageController.document);
-		
+
 		this.savingDatabaseSuccess = Mojo.Event.make(PodcastStorage.SavingDatabaseSuccess, {}, Mojo.Controller.stageController.document);
 		this.savingDatabaseFailure = Mojo.Event.make(PodcastStorage.SavingDatabaseFailure, {error: undefined}, Mojo.Controller.stageController.document);
-		
+
 		this.loadingDatabaseSuccess = Mojo.Event.make(PodcastStorage.LoadingDatabaseSuccess, {}, Mojo.Controller.stageController.document);
 		this.loadingDatabaseFailure = Mojo.Event.make(PodcastStorage.LoadingDatabaseFailure, {error: undefined}, Mojo.Controller.stageController.document);
 	},
@@ -22,7 +22,7 @@ var PodcastStorage = Class.create({
 			// Perform the event PodcastStorage.ConnectionToDatabase
 			Mojo.Controller.stageController.sendEventToCommanders(this.connectToDatabaseEvent);
 		};
-		
+
 		// Wait for failure creation/connection from the db
 		var onFailure = function(code) {
 			var error = interpretCode(code);
@@ -31,7 +31,7 @@ var PodcastStorage = Class.create({
 			Object.extend(this.failedConnectionToDatabaseEvent.error, error);
 			Mojo.Controller.stageController.sendEventToCommanders(this.failedConnectionToDatabaseEvent);
 		};
-		
+
 		try {
 			// Connect/Create statement for the db
 			this.db = new Mojo.Depot({
@@ -72,7 +72,7 @@ var PodcastStorage = Class.create({
 				Mojo.Controller.stageController.sendEventToCommanders(this.loadingDatabaseSuccess);
 			}
 		};
-		
+
 		// Wait for failure creation/connection from the db
 		var onFailure = function(code) {
 			var error = interpretCode(code);
@@ -81,7 +81,7 @@ var PodcastStorage = Class.create({
 			Object.extend(this.loadingDatabaseFailure.error, error);
 			Mojo.Controller.stageController.sendEventToCommanders(this.loadingDatabaseFailure);
 		};
-		
+
 		try {
 			this.db.get("podcastList", onSuccess.bind(this), onFailure.bind(this));
 		} catch(error) {
@@ -96,7 +96,7 @@ var PodcastStorage = Class.create({
 		this.listOfPodcasts.each(function(podcast, index) {
 			temp.push(podcast.toListItem());
 		});
-		
+
 		return temp.clone();
 	},
 	interpretCode: function(code) {
@@ -104,7 +104,7 @@ var PodcastStorage = Class.create({
 			code: code,
 			message: ""
 		};
-		
+
 		switch(code) {
 			case 0:
 				result.message = "The transaction failed for reasons unrelated to the database itself and not covered by any other error code.";
@@ -131,7 +131,7 @@ var PodcastStorage = Class.create({
 				result.message = "Un-recognized error code. See: http://developer.palm.com/index.php?option=com_content&view=article&id=1857&Itemid=246";
 				break;
 		}
-		
+
 		return result;
 	},
 	onFailure: function(code) {
@@ -143,25 +143,25 @@ var PodcastStorage = Class.create({
 		//http://www.wdwradio.com/xml/wdwradio.xml
 		//http://revision3.com/diggnation/feed/MP4-Large
 		//http://buzzreportpodcast.cnettv.com
-		
+
 		var onSuccess = function() {
 			this.loadDatabase();
 		};
-		
+
 		var initialList = [
 			new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
 			new Podcast('http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595'),
 			new Podcast('http://revision3.com/diggnation/feed/MP4-Large'),
 			new Podcast('http://buzzreportpodcast.cnettv.com')
 		];
-		
+
 		var tempArr = [];
 		initialList.each(function(podcastItem, index) {
 			if(podcastItem instanceof Podcast) {
 				tempArr.push(podcastItem.simpleObject());
 			}
 		});
-		
+
 		// Perform the addition of the list in the initial app
 		this.db.add("podcastList", tempArr, onSuccess.bind(this), this.onFailure);
 	},
@@ -171,14 +171,14 @@ var PodcastStorage = Class.create({
 			// Event to let it be known that the database was saved
 			Mojo.Controller.stageController.sendEventToCommanders(this.savingDatabaseSuccess);
 		};
-		
+
 		var onFailure = function(code) {
 			Mojo.Log.info("[PodcastStorage.savePodcasts] Failed.");
 			this.savingDatabaseFailure.error = {};
 			Object.extend(this.savingDatabaseFailure.error, this.interpretCode(code));
 			Mojo.Controller.stageController.sendEventToCommanders(this.savingDatabaseFailure);
 		};
-		
+
 		var tempArr = [];
 		this.listOfPodcasts.each(function(podcastItem, index) {
 			if(podcastItem instanceof Podcast) {
