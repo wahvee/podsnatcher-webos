@@ -9,6 +9,8 @@ function MainAssistant(db) {
 		nowPlayingModel: undefined,
 		downloadingModels: new Hash()
 	};
+	// Set the display to show new podcasts only
+	this.mode = MainAssistant.ListMode.New;
 	this.audioPlayer = undefined;
 	this.audioPlayerCanPlay = false;
 	this.audioPlayerLoading = false;
@@ -382,7 +384,21 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 		}));
 		//$('episodeList').mojo.revealItem(0, true);
 		$('podcastTitle').nodeValue = (currPodcast.title === undefined) ? "" : currPodcast.title;
-		this.episodeListModel.items = (currPodcast.items === undefined) ? [] : currPodcast.items;
+		
+		// Populate the list dependant upon the list mode
+		switch(this.mode) {
+			//default:
+			case MainAssistant.ListMode.New:
+				this.episodeListModel.items = (!currPodcast.hasItems()) ? [] : currPodcast.getNewItems();
+				break;
+			case MainAssistant.ListMode.Listened:
+				this.episodeListModel.items = (!currPodcast.hasItems()) ? [] : currPodcast.getListenedItems();
+				break;
+			case MainAssistant.ListMode.Downloaded:
+				this.episodeListModel.items = (!currPodcast.hasItems()) ? [] : currPodcast.getDownloadedItems();
+				break;
+		}
+		// Change the model
 		this.controller.modelChanged(this.episodeListModel);
 	} catch(error) {
 		Mojo.Log.error("[MainAssistant.podcastDisplayUpdate] %s", error.message);
@@ -697,3 +713,8 @@ MainAssistant.prototype.millisecondsToDuration = function(seconds) {
 
 	return hour + ":" + min + ":" + sec;
 };
+
+MainAssistant.ListMode = {};
+MainAssistant.ListMode.New = 'new';
+MainAssistant.ListMode.Listened = 'listened';
+MainAssistant.ListMode.Downloaded = 'downloaded';

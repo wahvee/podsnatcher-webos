@@ -58,7 +58,7 @@ var Podcast = Class.create(PFeed, {
 		// title is not blank (empty),
 		// that the items db has been defined,
 		// that the items db is an array
-		return (this.title === undefined || this.title.blank() || this.items === undefined || !Object.isArray(this.items));
+		return (this.title === undefined || this.title.blank() || this.items === undefined || !Object.isHash(this.items));
 	},
 	/**
 	 * Call this method to get the podcasts album-art or image. The method,
@@ -148,17 +148,26 @@ Podcast.prototype.imgPath = undefined;
 Podcast.prototype.imgTicket = undefined;
 
 /**
+ * Check if there are items in the db.
+ * @returns {Boolean} True if there are items, false otherwise.
+ */
+Podcast.prototype.hasItems = function() {
+	return this.items.size() > 0;
+}
+
+/**
  * Gets an array of the items in the database, that
  * are not marked as listened.
  * @returns {Array} An array that is either empty [] or filled.
  */
 Podcast.prototype.getNewItems = function () {
 	// Temp array that will be returned
+	var arr = [];
 	// Loop all of the items
-	var arr = this.items.findAll(function(item, array) {
-		return !item.value.listened;
+	this.items.each(function(item, index) {
+		var temp = PFeedItem.simpleObject(item.value)
+		if(!item.value.listened) { arr.push(temp); }
 	});
-
 	return arr;
 }
 
@@ -169,11 +178,12 @@ Podcast.prototype.getNewItems = function () {
  */
 Podcast.prototype.getDownloadedItems = function () {
 	// Temp array that will be returned
+	var arr = [];
 	// Loop all of the items
-	var arr = this.items.findAll(function(item, array) {
-		return item.value.isEnclosureCached();
+	this.items.each(function(item, index) {
+		var temp = PFeedItem.simpleObject(item.value)
+		if(item.value.isEnclosureCached()) { arr.push(temp); }
 	});
-
 	return arr;
 }
 
@@ -184,11 +194,12 @@ Podcast.prototype.getDownloadedItems = function () {
  */
 Podcast.prototype.getListenedItems = function () {
 	// Temp array that will be returned
+	var arr = [];
 	// Loop all of the items
-	var arr = this.items.findAll(function(item, array) {
-		return !item.value.listened;
+	this.items.each(function(item, index) {
+		var temp = PFeedItem.simpleObject(item.value)
+		if(item.value.listened) { arr.push(temp); }
 	});
-
 	return arr;
 }
 
