@@ -36,7 +36,7 @@ var Podcast = Class.create(PFeed, {
 					}, this);
 				}
 			}
-			
+
 			this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
 			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
 			this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
@@ -146,6 +146,51 @@ Podcast.prototype.url = undefined;
 Podcast.prototype.key = undefined;
 Podcast.prototype.imgPath = undefined;
 Podcast.prototype.imgTicket = undefined;
+
+/**
+ * Gets an array of the items in the database, that
+ * are not marked as listened.
+ * @returns {Array} An array that is either empty [] or filled.
+ */
+Podcast.prototype.getNewItems = function () {
+	// Temp array that will be returned
+	// Loop all of the items
+	var arr = this.items.findAll(function(item, array) {
+		return !item.value.listened;
+	});
+
+	return arr;
+}
+
+/**
+ * Gets an array of the items in the database that
+ * that have been dowloaded.
+ * @returns {Array} An array that is either empty [] or filled.
+ */
+Podcast.prototype.getDownloadedItems = function () {
+	// Temp array that will be returned
+	// Loop all of the items
+	var arr = this.items.findAll(function(item, array) {
+		return item.value.isEnclosureCached();
+	});
+
+	return arr;
+}
+
+/**
+ * Gets an array of the items in the database
+ * that are marked as listened.
+ * @returns {Array} An array that is either empty [] or filled.
+ */
+Podcast.prototype.getListenedItems = function () {
+	// Temp array that will be returned
+	// Loop all of the items
+	var arr = this.items.findAll(function(item, array) {
+		return !item.value.listened;
+	});
+
+	return arr;
+}
 
 /**
 * Deletes a podcast item. This includes removing any cached info for the
