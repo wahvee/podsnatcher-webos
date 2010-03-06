@@ -354,10 +354,12 @@ MainAssistant.prototype.handleItemDownload = function(event) {
 	event.stop();
 	// Get the node from the list
 	var node = event.target.parentNode;
+	// Get the key that represents the item selected
+	var key = node.identify();
 	// If found
 	if(node) {
 		// Get the model for the item in the list
-		var itemModel = $('episodeList').mojo.getItemByNode(node);
+		var itemModel = this.db.getItem(key);
 		// Check if podcast is currently dowloading
 		if(itemModel.isCaching()) {
 			// If we are currently caching, cancel it
