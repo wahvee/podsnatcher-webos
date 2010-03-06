@@ -50,7 +50,7 @@ var PFeed = Class.create({
 		this.imgTitle = xmlObj.evaluate("rss/channel/image/title/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.imgWidth = xmlObj.evaluate("rss/channel/image/width/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.imgHeight = xmlObj.evaluate("rss/channel/image/height/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
-		
+
 		var numElements = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
 		Mojo.Log.info("[PFeed.parseRSS] %s has %i item(s).", this.title, numElements);
 		// Get the list of nodes
@@ -71,7 +71,7 @@ var PFeed = Class.create({
 		this.title = xmlObj.evaluate("/Atom:feed/Atom:title/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.description  = xmlObj.evaluate("/Atom:feed/Atom:subtitle/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.author = xmlObj.evaluate("/Atom:feed/Atom:author/Atom:name/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
-		
+
 		// Start reading all of the different items
 		// First get a count
 		var numElements = xmlObj.evaluate("count(//Atom:entry)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;

@@ -206,8 +206,9 @@ Podcast.prototype.simpleObject = function() {
 		Object.extend(clone, {items: []});
 		// Loop through each item
 		tempArray.each(function(item, index) {
-			PFeedItem.simpleObject(item);
-			clone.items.push(item);
+			var simplifiedItem = Object.clone(item);
+			PFeedItem.simpleObject(simplifiedItem);
+			clone.items.push(simplifiedItem);
 		});
 	}
 	return clone;

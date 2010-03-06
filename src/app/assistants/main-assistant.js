@@ -7,7 +7,7 @@ function MainAssistant(db) {
 	this.uiUpdateTimer = undefined;
 	this.actionItems = {
 		nowPlayingModel: undefined,
-		downloadingModels: []
+		downloadingModels: {}
 	};
 	this.audioPlayer = undefined;
 	this.audioPlayerCanPlay = false;
@@ -37,7 +37,7 @@ function MainAssistant(db) {
 	};
 
 	this.episodeListModel = {
-	items: []
+		items: []
 	};
 
 	// Setting up the event listener callbacks
@@ -194,68 +194,6 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 	}
 };
 
-MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNode) {
-	// Should remove all events from this item...it's being removed from DOM anyway
-	var downloadBtn = itemNode.select('.downloadButton')[0];
-	downloadBtn.stopObserving();
-};
-
-/**
- * After user swipes to delete.
- * Call the current podcast being displayed and tell it to
- * delete the item that was sent.
- */
-MainAssistant.prototype.handleListDelete = function(event) {
-	// event.item.key
-	this.db.currentPodcast().deleteItem(event.item.key);
-};
-
-MainAssistant.prototype.handleItemDownload = function(event) {
-	// Stop the Mojo.Event.listTap from propigating
-	event.stop();
-	// Get the node from the list
-	var node = event.target.parentNode;
-	// If found
-	if(node) {
-		// Get the model for the item in the list
-		var itemModel = $('episodeList').mojo.getItemByNode(node);
-		// Check if podcast is currently dowloading
-		if(itemModel.isCaching()) {
-			// If we are currently caching, cancel it
-			this.db.currentPodcast().cancelCache(itemModel.key);
-		} else {
-			// Tell the current podcast to download the podcast
-			this.db.currentPodcast().cacheEnclosure(itemModel.key);
-		}
-	}
-};
-
-/**
- * Refreshes the list, updates the album-art displayed on the screen,
- * loads/reloads the list items that are shown on the screen.
- * All of this is based on the currentPodcast method of the
- * PodcastStorage class.
- */
-MainAssistant.prototype.podcastDisplayUpdate = function() {
-	try {
-		var currPodcast = this.db.currentPodcast();
-		$('album-art').removeChild($('image'));
-		$('album-art').appendChild(new Element('img', {
-			id: 'image',
-			src: (Object.isFunction(currPodcast.getImage)) ? currPodcast.getImage() : '',
-			alt: '',
-			height: '144px',
-			width: '144px'
-		}));
-		//$('episodeList').mojo.revealItem(0, true);
-		$('podcastTitle').nodeValue = (currPodcast.title === undefined) ? "" : currPodcast.title;
-		this.episodeListModel.items = (currPodcast.items === undefined) ? [] : currPodcast.items;
-		this.controller.modelChanged(this.episodeListModel);
-	} catch(error) {
-		Mojo.Log.error("[MainAssistant.podcastDisplayUpdate] %s", error.message);
-	}
-};
-
 /**
  * Method updates a given item in the list. The 'given' item is specified
  * using the key parameter of the input.
@@ -378,86 +316,65 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 	}
 };
 
-/**
- * Handle the commands that come from the objects that are created.
- */
-MainAssistant.prototype.handleCommand = function(command) {
-	var podcastKey = undefined;
-	if(command.podcast) {
-	     podcastKey = command.podcast.key;
-	}
-	switch(command.type) {
-		case PodcastStorage.LoadingDatabaseSuccess:
-			Mojo.Log.info("[MainAssistant.LoadingDatabaseSuccess]");
-			this.podcastDisplayUpdate();
-			if(this.db.requiresUpdate) {
-			    this.db.updatePodcasts();
-			}
-			break;
-		case PodcastStorage.LoadingDatabaseFailure:
-			Mojo.Log.error("[MainAssistant.LoadingDatabaseFailure] %s", command.error.message);
-			break;
-		case PodcastStorage.SavingDatabaseFailure:
-			Mojo.Log.error("[MainAssistant.SavingDatabaseFailure] %s", command.error.message);
-			break;
-		case PodcastStorage.SavingDatabaseSuccess:
-			break;
-		case Podcast.PodcastStartUpdate:
-			Mojo.Log.info("[MainAssistant.PodcastStartUpdate] %s starting update.", podcastKey);
-			// Updated podcast is the currently showing podcast
-			if(this.db.currentPodcast().key == podcastKey) {
-			    this.spinnerModel.spinning = true;
-			    this.controller.modelChanged(this.spinnerModel);
-			} else {
-			    // TODO Dashboard please...
-			    var title = command.podcast.title;
-			    var message = (title === undefined) ? "Updating podcast..." : "Updating " + title;
-			    Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
-			}
-			break;
-		case Podcast.PodcastUpdateSuccess:
-			Mojo.Log.info("[MainAssistant.PodcastUpdateSuccess] %s finished updating.", podcastKey);
-			// Updated podcast is the currently showing podcast
-			if(this.db.currentPodcast().key == podcastKey) {
-				      this.spinnerModel.spinning = false;
-				      this.controller.modelChanged(this.spinnerModel);
+MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNode) {
+	// Should remove all events from this item...it's being removed from DOM anyway
+	var downloadBtn = itemNode.select('.downloadButton')[0];
+	downloadBtn.stopObserving();
+};
 
-				      this.podcastDisplayUpdate();
-			}
-			break;
-		case Podcast.PodcastUpdateFailure:
-			try {
-				// Updated podcast is the currently showing podcast
-				if(this.db.currentPodcast().key == podcastKey) {
-					      this.spinnerModel.spinning = false;
-					      this.controller.modelChanged(this.spinnerModel);
-				}
-				var msg = "Update of " + command.podcast.key + " failed. " + command.message;
-				Mojo.Controller.errorDialog(msg);
-			} catch(error) {
-				Mojo.Log.error("[MainAssistant.PodcastUpdateFailure] %s", error.message);
-			}
-			break;
-		case PFeedItem.CacheCanceled:
-			// Remove the canceled button
-			this.listItemUpdate(command.key);
-			break;
-		case PFeedItem.CacheProgress:
-			// Update the downloading
-			this.listItemUpdate(command.key, command.percentage);
-			break;
-		case PFeedItem.CacheError:
-			// Something went wrong
-			this.listItemUpdate(command.key);
-			var msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed."
-			Mojo.Controller.errorDialog(msg);
-			break;
-		case PFeedItem.EnclosureCached:
-			this.listItemUpdate(command.key);
-			break;
-		default:
-			Mojo.Log.info("[MainAssistant.handleCommand] Not handling %s", command.type);
-			break;
+/**
+ * After user swipes to delete.
+ * Call the current podcast being displayed and tell it to
+ * delete the item that was sent.
+ */
+MainAssistant.prototype.handleListDelete = function(event) {
+	// event.item.key
+	this.db.currentPodcast().deleteItem(event.item.key);
+};
+
+MainAssistant.prototype.handleItemDownload = function(event) {
+	// Stop the Mojo.Event.listTap from propigating
+	event.stop();
+	// Get the node from the list
+	var node = event.target.parentNode;
+	// If found
+	if(node) {
+		// Get the model for the item in the list
+		var itemModel = $('episodeList').mojo.getItemByNode(node);
+		// Check if podcast is currently dowloading
+		if(itemModel.isCaching()) {
+			// If we are currently caching, cancel it
+			this.db.currentPodcast().cancelCache(itemModel.key);
+		} else {
+			// Tell the current podcast to download the podcast
+			this.db.currentPodcast().cacheEnclosure(itemModel.key);
+		}
+	}
+};
+
+/**
+ * Refreshes the list, updates the album-art displayed on the screen,
+ * loads/reloads the list items that are shown on the screen.
+ * All of this is based on the currentPodcast method of the
+ * PodcastStorage class.
+ */
+MainAssistant.prototype.podcastDisplayUpdate = function() {
+	try {
+		var currPodcast = this.db.currentPodcast();
+		$('album-art').removeChild($('image'));
+		$('album-art').appendChild(new Element('img', {
+			id: 'image',
+			src: (Object.isFunction(currPodcast.getImage)) ? currPodcast.getImage() : '',
+			alt: '',
+			height: '144px',
+			width: '144px'
+		}));
+		//$('episodeList').mojo.revealItem(0, true);
+		$('podcastTitle').nodeValue = (currPodcast.title === undefined) ? "" : currPodcast.title;
+		this.episodeListModel.items = (currPodcast.items === undefined) ? [] : currPodcast.items;
+		this.controller.modelChanged(this.episodeListModel);
+	} catch(error) {
+		Mojo.Log.error("[MainAssistant.podcastDisplayUpdate] %s", error.message);
 	}
 };
 
@@ -531,6 +448,93 @@ MainAssistant.prototype.switchPodcast = function(next) {
 		duration: this.animationDuration,
 		curve: this.animationType
 	});
+};
+
+/**
+ * Handle the commands that come from the objects that are created.
+ */
+MainAssistant.prototype.handleCommand = function(command) {
+	var podcastKey = undefined;
+	if(command.podcast) {
+	     podcastKey = command.podcast.key;
+	}
+	switch(command.type) {
+		case PodcastStorage.LoadingDatabaseSuccess:
+			Mojo.Log.info("[MainAssistant.LoadingDatabaseSuccess]");
+			this.podcastDisplayUpdate();
+			if(this.db.requiresUpdate) {
+			    this.db.updatePodcasts();
+			}
+			break;
+		case PodcastStorage.LoadingDatabaseFailure:
+			Mojo.Log.error("[MainAssistant.LoadingDatabaseFailure] %s", command.error.message);
+			break;
+		case PodcastStorage.SavingDatabaseFailure:
+			Mojo.Log.error("[MainAssistant.SavingDatabaseFailure] %s", command.error.message);
+			break;
+		case PodcastStorage.SavingDatabaseSuccess:
+			break;
+		case Podcast.PodcastStartUpdate:
+			Mojo.Log.info("[MainAssistant.PodcastStartUpdate] %s starting update.", podcastKey);
+			// Updated podcast is the currently showing podcast
+			if(this.db.currentPodcast().key == podcastKey) {
+			    this.spinnerModel.spinning = true;
+			    this.controller.modelChanged(this.spinnerModel);
+			} else {
+			    // TODO Dashboard please...
+			    var title = command.podcast.title;
+			    var message = (title === undefined) ? "Updating podcast..." : "Updating " + title;
+			    Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
+			}
+			break;
+		case Podcast.PodcastUpdateSuccess:
+			Mojo.Log.info("[MainAssistant.PodcastUpdateSuccess] %s finished updating.", podcastKey);
+			// Updated podcast is the currently showing podcast
+			if(this.db.currentPodcast().key == podcastKey) {
+				      this.spinnerModel.spinning = false;
+				      this.controller.modelChanged(this.spinnerModel);
+
+				      this.podcastDisplayUpdate();
+			}
+			break;
+		case Podcast.PodcastUpdateFailure:
+			try {
+				// Updated podcast is the currently showing podcast
+				if(this.db.currentPodcast().key == podcastKey) {
+					      this.spinnerModel.spinning = false;
+					      this.controller.modelChanged(this.spinnerModel);
+				}
+				var msg = "Update of " + command.podcast.key + " failed. " + command.message;
+				Mojo.Controller.errorDialog(msg);
+			} catch(error) {
+				Mojo.Log.error("[MainAssistant.PodcastUpdateFailure] %s", error.message);
+			}
+			break;
+		case PFeedItem.CacheCanceled:
+			// Remove the canceled button
+			this.listItemUpdate(command.key);
+			break;
+		case PFeedItem.CacheProgress:
+			// Update the downloading
+			if(this.actionItems.downloadingModels[command.key] === undefined) {
+				this.actionItems.downloadingModels[command.key] = command.item;
+			}
+			Mojo.Log.logProperties(this.actionItems.downloadingModels);
+			this.listItemUpdate(command.key, command.percentage);
+			break;
+		case PFeedItem.CacheError:
+			// Something went wrong
+			this.listItemUpdate(command.key);
+			var msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed."
+			Mojo.Controller.errorDialog(msg);
+			break;
+		case PFeedItem.EnclosureCached:
+			this.listItemUpdate(command.key);
+			break;
+		default:
+			Mojo.Log.info("[MainAssistant.handleCommand] Not handling %s", command.type);
+			break;
+	}
 };
 
 MainAssistant.prototype.handleListClick = function(event) {

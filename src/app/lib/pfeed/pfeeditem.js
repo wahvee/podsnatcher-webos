@@ -31,10 +31,10 @@ var PFeedItem = Class.create({
 				},
 			Mojo.Controller.stageController.document
 		);
-		this.cacheError = Mojo.Event.make(PFeedItem.CacheError, {key: this.key}, Mojo.Controller.stageController.document);
-		this.cacheComplete = Mojo.Event.make(PFeedItem.EnclosureCached, {key: this.key}, Mojo.Controller.stageController.document);
-		this.cacheDeleted = Mojo.Event.make(PFeedItem.EnclosureDeleted, {key: this.key}, Mojo.Controller.stageController.document);
-		this.cacheCanceled = Mojo.Event.make(PFeedItem.CacheCanceled, {key: this.key}, Mojo.Controller.stageController.document);
+		this.cacheError = Mojo.Event.make(PFeedItem.CacheError, {key: this.key, item: this}, Mojo.Controller.stageController.document);
+		this.cacheComplete = Mojo.Event.make(PFeedItem.EnclosureCached, {key: this.key, item: this}, Mojo.Controller.stageController.document);
+		this.cacheDeleted = Mojo.Event.make(PFeedItem.EnclosureDeleted, {key: this.key, item: this}, Mojo.Controller.stageController.document);
+		this.cacheCanceled = Mojo.Event.make(PFeedItem.CacheCanceled, {key: this.key, item: this}, Mojo.Controller.stageController.document);
 	},
 	savePosition: function(newPosition) {
 		this.currPosition = newPosition;
@@ -96,7 +96,7 @@ var PFeedItem = Class.create({
 				method: 'download',
 				parameters: {
 					target: this.enclosure,
-					mime: (this.enclosureType !== undefined && !this.enclosureType.blank()) ? this.enclosureType : '', 
+					mime: (this.enclosureType !== undefined && !this.enclosureType.blank()) ? this.enclosureType : '',
 					targetDir: '/media/internal/PodSnatcher/downloads',
 					keepFilenameOnRedirect: true,
 					subscribe: true
@@ -150,7 +150,7 @@ var PFeedItem = Class.create({
 				this.cacheProgress.percentage = (isNaN(percent)) ? 0 : percent;
 				// Send the progress event
 				Mojo.Controller.stageController.sendEventToCommanders(this.cacheProgress);
-			
+
 		// Otherwise, we are completed and everything is ok.
 		} else if(response.completed && response.completionStatusCode == 200) {
 			this.cacheComplete.key = this.key;
