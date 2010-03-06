@@ -104,15 +104,18 @@ var PFeed = Class.create({
 			thisNode = elementIterator.iterateNext();
 		}
 	},
-     /**
-      * Uses Enumerable#detect method to determine if the Hash contains
-      * a reference to the feed item.
-      * @param key {String} Hash key of the podcast item to be found.
-      * @returns {Boolean} True if has the key, false otherwise.
-      */
-     hasItem: function(key) {
-            return this.items.any(function(item, index) { });
-     },
+	/**
+	 * Uses Enumerable#detect method to determine if the Hash contains
+	 * a reference to the feed item.
+	 * @param key {String} Hash key of the podcast item to be found.
+	 * @returns {Boolean} True if has the key, false otherwise.
+	 */
+	hasItem: function(key) {
+		var result = this.items.any(function(item) {
+			return item.key == key;
+		});
+		return result;
+	},
      /**
       * @deprecated
 	 * Given an item key (unique id) it returns the item. Undefined if not found.

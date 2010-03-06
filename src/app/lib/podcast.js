@@ -4,44 +4,47 @@
  * @extends PFeed
  */
 var Podcast = Class.create(PFeed, {
-	   /**
-	    *@private
-	    *@constructor
-	    * Extends the initialize method of PFeed.
-	    * Basically looks to see if a feed url was given (String)
-	    * or if a Object was sent. If a string is sent then set the url
-	    * and key (MD5 Hash of url). Podcast will be out-of-date.
-	    * Otherwise extend this instance with the variables from the object
-	    * passed in.
-	    * @param {string, object} Either a string, that is a path to a URL; or an object with podcast data.
-	    */
-	   initialize: function($super, feedURL) {
-			 try {
-				    $super();				// Call the initialize method of it's extended object
-				    if(Object.isString(feedURL)) {
-						  this.url = feedURL;		// Store path to feed URL
-						  this.key = hex_md5(this.url);	// MD5 Hash of feed URL (unique cookie ID)
-				    } else {
-						  Object.extend(this, feedURL);
-						  delete this.items;
-						  this.items = [];
-						  if(feedURL.items) {
-								feedURL.items.each(function(item) {
-									   var temp = new PFeedItem();
-									   this.items.push(temp);
-									   Object.extend(temp, item);
-								}, this);
-						  }
-				    }
-
-				    this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
-				    this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
-				    this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
-				    this.imageCached = Mojo.Event.make(Podcast.ImageCached, {}, Mojo.Controller.stageController.document);
-			 } catch(error) {
-				    Mojo.Log.error("[Podcast] %s", error.message);
-			 }
-	   },
+	/**
+	 * @private
+	 * @constructor
+	 * Extends the initialize method of PFeed.
+	 * Basically looks to see if a feed url was given (String)
+	 * or if a Object was sent. If a string is sent then set the url
+	 * and key (MD5 Hash of url). Podcast will be out-of-date.
+	 * Otherwise extend this instance with the variables from the object
+	 * passed in.
+	 * @param {string, object} Either a string, that is a path to a URL; or an object with podcast data.
+	 */
+	initialize: function($super, feedURL) {
+		try {
+			// Call the initialize method of it's extended object
+			$super();
+			if(Object.isString(feedURL)) {
+				// Store path to feed URL
+				this.url = feedURL;
+				// MD5 Hash of feed URL (unique cookie ID)
+				this.key = hex_md5(this.url);
+			} else {
+				Object.extend(this, feedURL);
+				delete this.items;
+				this.items = new Hash();
+				if(feedURL.items) {
+					feedURL.items.each(function(item) {
+						var temp = new PFeedItem();
+						Object.extend(temp, item);
+						this.items.set(temp.key, temp);
+					}, this);
+				}
+			}
+			
+			this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
+			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
+			this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
+			this.imageCached = Mojo.Event.make(Podcast.ImageCached, {}, Mojo.Controller.stageController.document);
+		} catch(error) {
+			Mojo.Log.error("[Podcast] %s", error.message);
+		}
+	},
 	/**
 	 * Checks to make see if the current podcast is out-of-date.
 	 * The basic check is to see if title is not blank, that the
@@ -172,26 +175,23 @@ Podcast.prototype.simpleObject = function() {
 	var clone = Object.clone(this);
 	var arrKeys = Object.keys(this);
 	arrKeys.each(function(key) {
-		if(Object.isFunction(clone[key]) || clone[key] instanceof Event) {
-			delete clone[key];
-		} else if(Object.isString(clone[key]) && (clone[key].blank() || clone[key] === undefined)) {
-			delete clone[key];
-		}
+		if(!(Object.isString(clone[key]) || Object.isNumber(clone[key]) || Object.isHash(clone[key])) ||
+					(Object.isString(clone[key]) && clone[key].blank())) {
+				delete clone[key];
+			}
 	});
 
-	// Each item should be an PRssItem or PAtomItem
-	if(Object.isArray(clone.items)) {
-		// Temporary copy of array
-		var tempArray = clone.items.clone();
-		// Delete the messy array
-		delete clone.items;
-		// Create a new blank one
-		Object.extend(clone, {items: []});
-		// Loop through each item
-		tempArray.each(function(item, index) {
-			var simplifiedItem = PFeedItem.simpleObject(item);
-			clone.items.push(simplifiedItem);
+	// Items should be a Hash
+	if(clone.items instanceof Hash) {
+		var arr = [];
+		// Make an array of the items
+		clone.items.each(function(item, index) {
+			arr.push(PFeedItem.simpleObject(item.value));
 		});
+		// Delete the Hash
+		delete clone.items;
+		// Replaced as an array
+		Object.extend(clone, {items: arr});
 	}
 	return clone;
 };

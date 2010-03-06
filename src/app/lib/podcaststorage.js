@@ -1,5 +1,6 @@
-var PodcastStorage = Class.create({
-	initialize: function(name) {
+var PodcastStorage = Class.create(Hash, {
+	initialize: function($super, name) {
+		$super();
 		this.dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 		this.requiresUpdate = false;
 
