@@ -25,6 +25,7 @@ var PFeedItem = Class.create({
 			PFeedItem.CacheProgress,
 				{
 					key: this.key,
+					item: this,
 					amountReceived: 0,
 					amountTotal: 0,
 					percentage: 0
@@ -177,12 +178,15 @@ PFeedItem.EnclosureDeleted = 'onEnclosureDeleted';
 
 PFeedItem.simpleObject = function(instance) {
 	if(instance instanceof PFeedItem) {
-		var arrKeys = Object.keys(instance);
+		var copy = Object.clone(instance);
+		var arrKeys = Object.keys(copy);
 		arrKeys.each(function(key) {
-			if(!(Object.isString(instance[key]) || Object.isNumber(instance[key])) ||
-					(Object.isString(instance[key]) && instance[key].blank())) {
-				delete instance[key];
+			if(!(Object.isString(copy[key]) || Object.isNumber(copy[key])) ||
+					(Object.isString(copy[key]) && copy[key].blank())) {
+				delete copy[key];
 			}
 		});
+		return copy;
 	}
+	return undefined;
 }

@@ -7,7 +7,7 @@ function MainAssistant(db) {
 	this.uiUpdateTimer = undefined;
 	this.actionItems = {
 		nowPlayingModel: undefined,
-		downloadingModels: {}
+		downloadingModels: new Hash()
 	};
 	this.audioPlayer = undefined;
 	this.audioPlayerCanPlay = false;
@@ -208,7 +208,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 		// Check to make sure the node trying to update
 		// is even currently drawn on the scene (list)
 		if(node) {
-			var itemModel = this.actionItems.downloadingModels[key];
+			var itemModel = this.actionItems.downloadingModels.get(key);
 			// Select the progress bar layer
 			var statusDiv = node.select('.status')[0];
 			// Select the time indicator layer
@@ -224,7 +224,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 			// 4. Downloaded => itemModel.isEnclosureCache() == true
 			// 5. Default => itemModel.isEnclosureCached() == false && itemModel.isCaching() == false
 			// Case 1: Buffering
-			if(!this.audioPlayerLoading && key === this.actionItems.nowPlayingModel.key) {
+			if(!this.audioPlayerLoading && this.actionItems.nowPlayingModel && key === this.actionItems.nowPlayingModel.key) {
 				// Turn on the downloading class if it was not already on
 				statusDiv.addClassName('downloading');
 
@@ -250,7 +250,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 				currentTimeDiv.removeClassName('withButton');
 
 			// Case 2: Playing
-			} else if(!this.audioPlayer.paused && this.actionItems.nowPlayingModel.key) {
+			} else if(!this.audioPlayer.paused && this.actionItems.nowPlayingModel && this.actionItems.nowPlayingModel.key) {
 				// Set the current playing time
 				currentTimeDiv.nodeValue = this.millisecondsToDuration(this.audioPlayer.currentTime);
 				// Make sure that the status div is in 'playing' mode
@@ -291,7 +291,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 				// Remove event listener, preventing memory leaks
 				downloadBtn.stopObserving();
 				downloadBtn.remove();
-				episodeLength.removeClassName('withButton');
+				currentTimeDiv.removeClassName('withButton');
 				episodeTitle.removeClassName('withButton');
 				// Reset the status div
 				statusDiv.removeClassName('playing');
@@ -304,7 +304,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 				} else {
 					downloadBtn.removeClassName('cancel');
 				}
-				episodeLength.addClassName('withButton');
+				currentTimeDiv.addClassName('withButton');
 				episodeTitle.addClassName('withButton');
 				statusDiv.removeClassName('playing');
 				statusDiv.removeClassName('downloading');
@@ -312,7 +312,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 			}
 		}
 	} catch(error) {
-		Mojo.Log.error("[MainAssistant.itemDisplayUpdate] %s", error.message);
+		Mojo.Log.error("[MainAssistant.listItemUpdate] %s", error.message);
 	}
 };
 
@@ -513,23 +513,30 @@ MainAssistant.prototype.handleCommand = function(command) {
 		case PFeedItem.CacheCanceled:
 			// Remove the canceled button
 			this.listItemUpdate(command.key);
+			// Remove the item from the downloading models
+			this.actionItems.downloadingModels.unset(command.key);
 			break;
 		case PFeedItem.CacheProgress:
 			// Update the downloading
-			if(this.actionItems.downloadingModels[command.key] === undefined) {
-				this.actionItems.downloadingModels[command.key] = command.item;
+			// Check that the download item is set
+			if(this.actionItems.downloadingModels.get(command.key) === undefined) {
+				// If not set it
+				this.actionItems.downloadingModels.set(command.key, command.item);
 			}
-			Mojo.Log.logProperties(this.actionItems.downloadingModels);
 			this.listItemUpdate(command.key, command.percentage);
 			break;
 		case PFeedItem.CacheError:
 			// Something went wrong
 			this.listItemUpdate(command.key);
+			// Remove the item from the downloading models
+			this.actionItems.downloadingModels.unset(command.key);
 			var msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed."
 			Mojo.Controller.errorDialog(msg);
 			break;
 		case PFeedItem.EnclosureCached:
 			this.listItemUpdate(command.key);
+			// Remove the item from the downloading models
+			this.actionItems.downloadingModels.unset(command.key);
 			break;
 		default:
 			Mojo.Log.info("[MainAssistant.handleCommand] Not handling %s", command.type);
