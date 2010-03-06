@@ -19,6 +19,9 @@ var PAtomItem = Class.create(PFeedItem, {
 		this.updated = document.evaluate("./Atom:updated/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.author = document.evaluate("./Atom:author/Atom:name/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		//this.link = document.evaluate("string(./Atom:link[@href])", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+
+		// Regenerate the key
+		this.generateKey();
 	},
 	nsResolver: function(prefix) {
 		prefix = prefix.toLowerCase();

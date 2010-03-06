@@ -14,12 +14,7 @@ var PFeedItem = Class.create({
 			// DO SOMETHING IF NEEDED
 		}
 		// Make sure key is set
-		if(this.key.blank()) {
-			if(this.key.blank()) { this.key = (!this.enclosure.blank()) ? hex_md5(this.enclosure) : ''; }
-			if(this.key.blank()) { this.key = (!this.id.blank()) ? hex_md5(this.id) : ''; }
-			if(this.key.blank()) { this.key = (!this.link.blank()) ? hex_md5(this.link) : ''; }
-			if(this.key.blank()) { this.key = hex_md5(createUUID()); }
-		}
+		this.generateKey();
 		// Make the events
 		this.cacheProgress = Mojo.Event.make(
 			PFeedItem.CacheProgress,
@@ -36,6 +31,12 @@ var PFeedItem = Class.create({
 		this.cacheComplete = Mojo.Event.make(PFeedItem.EnclosureCached, {key: this.key, item: this}, Mojo.Controller.stageController.document);
 		this.cacheDeleted = Mojo.Event.make(PFeedItem.EnclosureDeleted, {key: this.key, item: this}, Mojo.Controller.stageController.document);
 		this.cacheCanceled = Mojo.Event.make(PFeedItem.CacheCanceled, {key: this.key, item: this}, Mojo.Controller.stageController.document);
+	},
+	generateKey: function() {
+		if(this.key.blank()) { this.key = (!this.enclosure.blank()) ? hex_md5(this.enclosure) : ''; }
+		if(this.key.blank()) { this.key = (!this.id.blank()) ? hex_md5(this.id) : ''; }
+		if(this.key.blank()) { this.key = (!this.link.blank()) ? hex_md5(this.link) : ''; }
+		if(this.key.blank()) { this.key = hex_md5(createUUID()); }
 	},
 	savePosition: function(newPosition) {
 		this.currPosition = newPosition;
