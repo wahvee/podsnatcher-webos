@@ -586,25 +586,26 @@ MainAssistant.prototype.handleCommand = function(command) {
 };
 
 MainAssistant.prototype.handleListClick = function(event) {
-	// Get the selected row
-	this.actionItems.nowPlayingModel = event.item;
-
-	// Check if we should pause (!this.audioPlayer.paused && this.actionItems.nowPlayingModel.key === event.item.key)
-	if(!this.audioPlayer.paused && this.actionItems.nowPlayingModel.key === event.item.key) {
+	var nowPlaying = this.actionItems.nowPlayingModel;
+	// Check if we should pause
+	if(!this.audioPlayer.paused && nowPlaying && nowPlaying.key === event.item.key) {
 		// Pause the player since it is the same item and we clicked
 		Mojo.Log.info("[MainAssistant.handleListClick] Pausing %s", event.item.key);
 		this.audioPlayer.pause();
 
-	// Check if we should resume (this.audioPlayer.paused && this.actionItems.nowPlayingModel.key === event.item.key)
-	} else if(this.audioPlayer.paused && this.actionItems.nowPlayingModel.key === event.item.key) {
+	// Check if we should resume
+	} else if(this.audioPlayer.paused && nowPlaying && nowPlaying.key === event.item.key) {
 		// The player needs to start playing since it was paused
 		Mojo.Log.info("[MainAssistant.handleListClick] Resuming %s", event.item.key);
 		this.audioPlayer.play();
 
 	// Otherwise start fresh
 	} else {
-		Mojo.Log.info("[MainAssistant.handleListClick] (%i) %s", event.index, event.item.enclosure);
-		switch(event.item.enclosureType) {
+		// Get the selected row
+		this.actionItems.nowPlayingModel = this.db.getItem(event.item.key);
+		nowPlaying = this.actionItems.nowPlayingModel;
+		Mojo.Log.info("[MainAssistant.handleListClick] (%i) %s", event.index, nowPlaying.getEnclosure());
+		switch(nowPlaying.enclosureType) {
 			case 'video/mp4':
 			case 'video/x-m4v':
 			case 'video/quicktime':
@@ -620,9 +621,9 @@ MainAssistant.prototype.handleListClick = function(event) {
 					name: "nowplaying"
 				};
 				var params = {
-					target: this.actionItems.nowPlayingModel.getEnclosure(),
-					title: this.actionItems.nowPlayingModel.title,
-					thumbUrl: this.db.currentPodcast().getImage()
+					target: nowPlaying.getEnclosure(),
+					title: nowPlaying.title,
+					thumbUrl: nowPlaying.getImage()
 				};
 				this.controller.stageController.pushScene(args, params);
 				break;
@@ -635,11 +636,11 @@ MainAssistant.prototype.handleListClick = function(event) {
 					while(!this.audioPlayer.paused) {
 						this.stop();
 					}
-					this.audioPlayer.src = this.actionItems.nowPlayingModel.getEnclosure();
+					this.audioPlayer.src = nowPlaying.getEnclosure();
 				}
 				break;
 			default:
-				Mojo.Log.error("[MainAssistant.handleListClick] Unknown file extension. %s", event.item.enclosureType);
+				Mojo.Log.error("[MainAssistant.handleListClick] Unknown file extension. %s", nowPlaying.enclosureType);
 				break;
 		}
 	}
