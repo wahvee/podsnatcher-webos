@@ -7,7 +7,7 @@ var PFeedItem = Class.create({
 	enclosureTicket: 0,
 	enclosureType: '',
 	enclosureLength: '',
-	listened: '',
+	listened: false,
 	currPosition: 0,
 	initialize: function(itemElement) {
 		if(Object.isElement(itemElement)) {
@@ -181,11 +181,13 @@ PFeedItem.simpleObject = function(instance) {
 		var copy = Object.clone(instance);
 		var arrKeys = Object.keys(copy);
 		arrKeys.each(function(key) {
-			if(!(Object.isString(copy[key]) || Object.isNumber(copy[key])) ||
+			if(!(Object.isString(copy[key]) || Object.isNumber(copy[key]) || Object.isBoolean(copy[key])) ||
 					(Object.isString(copy[key]) && copy[key].blank())) {
 				delete copy[key];
 			}
 		});
+		
+		
 		return copy;
 	}
 	return undefined;

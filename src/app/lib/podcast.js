@@ -216,7 +216,7 @@ Podcast.prototype.deleteItem = function(key) {
 			itemToDelete.markAsOld();
 			itemToDelete.removeCache();
 		}
-		// Do something now that the JSON object has been parsed
+		// Send event that the podcast is being deleted
 		Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
 	}
 };
