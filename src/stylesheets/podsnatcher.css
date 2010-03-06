@@ -131,6 +131,7 @@ img#image {
 }
 
 .listItem.palm-row.selected {
+	background-image: url(../images/background-inset-list.png);
 	-webkit-border-image: none !important;
 	background: none !important;
 	border: 4px solid #acc9dd !important;
