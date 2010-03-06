@@ -26,6 +26,17 @@ if(typeof Number.secondsToDuration !== 'function') {
 	Mojo.Log.info("[Number.secondsToDuration] is defined.");
 }
 
+// Add method to Number to convert seconds {Number} to a
+// string that represents HH:MM:SS
+if(typeof Object.isBoolean !== 'function') {
+	Mojo.Log.info("[Object.isBoolean] is not defined.");
+	Object.isBoolean = function(o) {
+		return typeof o === 'boolean';
+	}
+} else {
+	Mojo.Log.info("[Object.isBoolean] is defined.");
+}
+
 function isNull(val){return(val==null);}
 
 function createUUID() {
