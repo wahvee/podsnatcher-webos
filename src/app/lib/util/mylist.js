@@ -6,12 +6,10 @@ Mojo.Widget.MyList = Class.create(Mojo.Widget.List, {
 	},
 	removeListItemNode: function($super, node) {
 		var itemModel = this.getItemByNode(node);
-		
-		if(node.parentNode && itemModel && this.onItemRemoved) {
+		$super(node);
+		if(itemModel && this.onItemRemoved) {
 			this.onItemRemoved(this.controller.element, itemModel, node);
 		}
-		
-		$super(node);
 	}
 });
 

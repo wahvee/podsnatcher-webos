@@ -33,7 +33,6 @@ function MainAssistant(db) {
 		//listTemplate: "main/episodeListTemplate",
 		itemTemplate: "main/episodeListItemTemplate",
 		swipeToDelete: true,
-		uniquenessProperty: 'key',
 		onItemRendered: this.listItemRender.bind(this),
 		onItemRemoved: this.listItemRemoved.bind(this)
 	};

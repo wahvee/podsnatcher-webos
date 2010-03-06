@@ -41,6 +41,7 @@ var Podcast = Class.create(PFeed, {
 
 			this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
 			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
+			this.podcastItemDeleted = Mojo.Event.make(Podcast.PodcastItemDeleted, {podcast: this}, Mojo.Controller.stageController.document);
 			this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
 			this.imageCached = Mojo.Event.make(Podcast.ImageCached, {}, Mojo.Controller.stageController.document);
 		} catch(error) {
@@ -139,6 +140,7 @@ var Podcast = Class.create(PFeed, {
 
 // Static properties of the Podcast class
 Podcast.PodcastStartUpdate = 'onStartPodcastUpdate';
+Podcast.PodcastItemDeleted = 'onPodcastItemDelete';
 Podcast.PodcastUpdateSuccess = 'onPodcastSuccess';
 Podcast.PodcastUpdateFailure = 'onPodcastFailure';
 Podcast.ImageCached = 'onImageCached';
@@ -219,7 +221,7 @@ Podcast.prototype.deleteItem = function(key) {
 			itemToDelete.removeCache();
 		}
 		// Send event that the podcast is being deleted
-		Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
+		Mojo.Controller.stageController.sendEventToCommanders(this.podcastItemDeleted);
 	}
 };
 

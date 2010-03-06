@@ -141,10 +141,7 @@ var PodcastStorage = Class.create({
 		};
 
 		var initialList = [
-			new Podcast('http://www.wdwradio.com/xml/wdwradio.xml'),
-			new Podcast('http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595'),
-			new Podcast('http://revision3.com/diggnation/feed/MP4-Large'),
-			new Podcast('http://buzzreportpodcast.cnettv.com')
+			new Podcast('http://www.wahvee.com/wdwradio.xml')
 		];
 
 		var tempArr = [];
@@ -286,17 +283,9 @@ PodcastStorage.prototype.handleCommand = function(command) {
 			}
 			break;
 		case Podcast.ImageCached:
-			if(!this.updatingAll) {
-				Mojo.Log.info("[PodcastStorage.ImageCached] Saving.");
-				this.save();
-			}
-			break;
+		case Podcast.PodcastItemDeleted:
 		case PFeedItem.EnclosureCached:
-			Mojo.Log.info("[PodcastStorage.EnclosureCached] Saving.");
-			this.save();
-			break;
 		case PFeedItem.EnclosureDeleted:
-			Mojo.Log.info("[PodcastStorage.EnclosureDeleted] Saving.");
 			this.save();
 			break;
 		default:
