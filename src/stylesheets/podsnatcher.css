@@ -135,6 +135,9 @@ img#image {
 	background: none !important;
 	border: 4px solid #acc9dd !important;
 	background-color: #49708A !important;
+}
+
+.listItem.palm-row.clicked {
 	background-image: url(../images/background-inset-list.png) !important;
 }
 
