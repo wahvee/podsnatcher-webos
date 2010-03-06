@@ -36,7 +36,6 @@ var PFeedItem = Class.create({
 		if(this.key.blank()) { this.key = (!this.enclosure.blank()) ? hex_md5(this.enclosure) : ''; }
 		if(this.key.blank()) { this.key = (!this.id.blank()) ? hex_md5(this.id) : ''; }
 		if(this.key.blank()) { this.key = (!this.link.blank()) ? hex_md5(this.link) : ''; }
-		if(this.key.blank()) { this.key = hex_md5(createUUID()); }
 	},
 	savePosition: function(newPosition) {
 		this.currPosition = newPosition;

@@ -69,12 +69,8 @@ var PFeed = Class.create({
 			// Create a PRssItem from the feed
 			var loadedPRssItem = new PRssItem(thisNode);
 			// Check to see if it is already in the db
-			if(this.hasItem(loadedPRssItem.key)) {
-				// Get the item from the db
-				var loadedItem = this.items.get(loadedPRssItem.key);
-				// Update it
-				loadedItem.parse(thisNode);
-			} else {
+			// Only add it to the db if it has not been set
+			if(!this.hasItem(loadedPRssItem.key)) {
 				this.items.set(loadedPRssItem.key, loadedPRssItem);
 			}
 			// Go to the next node
