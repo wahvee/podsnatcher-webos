@@ -1,6 +1,5 @@
-var PodcastStorage = Class.create(Hash, {
-	initialize: function($super, name) {
-		$super();
+var PodcastStorage = Class.create({
+	initialize: function(name) {
 		this.dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 		this.requiresUpdate = false;
 
@@ -91,14 +90,6 @@ var PodcastStorage = Class.create(Hash, {
 			Mojo.Controller.stageController.sendEventToCommanders(this.loadingDatabaseFailure);
 			Mojo.Log.error("[PodcastStorage.loadDatabase] error! %s", error.message);
 		}
-	},
-	getPodcastList: function() {
-		var temp = [];
-		this.listOfPodcasts.each(function(podcast, index) {
-			temp.push(podcast.toListItem());
-		});
-
-		return temp.clone();
 	},
 	interpretCode: function(code) {
 		var result = {
@@ -220,6 +211,21 @@ PodcastStorage.prototype.previousPodcast = function() {
 };
 
 /**
+ * Gets a podcast item by key. Looks in all Podcasts
+ * for that item, returns it if found. Undefined if not
+ * found.
+ * @param key {string} Unique key of the podcast item to find.
+ * @returns {PFeedItem} Instance of PFeedItem that matches key.
+ */
+PodcastStorage.prototype.getItem = function(key) {
+	var pfeeditem;
+	this.listOfPodcasts.detect(function(podcast, index) {
+		pfeeditem = podcast.getItem(key);
+		return pfeeditem !== undefined;
+	});
+};
+
+/**
  * Tells the Podcast at the array index of _currentPodcast
  * that it needs to update it's feed.
  */
@@ -227,6 +233,9 @@ PodcastStorage.prototype.updateCurrent = function() {
 	this.listOfPodcasts[this._currentPodcast].updateFeed();
 };
 
+/**
+ * Update all the podcasts in the database.
+ */
 PodcastStorage.prototype.updatePodcasts = function() {
 	try {
 		// Reset the index that is currently updating
