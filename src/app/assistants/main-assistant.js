@@ -199,6 +199,8 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 				statusDiv.removeClassName('playing');
 				episodeTitle.addClassName('withButton');
 				currentTimeDiv.addClassName('withButton');
+			} else if(!pfeedItem.listened) {
+				episodeTitle.addClassName('newEpisode');
 			}
 		}
 
@@ -531,18 +533,18 @@ MainAssistant.prototype.handleCommand = function(command) {
 			Mojo.Log.info("[MainAssistant.PodcastUpdateSuccess] %s finished updating.", podcastKey);
 			// Updated podcast is the currently showing podcast
 			if(this.db.currentPodcast().key == podcastKey) {
-				      this.spinnerModel.spinning = false;
-				      this.controller.modelChanged(this.spinnerModel);
+				this.spinnerModel.spinning = false;
+				this.controller.modelChanged(this.spinnerModel);
 
-				      this.podcastDisplayUpdate();
+				this.podcastDisplayUpdate();
 			}
 			break;
 		case Podcast.PodcastUpdateFailure:
 			try {
 				// Updated podcast is the currently showing podcast
 				if(this.db.currentPodcast().key == podcastKey) {
-					      this.spinnerModel.spinning = false;
-					      this.controller.modelChanged(this.spinnerModel);
+					this.spinnerModel.spinning = false;
+					this.controller.modelChanged(this.spinnerModel);
 				}
 				var msg = "Update of " + command.podcast.key + " failed. " + command.message;
 				Mojo.Controller.errorDialog(msg);
