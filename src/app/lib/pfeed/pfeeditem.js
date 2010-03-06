@@ -186,8 +186,6 @@ PFeedItem.simpleObject = function(instance) {
 				delete copy[key];
 			}
 		});
-		
-		
 		return copy;
 	}
 	return undefined;
