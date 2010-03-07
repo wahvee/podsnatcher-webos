@@ -26,8 +26,7 @@ if(typeof Number.secondsToDuration !== 'function') {
 	Mojo.Log.info("[Number.secondsToDuration] is defined.");
 }
 
-// Add method to Number to convert seconds {Number} to a
-// string that represents HH:MM:SS
+// Add method to Object to check if instance is a boolean
 if(typeof Object.isBoolean !== 'function') {
 	Mojo.Log.info("[Object.isBoolean] is not defined.");
 	Object.isBoolean = function(o) {

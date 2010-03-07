@@ -65,7 +65,13 @@ var PFeedItem = Class.create({
 	getEnclosure: function() {
 		return ((this.isEnclosureCached()) ? this.enclosurePath : this.enclosure);
 	},
-	removeCache: function() {
+	/**
+	 * @param sendEvent {Boolean} Opitional parameter. Should events be triggered? Default to true.
+	 */
+	removeCache: function(sendEvent) {
+		if(Object.isUndefined(sendEvent) || isNull(sendEvent)) {
+			sendEvent = true;
+		}
 		var mojoController = Mojo.Controller.stageController.activeScene();
 		if(this.enclosureTicket !== 0) {
 			mojoController.serviceRequest('palm://com.palm.downloadmanager', {
@@ -79,7 +85,9 @@ var PFeedItem = Class.create({
 						this.enclosureTicket = 0;
 					}
 					this.cacheDeleted.key = this.key;
-					Mojo.Controller.stageController.sendEventToCommanders(this.cacheDeleted);
+					if(sendEvent) {
+						Mojo.Controller.stageController.sendEventToCommanders(this.cacheDeleted);
+					}
 				}.bind(this),
 				onFailure: function(response) {
 					this.enclosurePath = '';

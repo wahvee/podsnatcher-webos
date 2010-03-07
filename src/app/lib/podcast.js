@@ -104,6 +104,32 @@ var Podcast = Class.create(PFeed, {
 			Mojo.Log.error("[Podcast.cancelCache] Cannot find key: %s", key);
 		}
 	},
+	/**
+	 * Deletes the cached image.
+	 */
+	clearCachedImage: function() {
+		try {
+			if(this.isImageCached()) {
+				var mojoController = Mojo.Controller.stageController.activeScene();
+				mojoController.serviceRequest('palm://com.palm.downloadmanager', {
+					method: 'deleteDownloadedFile',
+					parameters: {
+						ticket: this.imgTicket
+					},
+					onSuccess: function(response) {
+						this.imgPath = undefined;
+						this.imgTicket = undefined;
+					}.bind(this),
+					onFailure: function(response) {
+						this.imgPath = undefined;
+						this.imgTicket = undefined;
+					}.bind(this)
+				});
+			}
+		} catch(error) {
+			Mojo.Log.error("[Podcast.clearCachedImage] Failed deleting album-art. %s", error.message);
+		}
+	},
 	cacheImage: function() {
 		try {
 			 if(this.imgURL !== undefined && !this.imgURL.blank()) {
@@ -207,21 +233,42 @@ Podcast.prototype.getListenedItems = function () {
 }
 
 /**
+ * Clears all cached info for this podcast, includes
+ * album-art and any downloaded podcast enclosures.
+ */
+Podcast.prototype.clearAllCached = function() {
+	// Loop all of the items
+	this.items.each(function(item, index) {
+		// Delete the downloaded things from each podcast
+		this.deleteItem(item.value.key, false);
+	}, this);
+	// Delete the image/album-art
+	this.clearCachedImage();
+};
+
+/**
 * Deletes a podcast item. This includes removing any cached info for the
 * given podcast item, and marking it as listened.
-* @param {string} The key that represents a specific item.
+* @param key {string} The key that represents a specific item.
+* @param sendEvent {Boolean} Opitional parameter. Should events be triggered? Default to true.
 */
-Podcast.prototype.deleteItem = function(key) {
+Podcast.prototype.deleteItem = function(key, sendEvent) {
+	if(Object.isUndefined(sendEvent) || isNull(sendEvent)) {
+		sendEvent = true;
+	}
 	var itemToDelete = this.getItem(key);
 
 	if(itemToDelete !== undefined) {
 		Mojo.Log.info("[Podcast.deleteItem] Deleting %s", itemToDelete.title);
 		if(itemToDelete instanceof PFeedItem) {
 			itemToDelete.markAsOld();
-			itemToDelete.removeCache();
+			itemToDelete.removeCache(sendEvent);
 		}
-		// Send event that the podcast is being deleted
-		Mojo.Controller.stageController.sendEventToCommanders(this.podcastItemDeleted);
+		// See if event should be sent
+		if(sendEvent) {
+			// Send event that the podcast is being deleted
+			Mojo.Controller.stageController.sendEventToCommanders(this.podcastItemDeleted);
+		}
 	}
 };
 

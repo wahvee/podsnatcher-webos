@@ -212,6 +212,42 @@ PodcastStorage.prototype.previousPodcast = function() {
 };
 
 /**
+ * Deletes a podcast from the db. Clears all cached information
+ * as well.
+ */
+PodcastStorage.prototype.deletePodcast = function(key) {
+	try {
+		// Get the podcast to be deleted
+		var podcastToDelete = this.getPodcast(key);
+		// Check if podcast found
+		if(podcastToDelete) {
+			// Get the index of the podcast to be deleted
+			var podcastIndex = this.listOfPodcasts.indexOf(podcastToDelete);
+			// Tell it to delete all of it's cached information
+			podcastToDelete.clearAllCached();
+			// Delete that object from the array
+			this.listOfPodcasts.splice(podcastIndex, 1);
+			// Save the db
+			this.save();
+		}
+	} catch(error) {
+		Mojo.Log.error("[PodcastStorage.deletePodcast] %s", error.message);
+	}
+}
+
+/**
+ * @private
+ * Find a podcast by it's unique id (key). Returns
+ * the instance of the podcast. Undefined if not found.
+ * @returns {Podcast | Undefined} Instance of Podcast that matches key.
+ */
+PodcastStorage.prototype.getPodcast = function(key) {
+	return this.listOfPodcasts.detect(function(podcast, index) {
+		return podcast.key === key;
+	});
+}
+
+/**
  * Gets a podcast item by key. Looks in all Podcasts
  * for that item, returns it if found. Undefined if not
  * found.

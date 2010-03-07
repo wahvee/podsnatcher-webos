@@ -1,7 +1,5 @@
 function StageAssistant() {
-	this.db = new PodcastStorage("podSnatcherDb", this);
-	this.standardMenuAttr = undefined;
-	this.standardMenuModel = undefined;
+	this.db = new PodcastStorage("podSnatcherDb");
 }
 
 StageAssistant.prototype.setup = function() {
@@ -24,6 +22,7 @@ StageAssistant.prototype.setup = function() {
 		items: [
 			Mojo.Menu.editItem,
 			{label: $L("Podcast Actions"), toggleCmd: 'podcast-actions', items: [
+				{label: $L("Add/Remove Podcasts ..."), command: 'do-add-remove'},
 				{label: $L("Update All Podcasts"), command: 'do-refresh-all'},
 				{label: $L("Refresh Album Art"), disabled: true, command: 'refresh-all-album-art'}
 			]},
@@ -37,6 +36,14 @@ StageAssistant.prototype.setup = function() {
 		]
 	};
 
+	addRemoveMenuModel = {
+		visible: true,
+		items: [
+			Mojo.Menu.editItem,
+			Mojo.Menu.helpItem
+		]
+	};
+
 	this.controller.pushCommander(this.db);
 	this.db.connectToDatabase();
 };
@@ -46,22 +53,31 @@ StageAssistant.prototype.handleCommand = function(event) {
 	var currentScene = this.controller.activeScene();
 	switch(event.type) {
 		case Mojo.Event.commandEnable:
-			//if(event.command === 'palm-help-cmd') {
-			//	event.stopPropagation();
-			//}
+			if(event.command === 'palm-help-cmd') {
+				event.stopPropagation();
+			}
 			break;
 		case Mojo.Event.command:
 			switch(event.command) {
 				case 'palm-prefs-cmd':
+					this.controller.popScene(undefined, {
+						name: 'main',
+						transition: Mojo.Transition.zoomFade
+					});
 					break;
 				case 'palm-help-cmd':
+					this.controller.pushAppSupportInfoScene();
 					break;
 				case 'do-refresh-all':
 					// Unload all scenes and then load the login scene
 					//this.controller.popScenesTo(undefined, undefined, undefined);
 					break;
-				case 'do-other-command':
-					Mojo.Log.error("Don't know how this is working!");
+				case 'do-add-remove':
+					// Start the add remove buttons
+					this.controller.swapScene({
+						name: "add-remove",
+						transition: Mojo.Transition.zoomFade
+					}, this.db);
 					break;
 				default:
 					Mojo.Log.error("There was an un-recognized app menu command. %s", event.command);
@@ -71,7 +87,10 @@ StageAssistant.prototype.handleCommand = function(event) {
 		case PodcastStorage.ConnectionToDatabase:
 			Mojo.Log.info("[StageAssistant] Connection to DB.");
 			// Start the scene
-			this.controller.pushScene({name: "main"}, this.db);
+			this.controller.pushScene({
+				name: "main",
+				transition: Mojo.Transition.zoomFade
+			}, this.db);
 			// Make screen rotatable
 			this.controller.setWindowOrientation("free");
 			break;

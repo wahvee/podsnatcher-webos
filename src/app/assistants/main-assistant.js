@@ -348,7 +348,9 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNode) {
 	// Should remove all events from this item...it's being removed from DOM anyway
 	var downloadBtn = itemNode.select('.downloadButton')[0];
-	downloadBtn.stopObserving();
+	if(downloadBtn) {
+		downloadBtn.stopObserving();
+	}
 };
 
 /**

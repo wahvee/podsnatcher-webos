@@ -17,5 +17,9 @@
     {
         "scenes": "info",
         "source": "app/assistants/info-assistant.js"
+    },
+    {
+        "scenes": "add-remove",
+        "source": "app/assistants/add-remove-assistant.js"
     }
 ]
