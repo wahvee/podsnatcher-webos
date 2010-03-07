@@ -72,6 +72,7 @@ MainAssistant.prototype.setup = function() {
 		this.controller.listen($('album-art-area-left'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
 		this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
 		this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
+		this.controller.listen($('album-art'), Mojo.Event.tap, this.handleAlbumArtTap.bindAsEventListener(this));
 		this.controller.listen($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
 		this.controller.listen($('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
 	} catch(eventErrors) {
@@ -400,7 +401,7 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 			width: '144px'
 		}));
 		//$('episodeList').mojo.revealItem(0, true);
-		$('podcastTitle').firstChild.nodeValue = (currPodcast.title === undefined) ? "" : currPodcast.title;
+		$('podcastTitle').innerText = (currPodcast.title === undefined) ? "" : currPodcast.title;
 
 		// Populate the list dependant upon the list mode
 		switch(this.mode) {
@@ -436,6 +437,18 @@ MainAssistant.prototype.handleShaking = function(event) {
 MainAssistant.prototype.handleAlbumArtHold = function(event) {
 	   this.db.updateCurrent();
 };
+
+/**
+ * Handles switching to the info page.
+ */
+MainAssistant.prototype.handleAlbumArtTap = function(event) {
+	Mojo.Log.info("[MainAssistant.handleAlbutmArtTap]");
+	Mojo.Controller.stageController.pushScene({
+		name: 'info',
+		podcast: this.db.currentPodcast(),
+		transition: Mojo.Transition.zoomFade
+	});
+}
 
 /**
  * If the user flicks the album art to switch to the next podcast.

@@ -268,6 +268,7 @@ Podcast.prototype.updateFeed = function(newUrl) {
 	if(Object.isString(this.url) && !this.url.blank()) {
 		var temp = new Ajax.Request(this.url, {
 			method: 'get',
+			evalJSON: false,
 			onSuccess: function(transport) {
 				try {
 					if(!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML) && transport.status === 200) {
