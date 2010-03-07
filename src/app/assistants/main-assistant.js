@@ -434,8 +434,18 @@ MainAssistant.prototype.handleOrientation = function(event) {
 MainAssistant.prototype.handleShaking = function(event) {
 };
 
+/**
+ * Handles the press and hold event for album-art. This
+ * event should lead to a refreshing of the currently
+ * selected podcasts.
+ */
 MainAssistant.prototype.handleAlbumArtHold = function(event) {
-	   this.db.updateCurrent();
+	// Since the div is also going to look
+	// for tap events, this needs to stop
+	// all events from propigating
+	event.stop();
+	// Update the current podcast
+	this.db.updateCurrent();
 };
 
 /**
