@@ -33,6 +33,7 @@ function MainAssistant(db) {
 		//listTemplate: "main/episodeListTemplate",
 		itemTemplate: "main/episodeListItemTemplate",
 		swipeToDelete: true,
+		hasNoWidgets: true,
 		onItemRendered: this.listItemRender.bind(this),
 		onItemRemoved: this.listItemRemoved.bind(this)
 	};
@@ -59,6 +60,7 @@ MainAssistant.prototype.setup = function() {
 		this.audioPlayer.palm.audioClass = "media";
 		this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 		this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
+		this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, appMenuModel);
 	} catch (func_error) {
 		Mojo.Log.error("[Create Widgets] %s", func_error.message);
 	}
@@ -398,7 +400,7 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 			width: '144px'
 		}));
 		//$('episodeList').mojo.revealItem(0, true);
-		$('podcastTitle').nodeValue = (currPodcast.title === undefined) ? "" : currPodcast.title;
+		$('podcastTitle').firstChild.nodeValue = (currPodcast.title === undefined) ? "" : currPodcast.title;
 
 		// Populate the list dependant upon the list mode
 		switch(this.mode) {
@@ -500,89 +502,111 @@ MainAssistant.prototype.handleCommand = function(command) {
 	if(command.podcast) {
 	     podcastKey = command.podcast.key;
 	}
-	switch(command.type) {
-		case PodcastStorage.LoadingDatabaseSuccess:
-			Mojo.Log.info("[MainAssistant.LoadingDatabaseSuccess]");
-			this.podcastDisplayUpdate();
-			if(this.db.requiresUpdate) {
-			    this.db.updatePodcasts();
-			}
-			break;
-		case PodcastStorage.LoadingDatabaseFailure:
-			Mojo.Log.error("[MainAssistant.LoadingDatabaseFailure] %s", command.error.message);
-			break;
-		case PodcastStorage.SavingDatabaseFailure:
-			Mojo.Log.error("[MainAssistant.SavingDatabaseFailure] %s", command.error.message);
-			break;
-		case PodcastStorage.SavingDatabaseSuccess:
-			break;
-		case Podcast.PodcastStartUpdate:
-			Mojo.Log.info("[MainAssistant.PodcastStartUpdate] %s starting update.", podcastKey);
-			// Updated podcast is the currently showing podcast
-			if(this.db.currentPodcast().key == podcastKey) {
-			    this.spinnerModel.spinning = true;
-			    this.controller.modelChanged(this.spinnerModel);
-			} else {
-			    // TODO Dashboard please...
-			    var title = command.podcast.title;
-			    var message = (title === undefined) ? "Updating podcast..." : "Updating " + title;
-			    Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
-			}
-			break;
-		case Podcast.PodcastUpdateSuccess:
-			Mojo.Log.info("[MainAssistant.PodcastUpdateSuccess] %s finished updating.", podcastKey);
-			// Updated podcast is the currently showing podcast
-			if(this.db.currentPodcast().key == podcastKey) {
-				this.spinnerModel.spinning = false;
-				this.controller.modelChanged(this.spinnerModel);
 
+	// Commands from the application-menu
+	if(command.type === Mojo.Event.command) {
+		switch(command.command) {
+			case 'do-refresh-all':
+				this.db.updatePodcasts();
+				break;
+			case 'set-show-new':
+				this.mode = MainAssistant.ListMode.New;
 				this.podcastDisplayUpdate();
-			}
-			break;
-		case Podcast.PodcastUpdateFailure:
-			try {
+				break;
+			case 'set-show-old':
+				this.mode = MainAssistant.ListMode.Listened;
+				this.podcastDisplayUpdate();
+				break;
+			case 'set-show-downloaded':
+				this.mode = MainAssistant.ListMode.Downloaded;
+				this.podcastDisplayUpdate();
+				break;
+		}
+	} else {
+		switch(command.type) {
+			case PodcastStorage.LoadingDatabaseSuccess:
+				Mojo.Log.info("[MainAssistant.LoadingDatabaseSuccess]");
+				this.podcastDisplayUpdate();
+				if(this.db.requiresUpdate) {
+				    this.db.updatePodcasts();
+				}
+				break;
+			case PodcastStorage.LoadingDatabaseFailure:
+				Mojo.Log.error("[MainAssistant.LoadingDatabaseFailure] %s", command.error.message);
+				break;
+			case PodcastStorage.SavingDatabaseFailure:
+				Mojo.Log.error("[MainAssistant.SavingDatabaseFailure] %s", command.error.message);
+				break;
+			case PodcastStorage.SavingDatabaseSuccess:
+				break;
+			case Podcast.PodcastStartUpdate:
+				Mojo.Log.info("[MainAssistant.PodcastStartUpdate] %s starting update.", podcastKey);
+				// Updated podcast is the currently showing podcast
+				if(this.db.currentPodcast().key == podcastKey) {
+				    this.spinnerModel.spinning = true;
+				    this.controller.modelChanged(this.spinnerModel);
+				} else {
+				    // TODO Dashboard please...
+				    var title = command.podcast.title;
+				    var message = (title === undefined) ? "Updating podcast..." : "Updating " + title;
+				    Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
+				}
+				break;
+			case Podcast.PodcastUpdateSuccess:
+				Mojo.Log.info("[MainAssistant.PodcastUpdateSuccess] %s finished updating.", podcastKey);
 				// Updated podcast is the currently showing podcast
 				if(this.db.currentPodcast().key == podcastKey) {
 					this.spinnerModel.spinning = false;
 					this.controller.modelChanged(this.spinnerModel);
+
+					this.podcastDisplayUpdate();
 				}
-				var msg = "Update of " + command.podcast.key + " failed. " + command.message;
+				break;
+			case Podcast.PodcastUpdateFailure:
+				try {
+					// Updated podcast is the currently showing podcast
+					if(this.db.currentPodcast().key == podcastKey) {
+						this.spinnerModel.spinning = false;
+						this.controller.modelChanged(this.spinnerModel);
+					}
+					var msg = "Update of " + command.podcast.key + " failed. " + command.message;
+					Mojo.Controller.errorDialog(msg);
+				} catch(error) {
+					Mojo.Log.error("[MainAssistant.PodcastUpdateFailure] %s", error.message);
+				}
+				break;
+			case PFeedItem.CacheCanceled:
+				// Remove the canceled button
+				this.listItemUpdate(command.key);
+				// Remove the item from the downloading models
+				this.actionItems.downloadingModels.unset(command.key);
+				break;
+			case PFeedItem.CacheProgress:
+				// Update the downloading
+				// Check that the download item is set
+				if(this.actionItems.downloadingModels.get(command.key) === undefined) {
+					// If not set it
+					this.actionItems.downloadingModels.set(command.key, command.item);
+				}
+				this.listItemUpdate(command.key, command.percentage);
+				break;
+			case PFeedItem.CacheError:
+				// Something went wrong
+				this.listItemUpdate(command.key);
+				// Remove the item from the downloading models
+				this.actionItems.downloadingModels.unset(command.key);
+				var msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed."
 				Mojo.Controller.errorDialog(msg);
-			} catch(error) {
-				Mojo.Log.error("[MainAssistant.PodcastUpdateFailure] %s", error.message);
-			}
-			break;
-		case PFeedItem.CacheCanceled:
-			// Remove the canceled button
-			this.listItemUpdate(command.key);
-			// Remove the item from the downloading models
-			this.actionItems.downloadingModels.unset(command.key);
-			break;
-		case PFeedItem.CacheProgress:
-			// Update the downloading
-			// Check that the download item is set
-			if(this.actionItems.downloadingModels.get(command.key) === undefined) {
-				// If not set it
-				this.actionItems.downloadingModels.set(command.key, command.item);
-			}
-			this.listItemUpdate(command.key, command.percentage);
-			break;
-		case PFeedItem.CacheError:
-			// Something went wrong
-			this.listItemUpdate(command.key);
-			// Remove the item from the downloading models
-			this.actionItems.downloadingModels.unset(command.key);
-			var msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed."
-			Mojo.Controller.errorDialog(msg);
-			break;
-		case PFeedItem.EnclosureCached:
-			this.listItemUpdate(command.key);
-			// Remove the item from the downloading models
-			this.actionItems.downloadingModels.unset(command.key);
-			break;
-		default:
-			Mojo.Log.info("[MainAssistant.handleCommand] Not handling %s", command.type);
-			break;
+				break;
+			case PFeedItem.EnclosureCached:
+				this.listItemUpdate(command.key);
+				// Remove the item from the downloading models
+				this.actionItems.downloadingModels.unset(command.key);
+				break;
+			default:
+				Mojo.Log.info("[MainAssistant.handleCommand] Not handling %s", command.type);
+				break;
+		}
 	}
 };
 

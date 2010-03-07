@@ -141,7 +141,11 @@ var PodcastStorage = Class.create({
 		};
 
 		var initialList = [
-			new Podcast('http://www.wahvee.com/wdwradio.xml')
+			//new Podcast('http://www.wahvee.com/wdwradio.xml')
+			new Podcast("http://www.wdwradio.com/xml/wdwradio.xml"),
+			new Podcast("http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595"),
+			new Podcast("http://revision3.com/diggnation/feed/MP4-Large"),
+			new Podcast("http://buzzreportpodcast.cnettv.com")
 		];
 
 		var tempArr = [];

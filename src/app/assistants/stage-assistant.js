@@ -16,19 +16,27 @@ StageAssistant.prototype.setup = function() {
 	} catch(version_error) {
 		Mojo.Log.error("[Prototype] %s", version_error.message);
 	}
-	
+
 	// Add a menu item for user to logout
-	standardMenuAttr = {omitDefaultItems: true};
-	standardMenuModel = {
+	appMenuAttr = {omitDefaultItems: true};
+	appMenuModel = {
 		visible: true,
 		items: [
 			Mojo.Menu.editItem,
+			{label: $L("Podcast Actions"), toggleCmd: 'podcast-actions', items: [
+				{label: $L("Update All Podcasts"), command: 'do-refresh-all'},
+				{label: $L("Refresh Album Art"), disabled: true, command: 'refresh-all-album-art'}
+			]},
+			{label: $L("Filter List"), toggleCmd: 'filter-list', items: [
+				{label: $L("Unheard"), command: 'set-show-new'},
+				{label: $L("Listened"), command: 'set-show-old'},
+				{label: $L("Downloaded"), command: 'set-show-downloaded'},
+			]},
 			Mojo.Menu.prefsItem,
-			{label: "Refresh All", command: 'do-refresh-all'},
 			Mojo.Menu.helpItem
 		]
 	};
-	
+
 	this.controller.pushCommander(this.db);
 	this.db.connectToDatabase();
 };
@@ -37,17 +45,26 @@ StageAssistant.prototype.setup = function() {
 StageAssistant.prototype.handleCommand = function(event) {
 	var currentScene = this.controller.activeScene();
 	switch(event.type) {
+		case Mojo.Event.commandEnable:
+			//if(event.command === 'palm-help-cmd') {
+			//	event.stopPropagation();
+			//}
+			break;
 		case Mojo.Event.command:
 			switch(event.command) {
+				case 'palm-prefs-cmd':
+					break;
+				case 'palm-help-cmd':
+					break;
 				case 'do-refresh-all':
 					// Unload all scenes and then load the login scene
-					this.controller.popScenesTo(undefined, undefined, undefined);
+					//this.controller.popScenesTo(undefined, undefined, undefined);
 					break;
 				case 'do-other-command':
-					Mojo.Log.error("Don't know how this is working!");	
+					Mojo.Log.error("Don't know how this is working!");
 					break;
 				default:
-					Mojo.Log.error("There was an un-recognized app menu command.");
+					Mojo.Log.error("There was an un-recognized app menu command. %s", event.command);
 					break;
 			}
 			break;
