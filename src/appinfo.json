@@ -1,14 +1,35 @@
 {
-  "id":"com.wahvee.podsnatcher",
-  "version":"0.9.2",
-  "title":"PodSnatcher",
-  "vendor":"Wahvee",
-  "vendorurl":"http://www.wahvee.com",
-  "main":"index.html",
-  "icon":"icon.png",
-  "miniicon":"miniicon.png",
-  "type":"web",
-  "theme":"light",
-  "noWindow":false,
-  "noDeprecatedStyles":true
+	"id":"com.wahvee.podsnatcher",
+	"version":"0.9.3",
+	"vendor": "wahvee",
+	"vendorurl": "http://www.wahvee.com",
+	"type": "web",
+	"main": "index.html",
+	"title": "PodSnatcher",
+	"icon": "icon.png",
+	"smallicon": "icon32x32.png",
+
+	"copyright": "© Copyright 2010 by wahvee",
+	"support": {
+		"url": "http://wahvee.com/webos",
+		"email": {
+			"address": "support@wahvee.com",
+			"subject": "Support"
+		},
+		"resources": [
+			{
+				"type":"web",
+				"label": "FAQ",
+				"url": "http://www.wahvee.com/webos/podsnatcher/faq"
+			},
+			{
+				"type": "web",
+				"label": "Discussion Forums",
+				"url": "http://www.wahvee.com/webos/forums"
+			}
+		]
+	},
+	"theme":"light",
+	"noWindow":false,
+	"noDeprecatedStyles":true
 }
