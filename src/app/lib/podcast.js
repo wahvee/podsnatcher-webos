@@ -298,10 +298,10 @@ Podcast.prototype.updateFeed = function(newUrl) {
 			onFailure: function(transport) {
 				Mojo.Log.error("[Podcast.getFeed Error] %j", transport);
 				Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
+			}.bind(this),
+			onLoading: function() {
+				Mojo.Controller.stageController.sendEventToCommanders(this.podcastStartUpdate);
 			}.bind(this)//,
-			//onLoading: function() {
-			//	Mojo.Controller.stageController.sendEventToCommanders(this.podcastStartUpdate);
-			//}.bind(this),
 			//onInteractive: function() {
 			//	Mojo.Log.info("[Podcast.getFeed] onInteractive");
 			//}.bind(this)
