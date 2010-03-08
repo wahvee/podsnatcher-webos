@@ -469,6 +469,8 @@ MainAssistant.prototype.handleAlbumArtTap = function(event) {
  * If the user flicks the album art to switch to the next podcast.
  */
 MainAssistant.prototype.handleAlbumArtFlick = function(event) {
+	// Stop the event from propagating
+	event.stop();
 	var start = $("album-art").cumulativeOffset().left;
 	if(event.velocity.x >= 500) {
 		Mojo.Animation.animateStyle($("album-art"), 'left', 'bezier', {
