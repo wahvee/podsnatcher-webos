@@ -13,7 +13,6 @@ function MainAssistant(db) {
 	this.mode = MainAssistant.ListMode.New;
 	this.audioPlayer = undefined;
 	this.audioPlayerCanPlay = false;
-	this.audioPlayerLoading = false;
 	this.videoPlayer = {};
 	this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
 	this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
@@ -56,8 +55,13 @@ MainAssistant.prototype.setup = function() {
 	try {
 		//this.videoPlayer = $('video-object');
 		//this.videoPlayer = VideoTag.extendElement(this.videoPlayer, this.controller);
-		this.audioPlayer = AudioTag.extendElement($("audio-object"), this.controller);
-		this.audioPlayer.palm.audioClass = "media";
+
+		// Changes for SDK 1.4 Audio object
+		this.audioPlayer = new Audio();
+		this.libs = MojoLoader.require({name: "mediaextension", version: "1.0"});
+		this.extObj = this.libs.mediaextension.MediaExtension.getInstance(this.audioPlayer);
+		this.extObj.audioClass = "media";
+
 		this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 		this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
 		this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, appMenuModel);
@@ -239,13 +243,13 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 			// Select the download button
 			var downloadBtn = node.select('.downloadButton')[0];
 			// Check to see if in one of 5 states:
-			// 1. Buffering => this.audioPlayerLoading == true && key === this.actionItems.nowPlayingModel.key
+			// 1. Buffering => this.audioPlayer.networkState == this.audioPlayer.NETWORK_LOADING && key === this.actionItems.nowPlayingModel.key
 			// 2. Playing => this.audioPlayer.paused == false && key === this.actionItems.nowPlayingModel.key
 			// 3. Downloading => itemModel !== undefined && itemModel.isCaching() == true
 			// 4. Downloaded => itemModel.isEnclosureCache() == true
 			// 5. Default => itemModel.isEnclosureCached() == false && itemModel.isCaching() == false
 			// Case 1: Buffering
-			if(!this.audioPlayerLoading && this.actionItems.nowPlayingModel && key === this.actionItems.nowPlayingModel.key) {
+			if(this.audioPlayer.networkState === this.audioPlayer.NETWORK_LOADING && this.actionItems.nowPlayingModel && key === this.actionItems.nowPlayingModel.key) {
 				// Turn on the downloading class if it was not already on
 				statusDiv.addClassName('downloading');
 				// Make the inset appear
@@ -696,6 +700,9 @@ MainAssistant.prototype.handleListClick = function(event) {
 	}
 };
 
+/**
+ * Handles all HTML 5 Audio object events.
+ */
 MainAssistant.prototype.audioEvent = function(event) {
 	switch(event.type) {
 		case Media.Event.X_PALM_CONNECT:
@@ -705,17 +712,14 @@ MainAssistant.prototype.audioEvent = function(event) {
 			this.audioPlayerCanPlay = false;
 			break;
 		case Media.Event.LOADSTART:
-			this.audioPlayerLoading = true;
-			break;
 		case Media.Event.LOAD:
-			this.audioPlayerLoading = false;
 			break;
 		case Media.Event.PROGRESS:
-			var totalBytes = event.target.totalBytes;
-			var bufferedBytes = event.target.bufferedBytes.end(0);
-			if(bufferedBytes !== undefined) {
+			var totalDuration = this.audioPlayer.duration;
+			var bufferedMedia = this.audioPlayer.buffered.end();
+			if(bufferedMedia !== undefined) {
 				// Calculate percent complete
-				var percentage = (!isNaN(totalBytes) && !isNaN(bufferedBytes) && totalBytes !== 0) ? ((bufferedBytes / totalBytes) * 100) : 0;
+				var percentage = (!isNaN(totalDuration) && !isNaN(bufferedMedia) && totalDuration !== 0) ? ((bufferedMedia / totalDuration) * 100) : 0;
 
 				// Update the UI
 				this.listItemUpdate(this.actionItems.nowPlayingModel.key, percentage);
@@ -738,12 +742,13 @@ MainAssistant.prototype.audioEvent = function(event) {
 };
 
 MainAssistant.prototype.play = function() {
-	   // Start timer
-	   this.timerHandler('start');
+	// Start timer
+	this.timerHandler('start');
 };
 
 MainAssistant.prototype.pause = function() {
-	   this.timerHandler('stop');
+	this.timerHandler('stop');
+	// Store the current position
 };
 
 MainAssistant.prototype.stop = function() {
