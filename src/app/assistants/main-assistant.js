@@ -407,7 +407,7 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 			width: '144px'
 		}));
 		//$('episodeList').mojo.revealItem(0, true);
-		$('podcastTitle').innerText = (currPodcast.title === undefined) ? "" : currPodcast.title;
+		$('podcastTitle').update((currPodcast.title === undefined) ? "" : currPodcast.title);
 
 		// Populate the list dependant upon the list mode
 		switch(this.mode) {

@@ -10,8 +10,6 @@ function AddRemoveAssistant(db) {
 		swipeToDelete: true,
 		hasNoWidgets: true,
 		addItemLabel: $L("Add New Podcast")
-		//onItemRendered: this.listItemRender.bind(this),
-		//onItemRemoved: this.listItemRemoved.bind(this)
 	};
 
 	this.podcastListModel = {
@@ -36,7 +34,7 @@ AddRemoveAssistant.prototype.setup = function() {
 	try {
 		this.controller.listen("podcastList", Mojo.Event.listTap, this.handleListTap.bindAsEventListener(this));
 		this.controller.listen("podcastList", Mojo.Event.listAdd, this.handleListAdd.bindAsEventListener(this));
-		this.controller.listen("podcastList", Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
+		//this.controller.listen("podcastList", Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
 	} catch (func_error) {
 		Mojo.Log.error("[Listening Setup] %s", func_error.message);
 	}
@@ -57,29 +55,33 @@ AddRemoveAssistant.prototype.cleanup = function(event) {
 	   a result of being popped off the scene stack */
 };
 
+/**
+ * Does nothing.
+ */
 AddRemoveAssistant.prototype.handleListTap = function(event) {
 	event.stop();
-	Mojo.Log.info("[AddRemoveAssistant.handleListTap]");
+	//Mojo.Log.info("[AddRemoveAssistant.handleListTap]");
 };
 
+/**
+ * Pop-up and ask for podcast location. Then create the podcast
+ */
 AddRemoveAssistant.prototype.handleListAdd = function(event) {
 	event.stop();
 	Mojo.Log.info("[AddRemoveAssistant.handleListTap]");
-
-	this.podcastListModel = {
-		items: this.db.listOfPodcasts
-	};
 
 	// Change the model
 	this.controller.modelChanged(this.podcastListModel);
 };
 
+/**
+ * Remove the items from the db. Update display to reflect changes.
+ */
 AddRemoveAssistant.prototype.handleListDelete = function(event) {
 	event.stop();
 	this.db.deletePodcast(event.item.key);
 
-	// Change the model
-	this.controller.modelChanged({
-		items: []
-	});
+	// Notify that index was removed
+	// Updates the display
+	$("podcastList").mojo.noticeRemovedItems(event.index, 0);
 };
