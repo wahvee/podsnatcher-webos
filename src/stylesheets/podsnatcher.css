@@ -197,3 +197,116 @@ img#image {
 	z-index: 3000;
 	background-color: #000020;
 }
+
+
+
+
+
+
+
+/* style for info-scene.html */
+#mojo-scene-info-scene-scroller,
+#mojo-scene-add-remove-scene-scroller {
+	background-image: url(../images/background-top.png), url(../images/stripe.png), url(../images/background-bottom.png);
+	background-size: 480px 155px, 480px 27px, 480px 363px;
+	background-position: 0px 0px, 0px 155px, 0px 0px;
+	background-repeat: no-repeat, repeat-x, repeat-x;
+	background-color: #ebf7f8;
+	z-index: 0;
+}
+#info-scene-container {
+	background-image: url(../images/info-content.png);
+	background-repeat: repeat-y;
+	width: 316px;
+	min-height: 154px;
+	position: absolute;
+	top: 0px;
+	left: 50%;
+	margin-left: -158px;
+	z-index: 300;
+}
+#info-album-art {
+	background-image: url(../images/info-border.png);
+	background-repeat: no-repeat;
+	height: 115px;
+	width: 115px;
+	position: absolute;
+	top: 24px;
+	left: 50%;
+	margin-left: -116px;
+}
+#info-title-box {
+	height: 115px;
+	width: 115px;
+	font-size: 11px;
+	text-align: right;
+	padding-top: 5px;
+	position: absolute;
+	top: 24px;
+	left: 50%;
+	margin-left: 1px;
+	overflow: hidden;
+}
+#podcast-description-box {
+	background-image: url(../images/info-content.png);
+	background-repeat: repeat-y;
+	width: 316px;
+	font-size: 12px;
+	position: absolute;
+	top: 154px;
+	left: 50%;
+	margin-left: -158px;
+}
+#podcast-description {
+	padding-right: 42px;
+	padding-left: 42px;
+	min-height: 180px;
+}
+#podcast-description-footer,
+#podcast-list-footer {
+	background-image: url(../images/info-footer.png);
+	background-repeat:  no-repeat;
+	width: 316px;
+	height: 20px;
+	position: relative;
+	top: 20px;
+}
+img#info-image {
+	background-image: url(../images/default-info-album-art.png);
+	background-color: #caff42;
+	height: 85px;
+	width: 85px;
+	margin: 12px 15px 18px 15px;
+}
+/* END style for info-scene.html */
+
+/* style for add/delete scene */
+#podcast-list-container {
+	background-image: url(../images/info-content.png);
+	background-repeat: repeat-y;
+	width: 316px;
+	font-size: 12px;
+	position: absolute;
+	left: 50%;
+	margin-left: -158px;
+}
+#podcast-list {
+	padding-right: 42px;
+	padding-left: 42px;
+	min-height: 320px;
+	margin-top: 10px;
+}
+.podcastTitle {
+	width: 80%;
+	font-size: 14px;
+	padding-top: 14px;
+	float: left
+}
+.podcastAlbumArt {
+	height: 42px;
+	width: 42px;
+	padding-top: 4px;
+	padding-right: 3px;
+	float: left;
+}
+/* END style for add/delete scene */

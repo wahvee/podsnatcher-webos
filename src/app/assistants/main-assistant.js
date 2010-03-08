@@ -461,9 +461,8 @@ MainAssistant.prototype.handleAlbumArtTap = function(event) {
 	Mojo.Log.info("[MainAssistant.handleAlbutmArtTap]");
 	Mojo.Controller.stageController.pushScene({
 		name: 'info',
-		podcast: this.db.currentPodcast(),
 		transition: Mojo.Transition.zoomFade
-	});
+	},this.db.currentPodcast());
 }
 
 /**

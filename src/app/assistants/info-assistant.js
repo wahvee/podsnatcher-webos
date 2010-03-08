@@ -1,14 +1,32 @@
-function InfoAssistant() {
+function InfoAssistant(podcast) {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
+	   
+	   this.podcast = podcast;
+	   
 }
 
 InfoAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
 		
-	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
+	/* use Mojo.View.render to render view templates and add them to the scene, if needed */	
+	
+	$('infoTitle').innerText = this.podcast.title;
+	$('infoAuthor').innerText = this.podcast.author;
+	$('infoCategory').innerText = this.podcast.category;
+	$('infoLanguage').innerText = "Language: " + this.podcast.language;
+	$('infoCopyright').innerText = this.podcast.copyright;
+	$('podcast-description').innerText = this.podcast.description;
+	$('info-image').remove();
+	var img = new Element('img', {
+		id: "info-image",
+		src: this.podcast.getImage(),
+		alt: this.podcast.title,
+		width: "85px"
+	});
+	$('info-album-art').appendChild(img);
 	
 	/* setup widgets here */
 	
