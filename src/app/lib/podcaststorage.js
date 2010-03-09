@@ -16,31 +16,25 @@ var PodcastStorage = Class.create({
 		this.loadingDatabaseFailure = Mojo.Event.make(PodcastStorage.LoadingDatabaseFailure, {error: undefined}, Mojo.Controller.stageController.document);
 	},
 	connectToDatabase: function() {
-		// Wait for successful creation/connection from the db
-		var onSuccess = function() {
-			Mojo.Log.info("[PodcastStorage] Connection to database success.");
-			// Perform the event PodcastStorage.ConnectionToDatabase
-			Mojo.Controller.stageController.sendEventToCommanders(this.connectToDatabaseEvent);
-		};
-
-		// Wait for failure creation/connection from the db
-		var onFailure = function(code) {
-			var error = interpretCode(code);
-			Mojo.Log.error("[PodcastStorage] Failed to open the database on disk. %s", error.message);
-			this.failedConnectionToDatabaseEvent.error = {};
-			Object.extend(this.failedConnectionToDatabaseEvent.error, error);
-			Mojo.Controller.stageController.sendEventToCommanders(this.failedConnectionToDatabaseEvent);
-		};
-
 		try {
 			// Connect/Create statement for the db
-			this.db = new Mojo.Depot({
-				//replace: true,
-				name: this.dbName,
-				version: "1",
-				displayName: "PodSnatcher Database",
-				estimatedSize: 25000
-			}, onSuccess.bind(this), onFailure.bind(this));
+			this.db = openDatabase(
+				   this.dbName,
+				   "1",
+				   "PodSnatcher Database",
+				   1048576
+			);
+		    
+			// Check if the database loaded correctly
+			if(this.db) {
+				   // The database was opened successfully
+				   Mojo.Log.error("[PodcastStorage.connectionToDatabase] Connection to database success.");
+				   Mojo.Controller.stageController.sendEventToCommanders(this.connectToDatabaseEvent);
+			} else {
+				   // The database object is empty and did not open successfully
+				   Mojo.Log.error("[PodcastStorage.connectionToDatabase] Connection to database failed.");
+				   Mojo.Controller.stageController.sendEventToCommanders(this.failedConnectionToDatabaseEvent);
+			}
 		} catch(error) {
 			this.loadingDatabaseFailure.error = {};
 			Object.extend(this.loadingDatabaseFailure.error, error);
