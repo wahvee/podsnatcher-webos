@@ -309,4 +309,14 @@ img#info-image {
 	padding-right: 3px;
 	float: left;
 }
+.addRemovePalmRow.palm-row.selected {
+	border: none !important;
+	background: none !important;
+}
+#podcast-list .palm-row.palm-swipe-delete {
+  background: none;
+  border-width: 24px 20px;                 
+  -webkit-box-sizing: border-box;
+  -webkit-border-image: url(../images/palm-delete.png) 24 20 24 20 repeat repeat;
+}
 /* END style for add/delete scene */
