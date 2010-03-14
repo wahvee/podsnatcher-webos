@@ -79,15 +79,14 @@ MainAssistant.prototype.setup = function() {
 		this.controller.listen($('album-art'), Mojo.Event.tap, this.handleAlbumArtTap.bindAsEventListener(this));
 		this.controller.listen($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
 		this.controller.listen($('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
+		// Update the display
+		this.podcastDisplayUpdate();
+		// Check if the DB needs to be forced to update
+		if(this.db.requiresUpdate) {
+			this.db.updatePodcasts();
+		}
 	} catch(eventErrors) {
 		      Mojo.Log.error("[MainAssistant.setup] %s", eventErrors.message);
-	}
-
-	try {
-		// Begin loading the database
-		this.db.loadDatabase();
-	} catch(dbLoadErrors) {
-		Mojo.Log.error("[MainAssistant.setup loadDB] %s", dbLoadErrors.message);
 	}
 };
 
@@ -554,20 +553,8 @@ MainAssistant.prototype.handleCommand = function(command) {
 		}
 	} else {
 		switch(command.type) {
-			case PodcastStorage.LoadingDatabaseSuccess:
-				Mojo.Log.info("[MainAssistant.LoadingDatabaseSuccess]");
-				this.podcastDisplayUpdate();
-				if(this.db.requiresUpdate) {
-				    this.db.updatePodcasts();
-				}
-				break;
-			case PodcastStorage.LoadingDatabaseFailure:
-				Mojo.Log.error("[MainAssistant.LoadingDatabaseFailure] %s", command.error.message);
-				break;
 			case PodcastStorage.SavingDatabaseFailure:
 				Mojo.Log.error("[MainAssistant.SavingDatabaseFailure] %s", command.error.message);
-				break;
-			case PodcastStorage.SavingDatabaseSuccess:
 				break;
 			case Podcast.PodcastStartUpdate:
 				Mojo.Log.info("[MainAssistant.PodcastStartUpdate] %s starting update.", podcastKey);
@@ -588,7 +575,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 				if(this.db.currentPodcast().key == podcastKey) {
 					this.spinnerModel.spinning = false;
 					this.controller.modelChanged(this.spinnerModel);
-
+					// Update the UI
 					this.podcastDisplayUpdate();
 				}
 				break;

@@ -21,5 +21,9 @@
     {
         "scenes": "add-remove",
         "source": "app/assistants/add-remove-assistant.js"
+    },
+    {
+        "scenes": "splash",
+        "source": "app/assistants/splash-assistant.js"
     }
 ]

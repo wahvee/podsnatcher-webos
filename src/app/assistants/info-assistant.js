@@ -4,14 +4,7 @@ function InfoAssistant(podcast) {
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
 	   
-	   this.podcast = podcast;
-	   
-}
-
-InfoAssistant.prototype.setup = function() {
-	/* this function is for setup tasks that have to happen when the scene is first created */
-		
-	/* use Mojo.View.render to render view templates and add them to the scene, if needed */	
+	this.podcast = podcast;
 	
 	$('infoTitle').innerText = this.podcast.title;
 	$('infoAuthor').innerText = this.podcast.author;
@@ -27,6 +20,13 @@ InfoAssistant.prototype.setup = function() {
 		width: "85px"
 	});
 	$('info-album-art').appendChild(img);
+	   
+}
+
+InfoAssistant.prototype.setup = function() {
+	/* this function is for setup tasks that have to happen when the scene is first created */
+		
+	/* use Mojo.View.render to render view templates and add them to the scene, if needed */	
 	
 	/* setup widgets here */
 	

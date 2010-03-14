@@ -25,25 +25,16 @@ var Podcast = Class.create(PFeed, {
 				// MD5 Hash of feed URL (unique cookie ID)
 				this.key = hex_md5(this.url);
 			} else {
-				Object.extend(this, feedURL);
-				delete this.items;
-				this.items = new Hash();
-				if(feedURL.items) {
-					feedURL.items.each(function(item) {
-						var temp = new PFeedItem();
-						Object.extend(temp, item);
-						// Make sure key is up-to-date
-						temp.generateKey();
-						this.items.set(temp.key, temp);
-					}, this);
-				}
+				// Add the properties of feedURL
+				// to this instance of Podcast
+				this.copy(feedURL);
 			}
 
 			this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
 			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
 			this.podcastItemDeleted = Mojo.Event.make(Podcast.PodcastItemDeleted, {podcast: this}, Mojo.Controller.stageController.document);
 			this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
-			this.imageCached = Mojo.Event.make(Podcast.ImageCached, {}, Mojo.Controller.stageController.document);
+			this.imageCached = Mojo.Event.make(Podcast.ImageCached, {podcast: this}, Mojo.Controller.stageController.document);
 		} catch(error) {
 			Mojo.Log.error("[Podcast] %s", error.message);
 		}
@@ -60,8 +51,9 @@ var Podcast = Class.create(PFeed, {
 		// Check to see if the title has been set,
 		// title is not blank (empty),
 		// that the items db has been defined,
-		// that the items db is an array
-		return (this.title === undefined || this.title.blank() || this.items === undefined || !Object.isHash(this.items));
+		// that the items db is a hash
+		// that the items db has items
+		return (this.title === undefined || this.title.blank() || this.items === undefined || !Object.isHash(this.items) || this.items.size() === 0);
 	},
 	/**
 	 * Call this method to get the podcasts album-art or image. The method,
@@ -160,7 +152,7 @@ var Podcast = Class.create(PFeed, {
 	},
 	isImageCached: function() {
 		// Returns true if image is stored locally
-		return (this.imgPath !== undefined && !this.imgPath.blank());
+		return (!Object.isUndefined(this.imgPath) && !isNull(this.imgPath) && this.imgPath.isPath());
 	}
 });
 
@@ -195,7 +187,15 @@ Podcast.prototype.getNewItems = function () {
 	var arr = [];
 	// Loop all of the items
 	this.items.each(function(item, index) {
-		if(!item.value.listened) { arr.push( {key: item.value.key, title: item.value.title, currentTime: item.value.currentTime } ); }
+		if(!item.value.listened) {
+			arr.push(
+				{
+					key: item.value.key,
+					title: item.value.title,
+					currentTime: item.value.currentTime
+				}
+			);
+		}
 	});
 	return arr;
 }
@@ -244,6 +244,27 @@ Podcast.prototype.clearAllCached = function() {
 	}, this);
 	// Delete the image/album-art
 	this.clearCachedImage();
+};
+
+/**
+ * Takes a simple object and creates a new PFeedItem from it, and adds
+ * it to the list of items for this object. Expected type that comes from the HTML5 db.
+ * @param objToAdd {Object} Object to create PFeedItem from.
+ */
+Podcast.prototype.addItem = function(objToAdd) {
+	var item;
+	if(this.type === 'rss') {
+		item = new PRssItem(objToAdd);
+	} else if(this.type === 'atom') {
+		item = new PAtomItem(objToAdd);
+	} else {
+		Mojo.Log.error("[Podcast.addItem] Uknown type: %s", this.type);
+	}
+
+	// If this object has been created, add it to the Hash.
+	if(!Object.isUndefined(item)) {
+		this.items.set(item.key, item);
+	}
 };
 
 /**
@@ -303,19 +324,46 @@ Podcast.prototype.simpleObject = function() {
 };
 
 /**
+ * Extend this instance of Podcast with the object
+ * being passed in. Only, properties that exist in
+ * the Podcast and reference object will be added.
+ * @param objToExtendFrom {Object | Podcast} The object that will have it's properties copied.
+ */
+Podcast.prototype.copy = function(objToExtendFrom) {
+	// Get all the properties from this
+	var arrKeys = Object.keys(this);
+	// Go through all of the keys of this instance
+	arrKeys.each(function(key) {
+		// Check to make sure:
+		//    it is not undefined and is not null
+		//    and it is a String and not blank
+		//    or it is a Number
+		if(!Object.isUndefined(objToExtendFrom[key])
+			&& !isNull(objToExtendFrom[key])
+			&& ((Object.isString(objToExtendFrom[key]) && !objToExtendFrom[key].blank())
+				|| Object.isNumber(objToExtendFrom[key]))
+		) {
+			this[key] = objToExtendFrom[key];
+		}
+	}, this);
+};
+
+/**
  * Actually, performs the updating of the XML feed.
  */
 Podcast.prototype.updateFeed = function(newUrl) {
 	// Set to path to feed if specified
 	if(Object.isString(newUrl) && !newUrl.blank()) {
 		this.url = newUrl;		// Store path to feed URL
-		this.key = hex_md5(this.url);	// MD5 Hash of feed URL (unique cookie ID)
 	}
 	// Make sure the URL is not blank, and is set
 	if(Object.isString(this.url) && !this.url.blank()) {
 		var temp = new Ajax.Request(this.url, {
+			asynchronous: true,
 			method: 'get',
+			evalJS: false,
 			evalJSON: false,
+			sanitizeJSON: false,
 			onSuccess: function(transport) {
 				try {
 					if(!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML) && transport.status === 200) {

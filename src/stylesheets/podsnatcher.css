@@ -309,6 +309,33 @@ img#info-image {
 	padding-right: 3px;
 	float: left;
 }
+/* END style for add/delete scene */
+
+/* style for splash scene */
+#mojo-scene-splash-scene-scroller {
+	background-color: #ffffff;
+	font-size: 12px;
+	background-image: url(../images/splash-wahvee.png);
+	background-position: bottom;
+	background-repeat: no-repeat;
+}
+#icon-holder {
+	background-image: url(../images/splash-background.png);
+	background-repeat: no-repeat;
+	background-position: top;
+	width: 320px;
+	height: 275px;
+}
+img#podsnatcher-logo {
+	margin-top: 40px;
+}
+#splash-container {
+	text-align: center;
+}
+#status-text {
+	margin: 0px 8px 0px 8px;
+}
+/* END style for splash scene */
 .addRemovePalmRow.palm-row.selected {
 	border: none !important;
 	background: none !important;

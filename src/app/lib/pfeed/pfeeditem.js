@@ -1,15 +1,16 @@
 var PFeedItem = Class.create({
-	id: '',
-	key: '',
-	link: '',
-	enclosure: '',
-	enclosurePath: '',
-	enclosureTicket: 0,
-	enclosureType: '',
-	enclosureLength: '',
-	listened: false,
-	currPosition: 0,
 	initialize: function(itemElement) {
+		this.id = '';
+		this.key = '';
+		this.link = '';
+		this.enclosure = '';
+		this.enclosurePath = '';
+		this.enclosureTicket = 0;
+		this.enclosureType = '';
+		this.enclosureLength = '';
+		this.listened = false;
+		this.currPosition = 0;
+
 		if(Object.isElement(itemElement)) {
 			// DO SOMETHING IF NEEDED
 		}
@@ -197,4 +198,35 @@ PFeedItem.simpleObject = function(instance) {
 		return copy;
 	}
 	return undefined;
-}
+};
+
+/**
+ * Extend this instance of PFeedItem with the object
+ * being passed in. Only, properties that exist in
+ * the PFeedItem and reference object will be added.
+ * @param objToExtendFrom {Object | PFeedItem} The object that will have it's properties copied.
+ */
+PFeedItem.prototype.copy = function(objToExtendFrom) {
+	// Get all the properties from this
+	var arrKeys = Object.keys(this);
+	// Go through all of the keys of this instance
+	arrKeys.each(function(key) {
+		// Check to make sure:
+		//    it is not undefined and is not null
+		//    and it is a String and not blank
+		//    or it is a Number
+		//    or it is Boolean
+		if(!Object.isUndefined(objToExtendFrom[key])
+			&& !isNull(objToExtendFrom[key])
+			&& ((Object.isString(objToExtendFrom[key]) && !objToExtendFrom[key].blank())
+				|| Object.isNumber(objToExtendFrom[key])
+				|| Object.isBoolean(objToExtendFrom[key]))
+		) {
+			if(Object.isBoolean(this[key])) {
+				this[key] = (objToExtendFrom[key] === 'true') ? true : false;
+			} else {
+				this[key] = objToExtendFrom[key];
+			}
+		}
+	}, this);
+};

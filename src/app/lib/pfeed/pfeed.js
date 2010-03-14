@@ -5,19 +5,19 @@
  * @base
  */
 var PFeed = Class.create({
-	id: '',
-	key: '',
-	type: '',
-	version: '1.0',
-	title: '',
-	author: '',
-	description: '',
-	category: '',
-	language: 'en-us',
-	copyright: '',
-	imgURL: '',
-	items: new Hash(),
 	initialize: function() {
+		this.id = '';
+		this.key = '';
+		this.type = '';
+		this.version = '1.0';
+		this.title = '';
+		this.author = '';
+		this.description = '';
+		this.category = '';
+		this.language = '';
+		this.copyright = '';
+		this.imgURL = '';
+		this.items = new Hash();
 	},
      /**
       * Parse the XML DOM to find out what type of Feed this is.

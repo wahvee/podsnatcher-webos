@@ -26,6 +26,18 @@ if(typeof Number.secondsToDuration !== 'function') {
 	Mojo.Log.info("[Number.secondsToDuration] is defined.");
 }
 
+// Add method to String to test if it is a valid pathname
+if(typeof String.isPath !== 'function') {
+	Mojo.Log.info("[String.isPath] is not defined.");
+	String.prototype.isPath = function() {
+		var regEx = new RegExp("/[^/]+$", "i");
+		return regEx.test(this);
+	}
+} else {
+	Mojo.Log.info("[String.isPath] is defined.");
+}
+
+
 // Add method to Object to check if instance is a boolean
 if(typeof Object.isBoolean !== 'function') {
 	Mojo.Log.info("[Object.isBoolean] is not defined.");

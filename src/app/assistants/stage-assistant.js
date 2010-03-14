@@ -45,13 +45,25 @@ StageAssistant.prototype.setup = function() {
 	};
 
 	this.controller.pushCommander(this.db);
-	this.db.connectToDatabase();
+
+	// Push the splash screen onto the stage
+	this.controller.pushScene({
+		name: "splash",
+		transition: Mojo.Transition.zoomFade
+	}, this.db);
+
 };
 
 // handleCommand - Setup handlers for menus:
 StageAssistant.prototype.handleCommand = function(event) {
 	var currentScene = this.controller.activeScene();
 	switch(event.type) {
+		case PodcastStorage.LoadingDatabaseSuccess:
+			this.controller.swapScene({
+				name: "main",
+				transition: Mojo.Transition.zoomFade
+			}, this.db);
+			break;
 		case Mojo.Event.commandEnable:
 			if(event.command === 'palm-help-cmd') {
 				event.stopPropagation();
@@ -83,21 +95,6 @@ StageAssistant.prototype.handleCommand = function(event) {
 					Mojo.Log.error("There was an un-recognized app menu command. %s", event.command);
 					break;
 			}
-			break;
-		case PodcastStorage.ConnectionToDatabase:
-			Mojo.Log.info("[StageAssistant] Connection to DB.");
-			// Start the scene
-			this.controller.pushScene({
-				name: "main",
-				transition: Mojo.Transition.zoomFade
-			}, this.db);
-			// Make screen rotatable
-			this.controller.setWindowOrientation("free");
-			break;
-		case PodcastStorage.FailedConnectionToDatabase:
-			Mojo.Log.error("[StageAssistant] Connection to DB not made.");
-			//Mojo.Controller.errorDialog("[" + error.code + "] " + error.message);
-			$('stageError').innerHTML = "[" + error.code + "] " + error.message;
 			break;
 		default:
 			Mojo.Log.info("[StageAssistant.handleCommand] Not handling %s", event.type);

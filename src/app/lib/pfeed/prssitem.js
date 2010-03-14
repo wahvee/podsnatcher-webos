@@ -1,16 +1,18 @@
 var PRssItem = Class.create(PFeedItem, {
-	id: '',
-	title: '',
-	description: '',
-	published: '',
-	updated: '',
-	author: '',
-	link: '',
 	initialize: function($super, elementItem) {
+		this.id = '';
+		this.title = '';
+		this.description = '';
+		this.published = '';
+		this.updated = '';
+		this.author = '';
+		this.link = '';
 		// Initialize PFeedItem
 		$super(elementItem);
 		if(Object.isElement(elementItem)) {
 			this.parse(elementItem);
+		} else {
+			this.copy(elementItem);
 		}
 	},
 	parse: function(elementItem) {

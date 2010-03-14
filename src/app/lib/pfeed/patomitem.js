@@ -1,15 +1,17 @@
 var PAtomItem = Class.create(PFeedItem, {
-	id: '',
-	title: '',
-	published: '',
-	updated: '',
-	author: '',
-	link: '',
 	initialize: function($super, elementItem) {
+		this.id = '';
+		this.title = '';
+		this.published = '';
+		this.updated = '';
+		this.author = '';
+		this.link = '';
 		// Initiate PFeedItem
 		$super(elementItem);
 		if(Object.isElement(elementItem)) {
 			this.parse(elementItem);
+		} else {
+			this.copy(elementItem);
 		}
 	},
 	parse: function(elementItem) {
