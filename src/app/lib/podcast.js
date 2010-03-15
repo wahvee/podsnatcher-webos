@@ -180,58 +180,117 @@ Podcast.prototype.hasItems = function() {
 /**
  * Gets an array of the items in the database, that
  * are not marked as listened.
+ * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default true.
  * @returns {Array} An array that is either empty [] or filled.
  */
-Podcast.prototype.getNewItems = function () {
+Podcast.prototype.getNewItems = function (sortAscending) {
+	if(Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
+		sortAscending = true;
+	}
+
+	var sortByDateAscending = function(a, b) {
+		return a.date - b.date;
+	};
+
+	var sortByDateDescending = function(a, b) {
+		return b.date - a.date;
+	};
+
 	// Temp array that will be returned
 	var arr = [];
 	// Loop all of the items
-	this.items.each(function(item, index) {
-		if(!item.value.listened) {
+	this.items.values().each(function(item, index) {
+		if(!item.listened) {
 			arr.push(
 				{
-					key: item.value.key,
-					date: '',
-					title: item.value.title,
-					currentTime: item.value.currentTime
+					key: item.key,
+					date: item.published,
+					title: item.title,
+					currentTime: item.currentTime
 				}
 			);
 		}
 	});
 	// Sort by date...
-	//arr.sort();
+	arr.sort((sortAscending) ? sortByDateAscending : sortByDateDescending);
 	return arr;
 }
 
 /**
  * Gets an array of the items in the database that
  * that have been dowloaded.
+ * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default true.
  * @returns {Array} An array that is either empty [] or filled.
  */
-Podcast.prototype.getDownloadedItems = function () {
+Podcast.prototype.getDownloadedItems = function (sortAscending) {
+	if(Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
+		sortAscending = true;
+	}
+
+	var sortByDateAscending = function(a, b) {
+		return a.date - b.date;
+	};
+
+	var sortByDateDescending = function(a, b) {
+		return b.date - a.date;
+	};
+
 	// Temp array that will be returned
 	var arr = [];
 	// Loop all of the items
-	this.items.each(function(item, index) {
-		var temp = PFeedItem.simpleObject(item.value)
-		if(item.value.isEnclosureCached()) { arr.push( {key: item.value.key, title: item.value.title, currentTime: item.value.currentTime } ); }
+	this.items.values().each(function(item, index) {
+		if(item.isEnclosureCached()) {
+			arr.push(
+				{
+					key: item.key,
+					date: item.published,
+					title: item.title,
+					currentTime: item.currentTime
+				}
+			)
+		}
 	});
+	// Sort by date...
+	arr.sort((sortAscending) ? sortByDateAscending : sortByDateDescending);
 	return arr;
 }
 
 /**
  * Gets an array of the items in the database
  * that are marked as listened.
+ * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default true.
  * @returns {Array} An array that is either empty [] or filled.
  */
-Podcast.prototype.getListenedItems = function () {
+Podcast.prototype.getListenedItems = function (sortAscending) {
+	if(Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
+		sortAscending = true;
+	}
+
+	var sortByDateAscending = function(a, b) {
+		return a.date - b.date;
+	};
+
+	var sortByDateDescending = function(a, b) {
+		return b.date - a.date;
+	};
+
 	// Temp array that will be returned
 	var arr = [];
 	// Loop all of the items
-	this.items.each(function(item, index) {
-		var temp = PFeedItem.simpleObject(item.value)
-		if(item.value.listened) { arr.push( {key: item.value.key, title: item.value.title, currentTime: item.value.currentTime } ); }
+	this.items.values().each(function(item, index) {
+		if(item.value.listened) {
+			arr.push(
+				{
+					key: item.key,
+					date: item.published,
+					title: item.title,
+					currentTime: item.currentTime
+				}
+			)
+		}
 	});
+	// Sort by date...
+	arr.sort((sortAscending) ? sortByDateAscending : sortByDateDescending);
 	return arr;
 }
 
