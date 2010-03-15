@@ -1,11 +1,11 @@
 function InfoAssistant(podcast) {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
+	/* this is the creator function for your scene assistant object. It will be passed all the
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
-	   
+
 	this.podcast = podcast;
-	
+
 	$('infoTitle').innerText = this.podcast.title;
 	$('infoAuthor').innerText = this.podcast.author;
 	$('infoCategory').innerText = this.podcast.category;
@@ -20,16 +20,16 @@ function InfoAssistant(podcast) {
 		width: "85px"
 	});
 	$('info-album-art').appendChild(img);
-	   
+
 }
 
 InfoAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
-		
-	/* use Mojo.View.render to render view templates and add them to the scene, if needed */	
-	
+
+	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
+
 	/* setup widgets here */
-	
+
 	/* add event handlers to listen to events from widgets */
 };
 
@@ -44,6 +44,6 @@ InfoAssistant.prototype.deactivate = function(event) {
 };
 
 InfoAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
+	/* this function should do any cleanup needed before the scene is destroyed as
 	   a result of being popped off the scene stack */
 };
