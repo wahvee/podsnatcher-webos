@@ -191,12 +191,15 @@ Podcast.prototype.getNewItems = function () {
 			arr.push(
 				{
 					key: item.value.key,
+					date: '',
 					title: item.value.title,
 					currentTime: item.value.currentTime
 				}
 			);
 		}
 	});
+	// Sort by date...
+	//arr.sort();
 	return arr;
 }
 

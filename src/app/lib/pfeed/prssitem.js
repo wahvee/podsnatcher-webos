@@ -19,8 +19,8 @@ var PRssItem = Class.create(PFeedItem, {
 		this.id = document.evaluate("./guid/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.title = document.evaluate("./title/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.description = document.evaluate("./description/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
-		this.published = document.evaluate("./pubDate/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
-		this.updated = document.evaluate("./pubDate/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.published = new Date(document.evaluate("./pubDate/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue);
+		this.updated = new Date(document.evaluate("./pubDate/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue);
 		this.author = document.evaluate("./author/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.link = document.evaluate("./link/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 

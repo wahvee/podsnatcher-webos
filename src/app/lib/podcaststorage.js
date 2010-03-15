@@ -16,8 +16,8 @@ function PodcastStorage(name) {
 
 	// SQL to store the podcast item into the podcast_item table
 	this.sqlPodcastItem = "INSERT OR REPLACE INTO podcast_item\
-				  (key, podcastKey, id, link, title, description, enclosure, enclosurePath, enclosureTicket, enclosureType, enclosureLength, listened, currPosition) \
-				  values (?,?,?,?,?,?,?,?,?,?,?,?,?);";
+				  (key, podcastKey, id, link, title, description, published, updated, author, enclosure, enclosurePath, enclosureTicket, enclosureType, enclosureLength, listened, currPosition) \
+				  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
 	this.dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 	this.requiresUpdate = false;
@@ -275,7 +275,11 @@ PodcastStorage.prototype.saveAllPodcasts = function() {
  * in the database, if not new data is added to the database automatically.
  * @param key {String} The key of the podcast to be stored in the database.
  */
-PodcastStorage.prototype.savePodcast = function(key, triggerSaveAll) {
+PodcastStorage.prototype.savePodcast = function(key, triggerSaveAll, saveOnlyPodcast) {
+	if(Object.isUndefined(saveOnlyPodcast) || !Object.isBoolean(saveOnlyPodcast)) {
+		saveOnlyPodcast = false;
+	}
+	
 	// If triggerSaveAll is undefined or not a boolean
 	if(Object.isUndefined(triggerSaveAll) || !Object.isBoolean(triggerSaveAll)) {
 		triggerSaveAll = false;
@@ -285,7 +289,6 @@ PodcastStorage.prototype.savePodcast = function(key, triggerSaveAll) {
 	var podcast = this.getPodcast(key);
 
 	var onSuccess = function(tx, response) {
-		Mojo.Log.info("[PodcastStorage.savePodcast] Success.");
 		// Event to let it be known that the database was saved
 		this.savePodcastSuccess.podcast = podcast;
 		Mojo.Controller.stageController.sendEventToCommanders(this.savePodcastSuccess);
@@ -323,33 +326,38 @@ PodcastStorage.prototype.savePodcast = function(key, triggerSaveAll) {
 					podcast.imgPath,
 					podcast.imgTicket
 				],
-				null,
+				(saveOnlyPodcast) ? onSuccess : null,
 				onFailure
 			);
 			// Perform an update for each item in the podcast
-			var values = podcast.items.values();
-			values.each(function(item, index) {
-				tx.executeSql(
-					this.sqlPodcastItem,
-					[
-						item.key,
-						podcast.key,
-						item.id,
-						item.link,
-						item.title,
-						item.description,
-						item.enclosure,
-						item.enclosurePath,
-						item.enclosureTicket,
-						item.enclosureType,
-						item.enclosureLength,
-						item.listened,
-						item.currPosition
-					],
-					(this.listOfPodcasts.size() - 1 == index) ? onSuccess : null,
-					onFailure
-				);
-			}, this);
+			if(!saveOnlyPodcast) {
+				var values = podcast.items.values();
+				values.each(function(item, index) {
+					tx.executeSql(
+						this.sqlPodcastItem,
+						[
+							item.key,
+							podcast.key,
+							item.id,
+							item.link,
+							item.title,
+							item.description,
+							item.published.toUTCString(),
+							item.updated.toUTCString(),
+							item.author,
+							item.enclosure,
+							item.enclosurePath,
+							item.enclosureTicket,
+							item.enclosureType,
+							item.enclosureLength,
+							item.listened,
+							item.currPosition
+						],
+						(this.listOfPodcasts.size() - 1 == index) ? onSuccess : null,
+						onFailure
+					);
+				}, this);
+			}
 		}.bind(this)
 	);
 };
@@ -475,6 +483,9 @@ PodcastStorage.prototype.savePodcastItem = function(key) {
 						item.link,
 						item.title,
 						item.description,
+						item.published.toUTCString(),
+						item.updated.toUTCString(),
+						item.author,
 						item.enclosure,
 						item.enclosurePath,
 						item.enclosureTicket,
@@ -545,6 +556,9 @@ PodcastStorage.prototype.createTables = function(tx) {
 		link TEXT,\
 		title TEXT,\
 		description TEXT,\
+		published TEXT,\
+		updated TEXT,\
+		author TEXT,\
 		enclosure TEXT,\
 		enclosurePath TEXT,\
 		enclosureTicket INTEGER NOT NULL DEFAULT 0,\
@@ -601,11 +615,11 @@ PodcastStorage.prototype.handleCommand = function(command) {
 			}
 			break;
 		case Podcast.ImageCached:
-		case Podcast.PodcastItemDeleted:
 			// Save the podcast to the database
 			this.savePodcast(podcastKey);
 			break;
 		case PFeedItem.EnclosureCached:
+		case Podcast.PodcastItemDeleted:
 		case PFeedItem.EnclosureDeleted:
 			this.savePodcastItem(podcastKey);
 			break;

@@ -17,8 +17,8 @@ var PAtomItem = Class.create(PFeedItem, {
 	parse: function(elementItem) {
 		this.id = document.evaluate("./Atom:id/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.title = document.evaluate("./Atom:title/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
-		this.published = document.evaluate("./Atom:published/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
-		this.updated = document.evaluate("./Atom:updated/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.published = new Date(document.evaluate("./Atom:published/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue);
+		this.updated = new Date(document.evaluate("./Atom:updated/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue);
 		this.author = document.evaluate("./Atom:author/Atom:name/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		//this.link = document.evaluate("string(./Atom:link[@href])", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 
