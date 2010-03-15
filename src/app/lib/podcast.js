@@ -180,12 +180,12 @@ Podcast.prototype.hasItems = function() {
 /**
  * Gets an array of the items in the database, that
  * are not marked as listened.
- * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default true.
+ * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default false.
  * @returns {Array} An array that is either empty [] or filled.
  */
 Podcast.prototype.getNewItems = function (sortAscending) {
 	if(Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
-		sortAscending = true;
+		sortAscending = false;
 	}
 
 	var sortByDateAscending = function(a, b) {
@@ -219,12 +219,12 @@ Podcast.prototype.getNewItems = function (sortAscending) {
 /**
  * Gets an array of the items in the database that
  * that have been dowloaded.
- * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default true.
+ * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default false.
  * @returns {Array} An array that is either empty [] or filled.
  */
 Podcast.prototype.getDownloadedItems = function (sortAscending) {
 	if(Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
-		sortAscending = true;
+		sortAscending = false;
 	}
 
 	var sortByDateAscending = function(a, b) {
@@ -258,12 +258,12 @@ Podcast.prototype.getDownloadedItems = function (sortAscending) {
 /**
  * Gets an array of the items in the database
  * that are marked as listened.
- * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default true.
+ * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default false.
  * @returns {Array} An array that is either empty [] or filled.
  */
 Podcast.prototype.getListenedItems = function (sortAscending) {
 	if(Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
-		sortAscending = true;
+		sortAscending = false;
 	}
 
 	var sortByDateAscending = function(a, b) {
