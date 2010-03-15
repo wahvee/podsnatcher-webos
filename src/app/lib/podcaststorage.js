@@ -16,8 +16,8 @@ function PodcastStorage(name) {
 
 	// SQL to store the podcast item into the podcast_item table
 	this.sqlPodcastItem = "INSERT OR REPLACE INTO podcast_item\
-				  (key, podcastKey, id, link, title, description, published, updated, author, enclosure, enclosurePath, enclosureTicket, enclosureType, enclosureLength, listened, currPosition) \
-				  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+				  (key, podcastKey, id, link, title, description, published, author, enclosure, enclosurePath, enclosureTicket, enclosureType, enclosureLength, listened, currPosition) \
+				  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
 	this.dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 	this.requiresUpdate = false;
@@ -94,10 +94,10 @@ PodcastStorage.prototype.loadDatabase = function() {
 				podcastToUpdate.addItem(response.rows.item(i));
 			}
 		} else {
-			// No items for this podcast, it needs to be updated
+			// No items for this podcast, it needs to be
 			this.requiresUpdate = true;
 		}
-		// Check to see if this is the last podcast updated
+		// Check to see if this is the last podcast
 		if(lastOne) {
 			// Perform the event PodcastStorage.LoadingDatabaseSuccess
 			Mojo.Controller.stageController.sendEventToCommanders(this.loadingDatabaseSuccess);
@@ -279,7 +279,7 @@ PodcastStorage.prototype.savePodcast = function(key, triggerSaveAll, saveOnlyPod
 	if(Object.isUndefined(saveOnlyPodcast) || !Object.isBoolean(saveOnlyPodcast)) {
 		saveOnlyPodcast = false;
 	}
-	
+
 	// If triggerSaveAll is undefined or not a boolean
 	if(Object.isUndefined(triggerSaveAll) || !Object.isBoolean(triggerSaveAll)) {
 		triggerSaveAll = false;
@@ -343,7 +343,6 @@ PodcastStorage.prototype.savePodcast = function(key, triggerSaveAll, saveOnlyPod
 							item.title,
 							item.description,
 							item.published.toUTCString(),
-							item.updated.toUTCString(),
 							item.author,
 							item.enclosure,
 							item.enclosurePath,
@@ -484,7 +483,6 @@ PodcastStorage.prototype.savePodcastItem = function(key) {
 						item.title,
 						item.description,
 						item.published.toUTCString(),
-						item.updated.toUTCString(),
 						item.author,
 						item.enclosure,
 						item.enclosurePath,
@@ -557,7 +555,6 @@ PodcastStorage.prototype.createTables = function(tx) {
 		title TEXT,\
 		description TEXT,\
 		published TEXT,\
-		updated TEXT,\
 		author TEXT,\
 		enclosure TEXT,\
 		enclosurePath TEXT,\

@@ -224,7 +224,8 @@ PFeedItem.prototype.copy = function(objToExtendFrom) {
 		) {
 			if(Object.isBoolean(this[key])) {
 				this[key] = (objToExtendFrom[key] === 'true') ? true : false;
-			} else if(key === "published" || key === "updated") {
+			} else if(this[key] instanceof Date) {
+				this[key] = new Date(objToExtendFrom[key]);
 			} else {
 				this[key] = objToExtendFrom[key];
 			}
