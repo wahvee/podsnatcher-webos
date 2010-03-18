@@ -4,8 +4,6 @@ function InfoAssistant(podcast) {
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
 
-	this.podcast = podcast;
-
 	var renderedInfo = Mojo.View.render(
 		{
 			object: {
@@ -22,22 +20,6 @@ function InfoAssistant(podcast) {
 	);
 
 	$('info-scene-container').update(renderedInfo);
-
-	//$('infoTitle').innerText = this.podcast.title;
-	//$('infoAuthor').innerText = this.podcast.author;
-	//$('infoCategory').innerText = this.podcast.category;
-	//$('infoLanguage').innerText = "Language: " + this.podcast.language;
-	//$('infoCopyright').innerText = this.podcast.copyright;
-	//$('podcast-description').innerText = this.podcast.description;
-	//$('info-image').remove();
-	//var img = new Element('img', {
-	//	id: "info-image",
-	//	src: this.podcast.getImage(),
-	//	alt: this.podcast.title,
-	//	width: "85px"
-	//});
-	//$('info-album-art').appendChild(img);
-
 }
 
 InfoAssistant.prototype.setup = function() {
