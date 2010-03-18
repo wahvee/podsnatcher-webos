@@ -6,20 +6,37 @@ function InfoAssistant(podcast) {
 
 	this.podcast = podcast;
 
-	$('infoTitle').innerText = this.podcast.title;
-	$('infoAuthor').innerText = this.podcast.author;
-	$('infoCategory').innerText = this.podcast.category;
-	$('infoLanguage').innerText = "Language: " + this.podcast.language;
-	$('infoCopyright').innerText = this.podcast.copyright;
-	$('podcast-description').innerText = this.podcast.description;
-	$('info-image').remove();
-	var img = new Element('img', {
-		id: "info-image",
-		src: this.podcast.getImage(),
-		alt: this.podcast.title,
-		width: "85px"
-	});
-	$('info-album-art').appendChild(img);
+	var renderedInfo = Mojo.View.render(
+		{
+			object: {
+				title: podcast.title,
+				author: podcast.author,
+				category: podcast.category,
+				language: podcast.language,
+				copyright: podcast.copyright,
+				description: podcast.description,
+				image: podcast.getImage()
+			},
+			template: 'info/info-scene-template'
+		}
+	);
+
+	$('info-scene-container').update(renderedInfo);
+
+	//$('infoTitle').innerText = this.podcast.title;
+	//$('infoAuthor').innerText = this.podcast.author;
+	//$('infoCategory').innerText = this.podcast.category;
+	//$('infoLanguage').innerText = "Language: " + this.podcast.language;
+	//$('infoCopyright').innerText = this.podcast.copyright;
+	//$('podcast-description').innerText = this.podcast.description;
+	//$('info-image').remove();
+	//var img = new Element('img', {
+	//	id: "info-image",
+	//	src: this.podcast.getImage(),
+	//	alt: this.podcast.title,
+	//	width: "85px"
+	//});
+	//$('info-album-art').appendChild(img);
 
 }
 
