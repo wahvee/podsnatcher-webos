@@ -9,6 +9,7 @@
     {"source": "app/lib/util/mylist.js"},
     {"source": "app/lib/util/built-in-extensions.js"},
     {"source": "/usr/palm/frameworks/media/media.js"},
+    {"source": "app/assistants/app-assistant.js"},
     {"source": "app/assistants/stage-assistant.js"},
     {
         "scenes": "main",
@@ -25,5 +26,13 @@
     {
         "scenes": "splash",
         "source": "app/assistants/splash-assistant.js"
+    },
+    {
+        "scenes": "now-playing-audio",
+        "source": "app/assistants/now-playing-audio-assistant.js"
+    },
+    {
+        "scenes": "now-playing-video",
+        "source": "app/assistants/now-playing-video-assistant.js"
     }
 ]
