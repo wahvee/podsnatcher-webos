@@ -269,6 +269,8 @@ img#image {
 }
 #podcast-episode-title {
 	text-align: center;
+	font-weight: bold;
+	font-size:14px;
 }
 #podcast-description-footer,
 #podcast-list-footer {
