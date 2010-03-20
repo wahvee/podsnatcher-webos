@@ -16,7 +16,7 @@ function PodcastStorage(name) {
 
 	// SQL to store the podcast item into the podcast_item table
 	this.sqlPodcastItem = "INSERT OR REPLACE INTO podcast_item\
-				  (key, podcastKey, id, link, title, description, published, author, enclosure, enclosurePath, enclosureTicket, enclosureType, enclosureLength, listened, currPosition) \
+				  (key, podcastKey, id, link, title, description, published, author, enclosure, enclosurePath, enclosureTicket, enclosureType, enclosureLength, listened, currentTime) \
 				  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
 	this.dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
@@ -350,7 +350,7 @@ PodcastStorage.prototype.savePodcast = function(key, triggerSaveAll, saveOnlyPod
 							item.enclosureType,
 							item.enclosureLength,
 							item.listened,
-							item.currPosition
+							item.currentTime
 						],
 						(this.listOfPodcasts.size() - 1 == index) ? onSuccess : null,
 						onFailure
@@ -490,7 +490,7 @@ PodcastStorage.prototype.savePodcastItem = function(key) {
 						item.enclosureType,
 						item.enclosureLength,
 						item.listened,
-						item.currPosition
+						item.currentTime
 					],
 					onSuccess,
 					onFailure
@@ -562,7 +562,7 @@ PodcastStorage.prototype.createTables = function(tx) {
 		enclosureType TEXT,\
 		enclosureLength INTEGER,\
 		listened BOOLEAN NOT NULL DEFAULT false,\
-		currPosition INTEGER NOT NULL DEFAULT 0\
+		currentTime INTEGER NOT NULL DEFAULT 0\
 	);"
 
 	// Create the podcasts table
@@ -615,9 +615,10 @@ PodcastStorage.prototype.handleCommand = function(command) {
 			// Save the podcast to the database
 			this.savePodcast(podcastKey);
 			break;
+		case PFeedItem.PodcastItemUpdated:
 		case PFeedItem.EnclosureCached:
-		case Podcast.PodcastItemDeleted:
 		case PFeedItem.EnclosureDeleted:
+		case Podcast.PodcastItemDeleted:
 			this.savePodcastItem(podcastKey);
 			break;
 		default:

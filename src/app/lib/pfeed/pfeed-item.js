@@ -9,7 +9,7 @@ var PFeedItem = Class.create({
 		this.enclosureType = '';
 		this.enclosureLength = '';
 		this.listened = false;
-		this.currPosition = 0;
+		this.currentTime = 0;
 
 		if(Object.isElement(itemElement)) {
 			// DO SOMETHING IF NEEDED
@@ -32,6 +32,7 @@ var PFeedItem = Class.create({
 		this.cacheComplete = Mojo.Event.make(PFeedItem.EnclosureCached, {key: this.key, item: this}, Mojo.Controller.stageController.document);
 		this.cacheDeleted = Mojo.Event.make(PFeedItem.EnclosureDeleted, {key: this.key, item: this}, Mojo.Controller.stageController.document);
 		this.cacheCanceled = Mojo.Event.make(PFeedItem.CacheCanceled, {key: this.key, item: this}, Mojo.Controller.stageController.document);
+		this.updatedEvent = Mojo.Event.make(PFeedItem.PodcastItemUpdated, {key: this.key, item: this}, Mojo.Controller.stageController.document);
 	},
 	generateKey: function() {
 		if(this.key.blank()) { this.key = (!this.enclosure.blank()) ? hex_md5(this.enclosure) : ''; }
@@ -39,13 +40,19 @@ var PFeedItem = Class.create({
 		if(this.key.blank()) { this.key = (!this.link.blank()) ? hex_md5(this.link) : ''; }
 	},
 	savePosition: function(newPosition) {
-		this.currPosition = newPosition;
+		this.currentTime = newPosition;
+		this.updatedEvent.key = this.key;
+		Mojo.Controller.stageController.sendEventToCommanders(this.updatedEvent);
 	},
 	markAsOld: function() {
 		this.listened = true;
+		this.updatedEvent.key = this.key;
+		Mojo.Controller.stageController.sendEventToCommanders(this.updatedEvent);
 	},
 	markAsNew: function() {
 		this.listened = false;
+		this.updatedEvent.key = this.key;
+		Mojo.Controller.stageController.sendEventToCommanders(this.updatedEvent);
 	},
 	/**
 	 * Check to see if the current podcast is already in progress
@@ -184,6 +191,7 @@ PFeedItem.CacheProgress = 'onEnclosureCacheProgress';
 PFeedItem.CacheError = 'onEnclosureCacheError';
 PFeedItem.EnclosureCached = 'onEnclosureCached';
 PFeedItem.EnclosureDeleted = 'onEnclosureDeleted';
+PFeedItem.PodcastItemUpdated = 'onPodcastChange';
 
 PFeedItem.simpleObject = function(instance) {
 	if(instance instanceof PFeedItem) {

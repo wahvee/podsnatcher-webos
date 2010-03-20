@@ -120,7 +120,6 @@ NowPlayingAudioAssistant.prototype.isPlaying = function() {
  * Take the enclosure path from the podcast item object and set the HTML5 Audio object to play it.
  */
 NowPlayingAudioAssistant.prototype.setSource = function() {
-	Mojo.Log.info("[NowPlayingAudioAssistant.setSource] %s", this.podcastItem.getEnclosure());
 	if(this.audioPlayer.src !== this.podcastItem.getEnclosure()) {
 		this.clearSource();
 		this.audioPlayer.src = this.podcastItem.getEnclosure();
@@ -139,6 +138,7 @@ NowPlayingAudioAssistant.prototype.clearSource = function() {
  * Tells the media object to stop playing the current object.
  */
 NowPlayingAudioAssistant.prototype.stop = function() {
+	this.audioPlayer.pause = true;
 	this.clearSource();
 };
 
@@ -146,13 +146,47 @@ NowPlayingAudioAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
 
+	// Store the current playing position
+	Mojo.Log.info("[NowPlayingAudioAssistant.deactivate] Saving current position: %s", this.audioPlayer.currentTime);
+	this.podcastItem.savePosition(this.audioPlayer.currentTime);
+
 	// Clean-up all the events on the audio player object
-	this.audioPlayer.stopObserving();
+	this.audioPlayer.stopObserving(Media.Event.X_PALM_CONNECT, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.X_PALM_DISCONNECT, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.X_PALM_WATCHDOG, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.ABORT, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.CANPLAY, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.CANPLAYTHROUGH, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.DURATIONCHANGE, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.EMPTIED, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.ENDED, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.ERROR, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.LOAD, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.LOADEDFIRSTFRAME, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.LOADEDMETADATA, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.LOADSTART, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.PAUSE, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.PLAY, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.PROGRESS, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.SEEKED, this.audioEventListener, false);
+	this.audioPlayer.stopObserving(Media.Event.SEEKING, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.STALLED, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.TIMEUPDATE, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.WAITING, this.audioEventListener, false);
 };
 
 NowPlayingAudioAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as
 	   a result of being popped off the scene stack */
+	Mojo.Log.info("[NowPlayingAudioAssistant.cleanup] Cleaning up.");
+
+	// Stop the audio from playing
+	this.stop();
+
+	// Store the current playing position
+	Mojo.Log.info("[NowPlayingAudioAssistant.cleanup] Saving current position: %s", this.audioPlayer.currentTime);
+	this.podcastItem.savePosition(this.audioPlayer.currentTime);
 };
 
 NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
@@ -189,32 +223,31 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
                 //        break;
 			 case Media.Event.CANPLAYTHROUGH:
 				this.audioPlayer.play();
+				break;
 			 case Media.Event.ERROR:
 				//MediaError.MEDIA_ERR_ABORTED=1	Equals HTML5 aborted error value.
 				//MediaError.MEDIA_ERR_DECODE=2	Equals HTML5 decode error value.
 				//MediaError.MEDIA_ERR_NETWORK=3	Equals HTML5 network error value.
 				//MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED=4
-				if(event.target.error) {
-					var error = '';
-					switch(event.target.error.code) {
-						case event.target.error.MEDIA_ERR_ABORTED:
-							error = "The media was aborted.";
-							break;
-						case event.target.error.MEDIA_ERR_DECODE:
-							error = "There was an error decoding the file: " + event.target.src;
-							break;
-						case event.target.error.MEDIA_ERR_NETWORK:
-							error = "There was an error with the network.";
-							break;
-						case event.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-							error = "The source file is not supported: " + event.target.src;
-							break;
-						default:
-							error = "Unknown error " + event.target.error.code;
-							break;
-					}
-					Mojo.Log.error("[NowPlayingAudioAssistant.Media.ERROR] %s", error);
+				var error = '';
+				switch(event.target.error.code) {
+					case event.target.error.MEDIA_ERR_ABORTED:
+						error = "The media was aborted.";
+						break;
+					case event.target.error.MEDIA_ERR_DECODE:
+						error = "There was an error decoding the file: " + event.target.src;
+						break;
+					case event.target.error.MEDIA_ERR_NETWORK:
+						error = "There was an error with the network.";
+						break;
+					case event.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+						error = "The source file is not supported: " + event.target.src;
+						break;
+					default:
+						error = "Unknown error " + event.target.error.code;
+						break;
 				}
+				Mojo.Log.error("[NowPlayingAudioAssistant.Media.ERROR] %s", error);
 				break;
                 default:
 				Mojo.Log.info("[NowPlayingAudioAssistant.audioEvent] %s", event.type);

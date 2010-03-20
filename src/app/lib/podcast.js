@@ -206,7 +206,7 @@ Podcast.prototype.getNewItems = function (sortAscending) {
 					key: item.key,
 					date: item.published,
 					title: item.title,
-					currentTime: item.currentTime
+					currentTime: item.currentTime.secondsToDuration()
 				}
 			);
 		}
@@ -245,7 +245,7 @@ Podcast.prototype.getDownloadedItems = function (sortAscending) {
 					key: item.key,
 					date: item.published,
 					title: item.title,
-					currentTime: item.currentTime
+					currentTime: item.currentTime.secondsToDuration()
 				}
 			)
 		}
@@ -284,7 +284,7 @@ Podcast.prototype.getListenedItems = function (sortAscending) {
 					key: item.key,
 					date: item.published,
 					title: item.title,
-					currentTime: item.currentTime
+					currentTime: item.currentTime.secondsToDuration()
 				}
 			)
 		}
