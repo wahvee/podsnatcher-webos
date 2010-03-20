@@ -204,9 +204,10 @@ img#image {
 
 
 
-/* style for info-scene.html */
+/* style for info-scene and now-playing-audio */
 #mojo-scene-info-scene-scroller,
-#mojo-scene-add-remove-scene-scroller {
+#mojo-scene-add-remove-scene-scroller,
+#mojo-scene-now-playing-audio-scene-scroller {
 	background-image: url(../images/background-top.png), url(../images/stripe.png), url(../images/background-bottom.png);
 	background-size: 480px 155px, 480px 27px, 480px 363px;
 	background-position: 0px 0px, 0px 155px, 0px 0px;
@@ -214,7 +215,8 @@ img#image {
 	background-color: #ebf7f8;
 	z-index: 0;
 }
-#info-scene-container {
+#info-scene-container,
+#now-playing-audio-scene-container {
 	background-image: url(../images/info-content.png);
 	background-repeat: repeat-y;
 	width: 316px;
@@ -225,7 +227,8 @@ img#image {
 	margin-left: -158px;
 	z-index: 300;
 }
-#info-album-art {
+#info-album-art,
+#now-playing-audio-album-art {
 	background-image: url(../images/info-border.png);
 	background-repeat: no-repeat;
 	height: 115px;
@@ -235,7 +238,8 @@ img#image {
 	left: 50%;
 	margin-left: -116px;
 }
-#info-title-box {
+#info-title-box,
+#now-playing-audio-title-box {
 	height: 108px;
 	width: 115px;
 	font-size: 12px;
@@ -260,7 +264,11 @@ img#image {
 #podcast-description {
 	padding-right: 42px;
 	padding-left: 42px;
+	padding-bottom: 8px;
 	min-height: 180px;
+}
+#podcast-episode-title {
+	text-align: center;
 }
 #podcast-description-footer,
 #podcast-list-footer {
@@ -271,7 +279,8 @@ img#image {
 	position: relative;
 	top: 20px;
 }
-img#info-image {
+img#info-image,
+img#now-playing-audio-image {
 	background-image: url(../images/default-info-album-art.png);
 	background-color: #caff42;
 	height: 85px;
@@ -309,15 +318,23 @@ img#info-image {
 	padding-right: 3px;
 	float: left;
 }
+
+.addRemovePalmRow.palm-row.selected {
+	border: none !important;
+	background: none !important;
+}
+#podcast-list .palm-row.palm-swipe-delete {
+  background: none;
+  border-width: 24px 20px;                 
+  -webkit-box-sizing: border-box;
+  -webkit-border-image: url(../images/palm-delete.png) 24 20 24 20 repeat repeat;
+}
 /* END style for add/delete scene */
 
 /* style for splash scene */
 #mojo-scene-splash-scene-scroller {
 	background-color: #ffffff;
 	font-size: 12px;
-	background-image: url(../images/splash-wahvee.png);
-	background-position: bottom;
-	background-repeat: no-repeat;
 }
 #icon-holder {
 	background-image: url(../images/splash-background.png);
@@ -335,15 +352,64 @@ img#podsnatcher-logo {
 #status-text {
 	margin: 0px 8px 0px 8px;
 }
+#company-logo {
+	background-image: url(../images/splash-wahvee.png);
+	background-position: bottom;
+	background-repeat: no-repeat;
+	margin: 0 auto;
+	width: 70px;
+	height: 88px;
+}
 /* END style for splash scene */
-.addRemovePalmRow.palm-row.selected {
-	border: none !important;
-	background: none !important;
+
+/* style for now-playing-audio scene */
+#player-controls-slider-area {
+	width: 100%;
+	position: fixed;
+	bottom: -63px; /* it's -63 instead of 0 for the slide-up-down to work */
+	z-index: 2000;
 }
-#podcast-list .palm-row.palm-swipe-delete {
-  background: none;
-  border-width: 24px 20px;                 
-  -webkit-box-sizing: border-box;
-  -webkit-border-image: url(../images/palm-delete.png) 24 20 24 20 repeat repeat;
+#player-controls {
+	background-image: url(../images/player-controls.png);
+	background-repeat: no-repeat;
+	margin: 0 auto;
+	padding-left: 36px;
+	padding-top: 4px;
+	width: 145px;
+	height: 26px;
 }
-/* END style for add/delete scene */
+#player-controls-slider {
+	background-color: #49708a;
+	opacity: 0.7;
+	width: 100%;
+	height: 75px; /* it's 75 instead of 12 because the div starts off the bottom of the page and slides up */
+}
+.slide-up-down:hover {
+	-webkit-transform: translate(0,-63px);
+	-webkit-transition: all .5s ease-in-out;
+}
+#rewind {
+	background-image: url(../images/player-controls-rewind.png);
+	background-repeat: no-repeat;
+	width: 32px;
+	height: 24px;
+	float: left;
+	padding: 4px 6px 0px 6px;
+}
+#pause {
+	background-image: url(../images/player-controls-pause.png);
+	background-repeat: no-repeat;
+	width: 21px;
+	height: 25px;
+	float: left;
+	padding: 4px 6px 0px 6px;
+}
+#fastforward {
+	background-image: url(../images/player-controls-fastforward.png);
+	background-repeat: no-repeat;
+	width: 33px;
+	height: 24px;
+	float: left;
+	padding: 4px 6px 0px 6px;
+}
+/* END style for now-playing-audio scene */
