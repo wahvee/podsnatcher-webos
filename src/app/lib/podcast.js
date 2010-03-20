@@ -130,7 +130,7 @@ var Podcast = Class.create(PFeed, {
 				method: 'download',
 				parameters: {
 					target: this.imgURL,
-					targetDir: "/media/internal/PodSnatcher/cache",
+					targetDir: "/media/internal/PodSnatcher/.cache",
 					keepFilenameOnRedirect: true
 				},
 				onSuccess: function(response) {

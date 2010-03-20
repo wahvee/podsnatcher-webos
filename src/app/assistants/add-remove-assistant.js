@@ -1,9 +1,8 @@
-function AddRemoveAssistant(db) {
+function AddRemoveAssistant() {
 	/* this is the creator function for your scene assistant object. It will be passed all the
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
-	this.db = db;
 
 	this.podcastListAttributes = {
 		itemTemplate: "add-remove/podcastListItemTemplate",
@@ -13,7 +12,7 @@ function AddRemoveAssistant(db) {
 	};
 
 	this.podcastListModel = {
-		items: this.db.listOfPodcasts
+		items: AppAssistant.db.listOfPodcasts
 	};
 }
 
@@ -24,6 +23,7 @@ AddRemoveAssistant.prototype.setup = function() {
 
 	/* setup widgets here */
 	try {
+		Mojo.Controller.stageController.setWindowOrientation("up");
 		this.controller.setupWidget("podcastList", this.podcastListAttributes, this.podcastListModel);
 		this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, addRemoveMenuModel);
 	} catch (func_error) {
@@ -79,7 +79,7 @@ AddRemoveAssistant.prototype.handleListAdd = function(event) {
  */
 AddRemoveAssistant.prototype.handleListDelete = function(event) {
 	event.stop();
-	this.db.deletePodcast(event.item.key);
+	AppAssistant.db.deletePodcast(event.item.key);
 
 	// Notify that index was removed
 	// Updates the display

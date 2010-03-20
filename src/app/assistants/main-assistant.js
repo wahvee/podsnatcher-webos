@@ -1,18 +1,11 @@
-function MainAssistant(db) {
+function MainAssistant() {
 	/* this is the creator function for your scene assistant object. It will be passed all the
 	 * additional parameters (after the scene name) that were passed to pushScene. The reference
 	 * to the scene controller (this.controller) has not be established yet, so any initialization
 	 * that needs the scene controller should be done in the setup function below. */
-	this.db = db;
 	this.uiUpdateTimer = undefined;
-	this.actionItems = {
-		nowPlayingModel: undefined,
-		downloadingModels: new Hash()
-	};
 	// Set the display to show new podcasts only
 	this.mode = MainAssistant.ListMode.New;
-	this.audioPlayer = undefined;
-	this.audioPlayerCanPlay = false;
 	this.videoPlayer = {};
 	this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
 	this.screenHeight = Mojo.Environment.DeviceInfo.screenHeight;
@@ -29,7 +22,6 @@ function MainAssistant(db) {
 	};
 
 	this.episodeListAttributes = {
-		//listTemplate: "main/episodeListTemplate",
 		itemTemplate: "main/episodeListItemTemplate",
 		swipeToDelete: true,
 		hasNoWidgets: true,
@@ -43,7 +35,6 @@ function MainAssistant(db) {
 
 	// Setting up the event listener callbacks
 	this.downloadFunction = this.handleItemDownload.bind(this);
-	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
 }
 
 MainAssistant.prototype.setup = function() {
@@ -56,15 +47,9 @@ MainAssistant.prototype.setup = function() {
 		//this.videoPlayer = $('video-object');
 		//this.videoPlayer = VideoTag.extendElement(this.videoPlayer, this.controller);
 
-		// Changes for SDK 1.4 Audio object
-		this.audioPlayer = new Audio();
-		this.libs = MojoLoader.require({name: "mediaextension", version: "1.0"});
-		this.extObj = this.libs.mediaextension.MediaExtension.getInstance(this.audioPlayer);
-		this.extObj.audioClass = "media";
-
 		this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 		this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
-		this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, appMenuModel);
+		this.controller.setupWidget(Mojo.Menu.appMenu, AppAssistant.appMenuAttr, AppAssistant.appMenuModel);
 	} catch (func_error) {
 		Mojo.Log.error("[Create Widgets] %s", func_error.message);
 	}
@@ -82,8 +67,8 @@ MainAssistant.prototype.setup = function() {
 		// Update the display
 		this.podcastDisplayUpdate();
 		// Check if the DB needs to be forced to update
-		if(this.db.requiresUpdate) {
-			this.db.updatePodcasts();
+		if(AppAssistant.db.requiresUpdate) {
+			AppAssistant.db.updatePodcasts();
 		}
 	} catch(eventErrors) {
 		      Mojo.Log.error("[MainAssistant.setup] %s", eventErrors.message);
@@ -95,33 +80,11 @@ MainAssistant.prototype.activate = function(event) {
 	   example, key handlers that are observing the document */
 
 	try {
+		Mojo.Controller.stageController.setWindowOrientation("free");
 		// Wait for screen orientation changes
 		this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
 		this.controller.listen(document, "shakeend", this.handleShaking.bindAsEventListener(this));
-		// Audio events
-		this.controller.listen(this.audioPlayer, Media.Event.X_PALM_CONNECT, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.X_PALM_DISCONNECT, this.audioEventListener, false);
-		//this.controller.listen(this.audioPlayer, Media.Event.X_PALM_WATCHDOG, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.ABORT, this.audioEventListener, false);
-		//this.controller.listen(this.audioPlayer, Media.Event.CANPLAY, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.CANPLAYTHROUGH, this.audioEventListener, false);
-		//this.controller.listen(this.audioPlayer, Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener, false);
-		//this.controller.listen(this.audioPlayer, Media.Event.DURATIONCHANGE, this.audioEventListener, false);
-		//this.controller.listen(this.audioPlayer, Media.Event.EMPTIED, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.ENDED, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.ERROR, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.LOAD, this.audioEventListener, false);
-		//this.controller.listen(this.audioPlayer, Media.Event.LOADEDFIRSTFRAME, this.audioEventListener, false);
-		//this.controller.listen(this.audioPlayer, Media.Event.LOADEDMETADATA, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.LOADSTART, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.PAUSE, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.PLAY, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.PROGRESS, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.SEEKED, this.audioEventListener, false);
-		this.controller.listen(this.audioPlayer, Media.Event.SEEKING, this.audioEventListener, false);
-		//this.controller.listen(this.audioPlayer, Media.Event.STALLED, this.audioEventListener, false);
-		//this.controller.listen(this.audioPlayer, Media.Event.TIMEUPDATE, this.audioEventListener, false);
-		//this.controller.listen(this.audioPlayer, Media.Event.WAITING, this.audioEventListener, false);
+		this.podcastDisplayUpdate();
 	} catch(eventErrors) {
 		Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
 	}
@@ -138,7 +101,6 @@ MainAssistant.prototype.cleanup = function(event) {
 	a result of being popped off the scene stack */
 
 	try {
-		this.stop();
 		this.controller.stopListening(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
 		this.controller.stopListening(document, "shakeend", this.handleShaking.bindAsEventListener(this));
 
@@ -148,30 +110,6 @@ MainAssistant.prototype.cleanup = function(event) {
 		this.controller.stopListening($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
 		this.controller.stopListening($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
 		this.controller.stopListening($('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
-
-		this.controller.stopListening(this.audioPlayer, Media.Event.X_PALM_CONNECT, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.X_PALM_DISCONNECT, this.audioEventListener, false);
-		//this.controller.stopListening(this.audioPlayer, Media.Event.X_PALM_WATCHDOG, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.ABORT, this.audioEventListener, false);
-		//this.controller.stopListening(this.audioPlayer, Media.Event.CANPLAY, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.CANPLAYTHROUGH, this.audioEventListener, false);
-		//this.controller.stopListening(this.audioPlayer, Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener, false);
-		//this.controller.stopListening(this.audioPlayer, Media.Event.DURATIONCHANGE, this.audioEventListener, false);
-		//this.controller.stopListening(this.audioPlayer, Media.Event.EMPTIED, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.ENDED, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.ERROR, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.LOAD, this.audioEventListener, false);
-		//this.controller.stopListening(this.audioPlayer, Media.Event.LOADEDFIRSTFRAME, this.audioEventListener, false);
-		//this.controller.stopListening(this.audioPlayer, Media.Event.LOADEDMETADATA, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.LOADSTART, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.PAUSE, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.PLAY, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.PROGRESS, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.SEEKED, this.audioEventListener, false);
-		this.controller.stopListening(this.audioPlayer, Media.Event.SEEKING, this.audioEventListener, false);
-		//this.controller.stopListening(this.audioPlayer, Media.Event.STALLED, this.audioEventListener, false);
-		//this.controller.stopListening(this.audioPlayer, Media.Event.TIMEUPDATE, this.audioEventListener, false);
-		//this.controller.stopListening(this.audioPlayer, Media.Event.WAITING, this.audioEventListener, false);
 	} catch(eventErrors) {
 		Mojo.Log.error("[MainAssistant.cleanup] %s", eventErrors.message);
 	}
@@ -187,7 +125,7 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 		var episodeTitle = itemNode.select('.episodeTitle')[0];
 		var episodeLength = itemNode.select('.episodeLength')[0];
 		// Get the PFeedItem that is being represented by this itemModel
-		var pfeedItem = this.db.getItem(itemModel.key);
+		var pfeedItem = AppAssistant.db.getItem(itemModel.key);
 		// Check to make sure the item is not already downloaded
 		// if it is remove the download button
 		if(pfeedItem) {
@@ -232,7 +170,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 		// Check to make sure the node trying to update
 		// is even currently drawn on the scene (list)
 		if(node) {
-			var itemModel = this.actionItems.downloadingModels.get(key);
+			// Get the Item that is currently downloading
 			// Select the progress bar layer
 			var statusDiv = node.select('.status')[0];
 			// Select the time indicator layer
@@ -242,69 +180,11 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 			// Select the download button
 			var downloadBtn = node.select('.downloadButton')[0];
 			// Check to see if in one of 5 states:
-			// 1. Buffering => this.audioPlayer.networkState == this.audioPlayer.NETWORK_LOADING && key === this.actionItems.nowPlayingModel.key
-			// 2. Playing => this.audioPlayer.paused == false && key === this.actionItems.nowPlayingModel.key
-			// 3. Downloading => itemModel !== undefined && itemModel.isCaching() == true
-			// 4. Downloaded => itemModel.isEnclosureCache() == true
-			// 5. Default => itemModel.isEnclosureCached() == false && itemModel.isCaching() == false
-			// Case 1: Buffering
-			if(this.audioPlayer.networkState === this.audioPlayer.NETWORK_LOADING && this.actionItems.nowPlayingModel && key === this.actionItems.nowPlayingModel.key) {
-				// Turn on the downloading class if it was not already on
-				statusDiv.addClassName('downloading');
-				// Make the inset appear
-				node.addClassName('clicked');
-
-				// Set the percentage width for the download
-				statusDiv.setStyle({
-					width: percentage.toFixed(2) + "%"
-				});
-				// Set the current playing time
-				if(!this.audioPlayer.paused) {
-					currentTimeDiv.nodeValue = this.audioPlayer.currentTime.secondsToDuration();
-				} else {
-					currentTimeDiv.nodeValue = (0).secondsToDuration();
-				}
-				// Clean-up make sure not playing
-				statusDiv.removeClassName('playing');
-				// Remove event listener, preventing memory leaks
-				if(downloadBtn) {
-					downloadBtn.stopObserving();
-					downloadBtn.remove();
-				}
-				// Correct formatting of the
-				episodeTitle.removeClassName('withButton');
-				currentTimeDiv.removeClassName('withButton');
-
-			// Case 2: Playing
-			} else if(!this.audioPlayer.paused && this.actionItems.nowPlayingModel && this.actionItems.nowPlayingModel.key) {
-				// Make the inset appear
-				node.addClassName('clicked');
-				// Set the current playing time
-				currentTimeDiv.nodeValue = this.audioPlayer.currentTime.secondsToDuration();
-				// Make sure that the status div is in 'playing' mode
-				if(!statusDiv.hasClassName('playing')) {
-					statusDiv.addClassName('playing');
-				}
-				// Set the width of the status div to percent played
-				percentage = ((this.audioPlayer.currentTime / this.audioPlayer.duration) * 100);
-				percentage = (isNaN(percentage) || percentage === undefined) ? 0 : percentage;
-				// ((this.audioPlayer.currentTime / this.audioPlayer.duration) * 100)
-				statusDiv.setStyle({
-					width: percentage.toFixed(2) + "%"
-				});
-				// Clean-up make sure no downloading
-				statusDiv.removeClassName('downloading');
-				// Remove event listener, preventing memory leaks
-				if(downloadBtn) {
-					downloadBtn.stopObserving();
-					downloadBtn.remove();
-				}
-				// Correct formatting of the
-				episodeTitle.removeClassName('withButton');
-				currentTimeDiv.removeClassName('withButton');
-
-			// Case 3: Downloading
-			} else if(itemModel && itemModel.isCaching()) {
+			// 1. Downloading => itemModel !== undefined && itemModel.isCaching() == true
+			// 2. Downloaded => itemModel.isEnclosureCache() == true
+			// 3. Default => itemModel.isEnclosureCached() == false && itemModel.isCaching() == false
+			// Case 1: Downloading
+			if(itemModel && itemModel.isCaching()) {
 				// Make the inset appear
 				node.addClassName('clicked');
 				// Give the downloadBtn the cancel class
@@ -316,7 +196,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 				episodeTitle.addClassName('withButton');
 				currentTimeDiv.addClassName('withButton');
 
-			// Case 4: Downloaded
+			// Case 2: Downloaded
 			} else if(itemModel && itemModel.isEnclosureCached()) {
 				// Remove event listener, preventing memory leaks
 				downloadBtn.stopObserving();
@@ -328,7 +208,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 				statusDiv.removeClassName('downloading');
 				statusDiv.setStyle({width: '0%'});
 				node.removeClassName('clicked');
-			// Case 5: Default
+			// Case 3: Default
 			} else {
 				if(downloadBtn === undefined) {
 					// TODO: Need to re-add the download button
@@ -363,7 +243,7 @@ MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNo
  */
 MainAssistant.prototype.handleListDelete = function(event) {
 	// event.item.key
-	this.db.currentPodcast().deleteItem(event.item.key);
+	AppAssistant.db.currentPodcast().deleteItem(event.item.key);
 };
 
 MainAssistant.prototype.handleItemDownload = function(event) {
@@ -376,14 +256,14 @@ MainAssistant.prototype.handleItemDownload = function(event) {
 	// If found
 	if(node) {
 		// Get the model for the item in the list
-		var itemModel = this.db.getItem(key);
+		var itemModel = AppAssistant.db.getItem(key);
 		// Check if podcast is currently dowloading
 		if(itemModel.isCaching()) {
 			// If we are currently caching, cancel it
-			this.db.currentPodcast().cancelCache(itemModel.key);
+			AppAssistant.db.currentPodcast().cancelCache(itemModel.key);
 		} else {
 			// Tell the current podcast to download the podcast
-			this.db.currentPodcast().cacheEnclosure(itemModel.key);
+			AppAssistant.db.currentPodcast().cacheEnclosure(itemModel.key);
 		}
 	}
 };
@@ -396,7 +276,7 @@ MainAssistant.prototype.handleItemDownload = function(event) {
  */
 MainAssistant.prototype.podcastDisplayUpdate = function() {
 	try {
-		var currPodcast = this.db.currentPodcast();
+		var currPodcast = AppAssistant.db.currentPodcast();
 		$('album-art').removeChild($('image'));
 		$('album-art').appendChild(new Element('img', {
 			id: 'image',
@@ -450,7 +330,7 @@ MainAssistant.prototype.handleAlbumArtHold = function(event) {
 	// all events from propigating
 	event.stop();
 	// Update the current podcast
-	this.db.updateCurrent();
+	AppAssistant.db.updateCurrent();
 };
 
 /**
@@ -461,7 +341,7 @@ MainAssistant.prototype.handleAlbumArtTap = function(event) {
 	Mojo.Controller.stageController.pushScene({
 		name: 'info',
 		transition: Mojo.Transition.zoomFade
-	},this.db.currentPodcast());
+	},AppAssistant.db.currentPodcast());
 }
 
 /**
@@ -504,10 +384,10 @@ MainAssistant.prototype.switchPodcast = function(next) {
 	var finish = 0;
 	// Actually perform loading or changing to next podcast
 	if(next === 'next') {
-		this.db.nextPodcast();
+		AppAssistant.db.nextPodcast();
 		this.podcastDisplayUpdate();
 	} else if(next === 'previous') {
-		this.db.previousPodcast();
+		AppAssistant.db.previousPodcast();
 		this.podcastDisplayUpdate();
 	}
 	// Move the image to it's new starting position
@@ -536,7 +416,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 	if(command.type === Mojo.Event.command) {
 		switch(command.command) {
 			case 'do-refresh-all':
-				this.db.updatePodcasts();
+				AppAssistant.db.updatePodcasts();
 				break;
 			case 'set-show-new':
 				this.mode = MainAssistant.ListMode.New;
@@ -559,7 +439,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 			case Podcast.PodcastStartUpdate:
 				Mojo.Log.info("[MainAssistant.PodcastStartUpdate] %s starting update.", podcastKey);
 				// Updated podcast is the currently showing podcast
-				if(this.db.currentPodcast().key == podcastKey) {
+				if(AppAssistant.db.currentPodcast().key == podcastKey) {
 				    this.spinnerModel.spinning = true;
 				    this.controller.modelChanged(this.spinnerModel);
 				} else {
@@ -572,7 +452,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 			case Podcast.PodcastUpdateSuccess:
 				Mojo.Log.info("[MainAssistant.PodcastUpdateSuccess] %s finished updating.", podcastKey);
 				// Updated podcast is the currently showing podcast
-				if(this.db.currentPodcast().key == podcastKey) {
+				if(AppAssistant.db.currentPodcast().key == podcastKey) {
 					this.spinnerModel.spinning = false;
 					this.controller.modelChanged(this.spinnerModel);
 					// Update the UI
@@ -582,7 +462,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 			case Podcast.PodcastUpdateFailure:
 				try {
 					// Updated podcast is the currently showing podcast
-					if(this.db.currentPodcast().key == podcastKey) {
+					if(AppAssistant.db.currentPodcast().key == podcastKey) {
 						this.spinnerModel.spinning = false;
 						this.controller.modelChanged(this.spinnerModel);
 					}
@@ -595,30 +475,19 @@ MainAssistant.prototype.handleCommand = function(command) {
 			case PFeedItem.CacheCanceled:
 				// Remove the canceled button
 				this.listItemUpdate(command.key);
-				// Remove the item from the downloading models
-				this.actionItems.downloadingModels.unset(command.key);
 				break;
 			case PFeedItem.CacheProgress:
 				// Update the downloading
-				// Check that the download item is set
-				if(this.actionItems.downloadingModels.get(command.key) === undefined) {
-					// If not set it
-					this.actionItems.downloadingModels.set(command.key, command.item);
-				}
 				this.listItemUpdate(command.key, command.percentage);
 				break;
 			case PFeedItem.CacheError:
 				// Something went wrong
 				this.listItemUpdate(command.key);
-				// Remove the item from the downloading models
-				this.actionItems.downloadingModels.unset(command.key);
 				var msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed."
 				Mojo.Controller.errorDialog(msg);
 				break;
 			case PFeedItem.EnclosureCached:
 				this.listItemUpdate(command.key);
-				// Remove the item from the downloading models
-				this.actionItems.downloadingModels.unset(command.key);
 				break;
 			default:
 				Mojo.Log.info("[MainAssistant.handleCommand] Not handling %s", command.type);
@@ -628,136 +497,41 @@ MainAssistant.prototype.handleCommand = function(command) {
 };
 
 MainAssistant.prototype.handleListClick = function(event) {
-	var nowPlaying = this.actionItems.nowPlayingModel;
-	// Check if we should pause
-	if(!this.audioPlayer.paused && nowPlaying && nowPlaying.key === event.item.key) {
-		// Pause the player since it is the same item and we clicked
-		Mojo.Log.info("[MainAssistant.handleListClick] Pausing %s", event.item.key);
-		this.audioPlayer.pause();
-
-	// Check if we should resume
-	} else if(this.audioPlayer.paused && nowPlaying && nowPlaying.key === event.item.key) {
-		// The player needs to start playing since it was paused
-		Mojo.Log.info("[MainAssistant.handleListClick] Resuming %s", event.item.key);
-		this.audioPlayer.play();
-
-	// Otherwise start fresh
-	} else {
-		// Get the selected row
-		this.actionItems.nowPlayingModel = this.db.getItem(event.item.key);
-		nowPlaying = this.actionItems.nowPlayingModel;
-		Mojo.Log.info("[MainAssistant.handleListClick] (%i) %s", event.index, nowPlaying.getEnclosure());
-		switch(nowPlaying.enclosureType) {
-			case 'video/mp4':
-			case 'video/x-m4v':
-			case 'video/quicktime':
-				Mojo.Log.info("[MainAssistant.handleListClick] Playing Video");
-				//$('video-object').toggleClassName('video');
-				//this.videoPlayer.src = event.item.enclosure;
-				// Make sure the audio stops then play some videos
-				while(!this.audioPlayer.paused) {
-					this.stop();
-				}
-				var args = {
-					appId: "com.palm.app.videoplayer",
-					name: "nowplaying"
-				};
-				var params = {
-					target: nowPlaying.getEnclosure(),
-					title: nowPlaying.title,
-					thumbUrl: nowPlaying.getImage()
-				};
-				this.controller.stageController.pushScene(args, params);
-				break;
-			case 'audio/mp3':
-			case 'audio/mpeg':
-				Mojo.Log.info("[MainAssistant.handleListClick] Playing Audio");
-				// Check if the scene can play audio
-				if(this.audioPlayerCanPlay) {
-					// If currently playing then stop what is currently playing
-					while(!this.audioPlayer.paused) {
-						this.stop();
-					}
-					this.audioPlayer.src = nowPlaying.getEnclosure();
-				}
-				break;
-			default:
-				Mojo.Log.error("[MainAssistant.handleListClick] Unknown file extension. %s", nowPlaying.enclosureType);
-				break;
-		}
-	}
-};
-
-/**
- * Handles all HTML 5 Audio object events.
- */
-MainAssistant.prototype.audioEvent = function(event) {
-	switch(event.type) {
-		case Media.Event.X_PALM_CONNECT:
-			this.audioPlayerCanPlay = true;
+	// Get the selected row
+	var nowPlaying = AppAssistant.db.getItem(event.item.key);
+	Mojo.Log.info("[MainAssistant.handleListClick] (%i) %s", event.index, nowPlaying.getEnclosure());
+	switch(nowPlaying.enclosureType) {
+		case 'video/mp4':
+		case 'video/x-m4v':
+		case 'video/quicktime':
+			Mojo.Log.info("[MainAssistant.handleListClick] Playing Video");
+			//$('video-object').toggleClassName('video');
+			//this.videoPlayer.src = event.item.enclosure;
+			// Make sure the audio stops then play some videos
+			AppAssistant.audioPlayer.stop();
+			var args = {
+				appId: "com.palm.app.videoplayer",
+				name: "nowplaying"
+			};
+			var params = {
+				target: nowPlaying.getEnclosure(),
+				title: nowPlaying.title,
+				thumbUrl: AppAssistant.db.currentPodcast().getImage()
+			};
+			this.controller.stageController.pushScene(args, params);
 			break;
-		case Media.Event.X_PALM_DISCONNECT:
-			this.audioPlayerCanPlay = false;
-			break;
-		case Media.Event.LOADSTART:
-		case Media.Event.LOAD:
-			break;
-		case Media.Event.PROGRESS:
-			var totalDuration = this.audioPlayer.duration;
-			var bufferedMedia = this.audioPlayer.buffered.end();
-			if(bufferedMedia !== undefined) {
-				// Calculate percent complete
-				var percentage = (!isNaN(totalDuration) && !isNaN(bufferedMedia) && totalDuration !== 0) ? ((bufferedMedia / totalDuration) * 100) : 0;
-
-				// Update the UI
-				this.listItemUpdate(this.actionItems.nowPlayingModel.key, percentage);
-			}
-			break;
-		case Media.Event.PLAY:
-			this.play();
-			break;
-		case Media.Event.PAUSE:
-			Mojo.Log.info("[Media.Event.PAUSE] %s", this.audioPlayer.paused);
-			this.pause();
-			break;
-		case Media.Event.ENDED:
-			this.stop();
+		case 'audio/mp3':
+		case 'audio/mpeg':
+			Mojo.Log.info("[MainAssistant.handleListClick] Playing Audio");
+			// Push the audio scene and the pass the Podcast to play
+			this.controller.stageController.pushScene({
+				name: "now-playing-audio",
+				transition: Mojo.Transition.zoomFade
+			}, nowPlaying);
 			break;
 		default:
-			Mojo.Log.error("[MainAssistant.audioEvent] %s", event.type);
+			Mojo.Log.error("[MainAssistant.handleListClick] Unknown file extension. %s", nowPlaying.enclosureType);
 			break;
-	}
-};
-
-MainAssistant.prototype.play = function() {
-	// Start timer
-	this.timerHandler('start');
-};
-
-MainAssistant.prototype.pause = function() {
-	this.timerHandler('stop');
-	// Store the current position
-};
-
-MainAssistant.prototype.stop = function() {
-	this.timerHandler('stop');
-	if(this.audioPlayerCanPlay) {
-		this.actionItems.nowPlayingModel = undefined;
-	}
-};
-
-MainAssistant.prototype.timerHandler = function(action) {
-	try {
-		if((this.uiUpdateTimer !== undefined && action == 'start') || action == 'stop') {
-			clearInterval(this.uiUpdateTimer);
-			this.uiUpdateTimer = undefined;
-		}
-
-		if(action == 'start') {
-			this.uiUpdateTimer = setInterval(this.listItemUpdate.bind(this), 500);
-		}
-	} catch(error) {
-		Mojo.Log.error("[MainAssistant.timerHandler] %s", error.message);
 	}
 };
 

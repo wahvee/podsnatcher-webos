@@ -23,25 +23,25 @@ function PodcastStorage(name) {
 	this.requiresUpdate = false;
 
 	// When updating all podcasts, call these events at the begining and end
-	this.podcastListStartUpdate = Mojo.Event.make(PodcastStorage.PodcastListStartUpdate, {}, Mojo.Controller.stageController.document);
-	this.podcastListFinishUpdate = Mojo.Event.make(PodcastStorage.PodcastListFinishUpdate, {}, Mojo.Controller.stageController.document);
+	this.podcastListStartUpdate = Mojo.Event.make(PodcastStorage.PodcastListStartUpdate, {});
+	this.podcastListFinishUpdate = Mojo.Event.make(PodcastStorage.PodcastListFinishUpdate, {});
 
 	// Called when trying to connect to the database
-	this.connectToDatabaseEvent = Mojo.Event.make(PodcastStorage.ConnectionToDatabase, {}, Mojo.Controller.stageController.document);
-	this.failedConnectionToDatabaseEvent = Mojo.Event.make(PodcastStorage.FailedConnectionToDatabase, {error: undefined}, Mojo.Controller.stageController.document);
+	this.connectToDatabaseEvent = Mojo.Event.make(PodcastStorage.ConnectionToDatabase, {});
+	this.failedConnectionToDatabaseEvent = Mojo.Event.make(PodcastStorage.FailedConnectionToDatabase, {error: undefined});
 
 	// Event called when program loaded for first time
-	this.firstRunEvent = Mojo.Event.make(PodcastStorage.FirstRun, {}, Mojo.Controller.stageController.document);
+	this.firstRunEvent = Mojo.Event.make(PodcastStorage.FirstRun, {});
 
 	// Called when trying to load info from the database
-	this.loadingDatabaseSuccess = Mojo.Event.make(PodcastStorage.LoadingDatabaseSuccess, {}, Mojo.Controller.stageController.document);
-	this.loadingDatabaseFailure = Mojo.Event.make(PodcastStorage.LoadingDatabaseFailure, {error: undefined}, Mojo.Controller.stageController.document);
+	this.loadingDatabaseSuccess = Mojo.Event.make(PodcastStorage.LoadingDatabaseSuccess, {});
+	this.loadingDatabaseFailure = Mojo.Event.make(PodcastStorage.LoadingDatabaseFailure, {error: undefined});
 
 	// Events to be called when saving
-	this.saveAllSuccess = Mojo.Event.make(PodcastStorage.SaveAllSuccess, {}, Mojo.Controller.stageController.document);
-	this.savePodcastSuccess = Mojo.Event.make(PodcastStorage.SavePodcastSuccess, {podcast: undefined}, Mojo.Controller.stageController.document);
-	this.savePodcastItemSuccess = Mojo.Event.make(PodcastStorage.SavePodcastItemSuccess, {item: undefined}, Mojo.Controller.stageController.document);
-	this.saveFailure = Mojo.Event.make(PodcastStorage.SaveFailure, {error: undefined}, Mojo.Controller.stageController.document);
+	this.saveAllSuccess = Mojo.Event.make(PodcastStorage.SaveAllSuccess, {});
+	this.savePodcastSuccess = Mojo.Event.make(PodcastStorage.SavePodcastSuccess, {podcast: undefined});
+	this.savePodcastItemSuccess = Mojo.Event.make(PodcastStorage.SavePodcastItemSuccess, {item: undefined});
+	this.saveFailure = Mojo.Event.make(PodcastStorage.SaveFailure, {error: undefined});
 };
 
 /**

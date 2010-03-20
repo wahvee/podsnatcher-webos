@@ -1,9 +1,9 @@
-function SplashAssistant(db) {
+function SplashAssistant() {
 	/* this is the creator function for your scene assistant object. It will be passed all the
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
-	this.db = db;
+
 	// Give a status on the screen
 	this.status = $('status-text');
 	this.status.update("Connecting to Database");
@@ -24,7 +24,7 @@ SplashAssistant.prototype.activate = function(event) {
 	   example, key handlers that are observing the document */
 
 	// Connect to database, asyncronous call
-	this.db.connectToDatabase();
+	AppAssistant.db.connectToDatabase();
 };
 
 SplashAssistant.prototype.deactivate = function(event) {
@@ -51,14 +51,7 @@ SplashAssistant.prototype.handleCommand = function(event) {
 		case PodcastStorage.ConnectionToDatabase:
 			Mojo.Log.info("[SplashAssistant.ConnectionToDatabase]");
 			this.status.update("Loading the Database.");
-			//// Start the scene
-			//this.controller.pushScene({
-			//	name: "main",
-			//	transition: Mojo.Transition.zoomFade
-			//}, this.db);
-			//// Make screen rotatable
-			//this.controller.setWindowOrientation("free");
-			this.db.loadDatabase();
+			AppAssistant.db.loadDatabase();
 			break;
 		case PodcastStorage.FailedConnectionToDatabase:
 			this.status.update("Connection to the database failed. " + event.error.message);

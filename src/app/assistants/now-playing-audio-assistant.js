@@ -4,26 +4,39 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
 
-	this.podcastToPlay = podcastToPlay;
+	this.podcastItem = podcastToPlay;
+	this.podcast = AppAssistant.db.podcastContainingItem(this.podcastItem.key);
 	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
+
+	this.sliderAttributes = {
+		modelProperty: 'value',
+		minValue: 0,
+		maxValue: 1,
+		round: false,
+		updateInterval: 0
+	};
+
+	this.sliderModel = {
+		value: .3,
+		disabled: false
+	};
 }
 
 NowPlayingAudioAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
-	var podcast = AppAssistant.db.podcastContainingItem(this.podcastToPlay.key);
 
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
 	var renderedInfo = Mojo.View.render(
 		{
 			object: {
-				title: podcast.title,
-				author: podcast.author,
-				category: podcast.category,
-				language: podcast.language,
-				copyright: podcast.copyright,
-				image: podcast.getImage(),
-				episodeTitle: this.podcastToPlay.title,
-				episodeDescription: this.podcastToPlay.description
+				title: this.podcast.title,
+				author: this.podcast.author,
+				category: this.podcast.category,
+				language: this.podcast.language,
+				copyright: this.podcast.copyright,
+				image: this.podcast.getImage(),
+				episodeTitle: this.podcastItem.title,
+				episodeDescription: Mojo.Format.runTextIndexer(this.podcastItem.description)
 			},
 			template: 'now-playing-audio/now-playing-audio-scene-template'
 		}
@@ -32,6 +45,11 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	$('now-playing-audio-scene-container').update(renderedInfo);
 
 	/* setup widgets here */
+	this.controller.setupWidget(
+		"player-controls-slider",
+		this.sliderAttributes,
+		this.sliderModel
+	);
 
 	// Load the MediaExtension library
 	this.libs = MojoLoader.require({ name: "mediaextension", version: "1.0"});
@@ -42,15 +60,8 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	// Set the media class
 	this.extObj.audioClass = "media";
 
-	// Check to see already playing
-	if(this.isPlaying()) {
-		Mojo.Log.info("Playing %s, switching to: %s", this.audioPlayer.src, this.podcastToPlay.getEnclosure());
-		if(this.audioPlayer.src === this.podcastToPlay.getEnclosure()) {
-			Mojo.Log.info("Already playing this track!");
-		}
-	} else {
-		this.audioPlayer.src = this.podcastToPlay.getEnclosure();
-	}
+	// Tell the audio object what to play
+	this.setSource();
 
 	/* add event handlers to listen to events from widgets */
 };
@@ -103,6 +114,32 @@ NowPlayingAudioAssistant.prototype.isPlaying = function() {
 	} else {
 		return false;
 	}
+};
+
+/**
+ * Take the enclosure path from the podcast item object and set the HTML5 Audio object to play it.
+ */
+NowPlayingAudioAssistant.prototype.setSource = function() {
+	Mojo.Log.info("[NowPlayingAudioAssistant.setSource] %s", this.podcastItem.getEnclosure());
+	if(this.audioPlayer.src !== this.podcastItem.getEnclosure()) {
+		this.clearSource();
+		this.audioPlayer.src = this.podcastItem.getEnclosure();
+		this.audioPlayer.load();
+	}
+};
+
+/**
+ * Clears the Audio object and stops it from playing anything.
+ */
+NowPlayingAudioAssistant.prototype.clearSource = function() {
+	this.audioPlayer.src = null;
+};
+
+/**
+ * Tells the media object to stop playing the current object.
+ */
+NowPlayingAudioAssistant.prototype.stop = function() {
+	this.clearSource();
 };
 
 NowPlayingAudioAssistant.prototype.deactivate = function(event) {

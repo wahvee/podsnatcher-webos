@@ -1,6 +1,6 @@
 {
 	"id":"com.wahvee.podsnatcher",
-	"version":"0.9.4",
+	"version":"0.9.5",
 	"vendor": "wahvee",
 	"vendorurl": "http://www.wahvee.com",
 	"type": "web",
@@ -8,10 +8,11 @@
 	"title": "PodSnatcher",
 	"icon": "icon.png",
 	"smallicon": "icon32x32.png",
+	"splashicon": "icon256×256.png",
 
 	"copyright": "© Copyright 2010 by wahvee",
 	"support": {
-		"url": "http://wahvee.com/webos",
+		"url": "http://www.wahvee.com/webos",
 		"email": {
 			"address": "support@wahvee.com",
 			"subject": "Support"
