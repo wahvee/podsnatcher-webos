@@ -292,6 +292,19 @@ img#now-playing-audio-image {
 /* END style for info-scene.html */
 
 /* style for add/delete scene */
+.list-click-and-swipe {
+	background-color: #ffffff;
+}
+.palm-button {
+	font-size: 15px !important;
+}
+.palm-swipe-undo-button {
+	width: 95px !important;
+	-webkit-border-image: url(../images/swipe-undo-button-up.png) 0 14 0 14 repeat repeat !important;
+}
+.palm-swipe-delete-button {
+	width: 95px !important;
+}
 #podcast-list-container {
 	background-image: url(../images/info-content.png);
 	background-repeat: repeat-y;
@@ -415,3 +428,8 @@ img#podsnatcher-logo {
 	padding: 4px 6px 0px 6px;
 }
 /* END style for now-playing-audio scene */
+
+.palm-row.palm-swipe-delete {
+	-webkit-border-image: none !important;
+	margin-top: 24px;
+}

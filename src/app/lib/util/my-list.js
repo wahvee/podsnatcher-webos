@@ -10,6 +10,16 @@ Mojo.Widget.MyList = Class.create(Mojo.Widget.List, {
 		if(itemModel && this.onItemRemoved) {
 			this.onItemRemoved(this.controller.element, itemModel, node);
 		}
+	},
+	dragStartHandler: function($super, event) {
+		$super(event);
+		var node = Mojo.Widget.Util.findListItemNode(event.target, this.listItemsParent);
+		node.removeClassName(this.kDeleteDragClass);
+		node.addClassName("list-click-and-swipe");
+	},
+	completeSwipeDelete: function($super, el, cancelled) {
+		$super(el, cancelled);
+		el.removeClassName("list-click-and-swipe");
 	}
 });
 
