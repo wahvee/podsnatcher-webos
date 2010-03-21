@@ -521,7 +521,7 @@ MainAssistant.prototype.handleListClick = function(event) {
 			//$('video-object').toggleClassName('video');
 			//this.videoPlayer.src = event.item.enclosure;
 			// Make sure the audio stops then play some videos
-			AppAssistant.audioPlayer.stop();
+			this.stop();
 			var args = {
 				appId: "com.palm.app.videoplayer",
 				name: "nowplaying"
@@ -549,6 +549,22 @@ MainAssistant.prototype.handleListClick = function(event) {
 			break;
 	}
 };
+
+/**
+ * Tells the media object to stop playing the current object.
+ */
+MainAssistant.prototype.stop = function() {
+	this.audioPlayer.pause();
+	this.clearSource();
+};
+
+/**
+ * Clears the Audio object and stops it from playing anything.
+ */
+MainAssistant.prototype.clearSource = function() {
+	this.audioPlayer.src = null;
+};
+
 
 MainAssistant.prototype.audioEvent = function(event) {
 	switch(event.type) {
