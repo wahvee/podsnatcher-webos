@@ -8,7 +8,9 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 	this.podcast = AppAssistant.db.podcastContainingItem(this.podcastItem.key);
 	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
 	this.playPauseBtnListener = this.handlePlayPauseToggle.bindAsEventListener(this);
+	this.timerUpdateSceneHandler = this.updateUIOnTimer.bind(this);
 	this.resume = this.podcastItem.currentTime > 0;
+	this.sceneUpdateTimer = undefined;
 
 	this.sliderAttributes = {
 		sliderProperty: "currentTime",
@@ -33,6 +35,9 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	this.playPauseElement = this.controller.get('play-pause-toggle');
 	this.forward = this.controller.get('fastforward');
 	this.back = this.controller.get('rewind');
+	this.timePlayed = this.controller.get('timePlayed');
+	this.timeRemaining = this.controller.get('timeRemaining');
+	this.progressSlider = this.controller.get("player-controls-slider");
 
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
 	var renderedInfo = Mojo.View.render(
@@ -54,7 +59,6 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	this.controller.get("now-playing-audio-scene-container").update(renderedInfo);
 
 	/* setup widgets here */
-	this.progressSlider = this.controller.get("player-controls-slider");
 	this.controller.setupWidget(
 		"player-controls-slider",
 		this.sliderAttributes,
@@ -73,27 +77,28 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	// Tell the audio object what to play
 	this.setSource();
 
-	if(this.isPlaying()) {
-		this.playPauseElement.removeClassName('play');
-		this.playPauseElement.addClassName('pause');
-	}
-
 	/* add event handlers to listen to events from widgets */
 };
 
 NowPlayingAudioAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
+	if(this.isPlaying()) {
+		this.playPauseElement.removeClassName('play');
+		this.playPauseElement.addClassName('pause');
+		this.timerToggle('start');
+	}
+
 	// Audio events
 	//this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEventListener);
-	this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEventListener);
 	this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEventListener);
-	this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEventListener);
-	this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEventListener);
 	this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEventListener);
 	this.audioPlayer.addEventListener(Media.Event.ERROR, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEventListener);
@@ -172,7 +177,18 @@ NowPlayingAudioAssistant.prototype.handlePlayPauseToggle = function(event) {
 	} else {
 		this.audioPlayer.play();
 	}
-}
+};
+
+/**
+ * Handle updating the UI elements like the slider position and the now
+ * playing times.
+ */
+NowPlayingAudioAssistant.prototype.updateUIOnTimer = function() {
+	if(this.isPlaying()) {
+		this.timePlayed.update(this.audioPlayer.currentTime.secondsToDuration());
+		this.timeRemaining.update((this.audioPlayer.duration - this.audioPlayer.currentTime).secondsToDuration());
+	}
+};
 
 NowPlayingAudioAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
@@ -213,6 +229,23 @@ NowPlayingAudioAssistant.prototype.deactivate = function(event) {
 NowPlayingAudioAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as
 	   a result of being popped off the scene stack */
+	// Stop the timer
+	this.timerToggle('stop');
+};
+
+NowPlayingAudioAssistant.prototype.timerToggle = function(action) {
+	try {
+		if((this.sceneUpdateTimer !== undefined && action == 'start') || action == 'stop') {
+			clearInterval(this.sceneUpdateTimer);
+			this.sceneUpdateTimer = undefined;
+		}
+
+		if(action == 'start') {
+			this.sceneUpdateTimer = setInterval(this.timerUpdateSceneHandler, 500);
+		}
+	} catch(error) {
+		Mojo.Log.error("[NowPlayingAudioAssistant.timerToggle] %s", error.message);
+	}
 };
 
 NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
@@ -237,11 +270,13 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 			// turn on the pause button
 			this.playPauseElement.removeClassName('play');
 			this.playPauseElement.addClassName('pause');
+			this.timerToggle('start');
 			break;
 		case Media.Event.PAUSE:
 			// turn on the play button
 			this.playPauseElement.removeClassName('pause');
 			this.playPauseElement.addClassName('play');
+			this.timerToggle('stop');
 			break;
 		//case Media.Event.ENDED:
 		//	this.stop();
