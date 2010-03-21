@@ -388,16 +388,14 @@ img#podsnatcher-logo {
 	background-image: url(../images/player-controls.png);
 	background-repeat: no-repeat;
 	margin: 0 auto;
-	padding-left: 36px;
-	padding-top: 4px;
-	width: 145px;
-	height: 26px;
+	width: 212px;
+	height: 35px;
 }
 #player-controls-slider-box {
 	background-color: #49708a;
-	opacity: 0.7;
+	opacity: 0.9;
 	width: 100%;
-	height: 55px; /* it's 75 instead of 12 because the div starts off the bottom of the page and slides up */
+	height: 35px; /* it's 75 instead of 12 because the div starts off the bottom of the page and slides up */
 	padding-top: 40px;
 }
 #player-controls-slider {
@@ -414,6 +412,7 @@ img#podsnatcher-logo {
 	margin-top: 13px;
 	background-color: #000000;
 	color: #ffffff;
+	font-weight: bold;
 }
 #timePlayed {
 	width: 40%;
@@ -430,29 +429,33 @@ img#podsnatcher-logo {
 	-webkit-transform: translate(0,-63px);
 	-webkit-transition: all .5s ease-in-out;*/
 }
+#buttons {
+	width: 144px;
+	margin: 0 auto;
+	padding-top: 6px;
+}
 #rewind {
 	background-image: url(../images/player-controls-rewind.png);
 	background-repeat: no-repeat;
-	width: 32px;
-	height: 24px;
+	width: 40px;
+	height: 30px;
 	float: left;
-	padding: 4px 6px 0px 6px;
 }
-#pause {
+.pause {
 	background-image: url(../images/player-controls-pause.png);
 	background-repeat: no-repeat;
-	width: 21px;
-	height: 25px;
+	width: 40px;
+	height: 30px;
 	float: left;
-	padding: 4px 6px 0px 6px;
+	margin-left: 12px;
+	margin-right: 12px;
 }
 #fastforward {
 	background-image: url(../images/player-controls-fastforward.png);
 	background-repeat: no-repeat;
-	width: 33px;
-	height: 24px;
+	width: 40px;
+	height: 30px;
 	float: left;
-	padding: 4px 6px 0px 6px;
 }
 /* END style for now-playing-audio scene */
 
