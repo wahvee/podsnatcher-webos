@@ -3,7 +3,6 @@ function MainAssistant() {
 	 * additional parameters (after the scene name) that were passed to pushScene. The reference
 	 * to the scene controller (this.controller) has not be established yet, so any initialization
 	 * that needs the scene controller should be done in the setup function below. */
-	this.uiUpdateTimer = undefined;
 	// Set the display to show new podcasts only
 	this.mode = MainAssistant.ListMode.New;
 	this.videoPlayer = {};
@@ -12,6 +11,9 @@ function MainAssistant() {
 	this.animationFinish = 500;
 	this.animationDuration = 0.25;
 	this.animationType = 'ease-in';
+
+	this.nowPlayingKey = '';
+	this.nowPlayingNode = undefined;
 
 	this.spinnerAttributes = {
 		spinnerSize: Mojo.Widget.spinnerLarge
@@ -35,6 +37,7 @@ function MainAssistant() {
 
 	// Setting up the event listener callbacks
 	this.downloadFunction = this.handleItemDownload.bind(this);
+	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
 }
 
 MainAssistant.prototype.setup = function() {
@@ -46,6 +49,7 @@ MainAssistant.prototype.setup = function() {
 	try {
 		//this.videoPlayer = $('video-object');
 		//this.videoPlayer = VideoTag.extendElement(this.videoPlayer, this.controller);
+		this.audioPlayer = this.controller.get("audio-element");
 
 		this.controller.setupWidget("updatingSpinner", this.spinnerAttributes, this.spinnerModel);
 		this.controller.setupWidget("episodeList", this.episodeListAttributes, this.episodeListModel);
@@ -85,6 +89,8 @@ MainAssistant.prototype.activate = function(event) {
 		this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
 		this.controller.listen(document, "shakeend", this.handleShaking.bindAsEventListener(this));
 		this.podcastDisplayUpdate();
+
+		this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEventListener);
 	} catch(eventErrors) {
 		Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
 	}
@@ -94,6 +100,7 @@ MainAssistant.prototype.activate = function(event) {
 MainAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
+	this.audioPlayer.stopObserving(Media.Event.TIMEUPDATE, this.audioEventListener);
 };
 
 MainAssistant.prototype.cleanup = function(event) {
@@ -110,6 +117,8 @@ MainAssistant.prototype.cleanup = function(event) {
 		this.controller.stopListening($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
 		this.controller.stopListening($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
 		this.controller.stopListening($('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
+
+		this.audioPlayer.stopObserving(Media.Event.TIMEUPDATE, this.audioEventListener);
 	} catch(eventErrors) {
 		Mojo.Log.error("[MainAssistant.cleanup] %s", eventErrors.message);
 	}
@@ -119,6 +128,10 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 	// If playing and the key matches the playing key set this item as the
 	// user's selected row. Should keep the UI up to date!!
 	// !!! VERY IMPORTANT !!!
+	if(itemModel.key === this.nowPlayingKey) {
+		this.nowPlayingNode = itemNode;
+	}
+
 	try {
 		// Setup the download btn listener
 		var downloadBtn = itemNode.select('.downloadButton')[0];
@@ -523,6 +536,8 @@ MainAssistant.prototype.handleListClick = function(event) {
 		case 'audio/mp3':
 		case 'audio/mpeg':
 			Mojo.Log.info("[MainAssistant.handleListClick] Playing Audio");
+			this.nowPlayingKey = nowPlaying.key;
+			this.nowPlayingNode = this.controller.get(nowPlaying.key);
 			// Push the audio scene and the pass the Podcast to play
 			this.controller.stageController.pushScene({
 				name: "now-playing-audio",
@@ -534,6 +549,16 @@ MainAssistant.prototype.handleListClick = function(event) {
 			break;
 	}
 };
+
+MainAssistant.prototype.audioEvent = function(event) {
+	switch(event.type) {
+		case Media.Event.TIMEUPDATE:
+			if(this.nowPlayingNode) {
+				this.nowPlayingNode.select('.episodeLength')[0].update(this.audioPlayer.currentTime.secondsToDuration());
+			}
+			break;
+	}
+}
 
 MainAssistant.ListMode = {};
 MainAssistant.ListMode.New = 'new';
