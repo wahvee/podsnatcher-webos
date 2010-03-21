@@ -7,6 +7,7 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 	this.podcastItem = podcastToPlay;
 	this.podcast = AppAssistant.db.podcastContainingItem(this.podcastItem.key);
 	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
+	this.resume = this.podcastItem.currentTime > 0;
 
 	this.sliderAttributes = {
 		modelProperty: 'value',
@@ -42,9 +43,10 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 		}
 	);
 
-	$('now-playing-audio-scene-container').update(renderedInfo);
+	this.controller.get("now-playing-audio-scene-container").update(renderedInfo);
 
 	/* setup widgets here */
+	this.progressSlider = this.controller.get("player-controls-slider");
 	this.controller.setupWidget(
 		"player-controls-slider",
 		this.sliderAttributes,
@@ -58,7 +60,7 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	// Instantiate the MediaExtension object
 	this.extObj = this.libs.mediaextension.MediaExtension.getInstance(this.audioPlayer);
 	// Set the media class
-	this.extObj.audioClass = "media";
+	this.extObj.audioClass = Media.AudioClass.MEDIA;
 
 	// Tell the audio object what to play
 	this.setSource();
@@ -70,29 +72,29 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
 	// Audio events
-	this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEventListener, false);
-	//this.audioPlayer.addEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEventListener, false);
-	//this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEventListener, false);
-	//this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener, false);
-	//this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEventListener, false);
-	//this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.ERROR, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEventListener, false);
-	//this.audioPlayer.addEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEventListener, false);
-	//this.audioPlayer.addEventListener(Media.Event.LOADEDMETADATA, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.LOADSTART, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.PAUSE, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.PLAY, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.PROGRESS, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.SEEKED, this.audioEventListener, false);
-	this.audioPlayer.addEventListener(Media.Event.SEEKING, this.audioEventListener, false);
-	//this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEventListener, false);
-	//this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEventListener, false);
-	//this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEventListener, false);
+	//this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.X_PALM_WATCHDOG, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.ABORT, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.ERROR, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.LOADEDMETADATA, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.LOADSTART, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.PAUSE, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.PLAY, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.PROGRESS, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.SEEKED, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.SEEKING, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEventListener);
+	//this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEventListener);
 };
 
 /**
@@ -120,7 +122,10 @@ NowPlayingAudioAssistant.prototype.isPlaying = function() {
  * Take the enclosure path from the podcast item object and set the HTML5 Audio object to play it.
  */
 NowPlayingAudioAssistant.prototype.setSource = function() {
-	if(this.audioPlayer.src !== this.podcastItem.getEnclosure()) {
+	//Mojo.Log.info("Audio Src: %s", this.audioPlayer.currentSrc);
+	//Mojo.Log.info("Podcast Src: %s", this.podcastItem.getEnclosure());
+	//Mojo.Log.info(Object.keys(this.audioPlayer));
+	if(this.audioPlayer.currentSrc !== this.podcastItem.getEnclosure()) {
 		this.clearSource();
 		this.audioPlayer.src = this.podcastItem.getEnclosure();
 		this.audioPlayer.load();
@@ -151,29 +156,29 @@ NowPlayingAudioAssistant.prototype.deactivate = function(event) {
 	this.podcastItem.savePosition(this.audioPlayer.currentTime);
 
 	// Clean-up all the events on the audio player object
-	this.audioPlayer.stopObserving(Media.Event.X_PALM_CONNECT, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.X_PALM_DISCONNECT, this.audioEventListener, false);
-	//this.audioPlayer.stopObserving(Media.Event.X_PALM_WATCHDOG, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.ABORT, this.audioEventListener, false);
-	//this.audioPlayer.stopObserving(Media.Event.CANPLAY, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.CANPLAYTHROUGH, this.audioEventListener, false);
-	//this.audioPlayer.stopObserving(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener, false);
-	//this.audioPlayer.stopObserving(Media.Event.DURATIONCHANGE, this.audioEventListener, false);
-	//this.audioPlayer.stopObserving(Media.Event.EMPTIED, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.ENDED, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.ERROR, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.LOAD, this.audioEventListener, false);
-	//this.audioPlayer.stopObserving(Media.Event.LOADEDFIRSTFRAME, this.audioEventListener, false);
-	//this.audioPlayer.stopObserving(Media.Event.LOADEDMETADATA, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.LOADSTART, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.PAUSE, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.PLAY, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.PROGRESS, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.SEEKED, this.audioEventListener, false);
-	this.audioPlayer.stopObserving(Media.Event.SEEKING, this.audioEventListener, false);
-	//this.audioPlayer.stopObserving(Media.Event.STALLED, this.audioEventListener, false);
-	//this.audioPlayer.stopObserving(Media.Event.TIMEUPDATE, this.audioEventListener, false);
-	//this.audioPlayer.stopObserving(Media.Event.WAITING, this.audioEventListener, false);
+	//this.audioPlayer.stopObserving(Media.Event.X_PALM_CONNECT, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.X_PALM_DISCONNECT, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.X_PALM_WATCHDOG, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.ABORT, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.CANPLAY, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.CANPLAYTHROUGH, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.DURATIONCHANGE, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.EMPTIED, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.ENDED, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.ERROR, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.LOAD, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.LOADEDFIRSTFRAME, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.LOADEDMETADATA, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.LOADSTART, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.PAUSE, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.PLAY, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.PROGRESS, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.SEEKED, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.SEEKING, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.STALLED, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.TIMEUPDATE, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.WAITING, this.audioEventListener);
 };
 
 NowPlayingAudioAssistant.prototype.cleanup = function(event) {
@@ -191,40 +196,51 @@ NowPlayingAudioAssistant.prototype.cleanup = function(event) {
 
 NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
         switch(event.type) {
-                //case Media.Event.X_PALM_CONNECT:
-                //        this.audioPlayerCanPlay = true;
-                //        break;
-                //case Media.Event.X_PALM_DISCONNECT:
-                //        this.audioPlayerCanPlay = false;
-                //        break;
-                //case Media.Event.LOADSTART:
-                //case Media.Event.LOAD:
-                //        break;
-                //case Media.Event.PROGRESS:
-                //        var totalDuration = this.audioPlayer.duration;
-                //        var bufferedMedia = this.audioPlayer.buffered.end();
-                //        if(bufferedMedia !== undefined) {
-                //                // Calculate percent complete
-                //                var percentage = (!isNaN(totalDuration) && !isNaN(bufferedMedia) && totalDuration !== 0) ? ((bufferedMedia / totalDuration) * 100) : 0;
-                //
-                //                // Update the UI
-                //                this.listItemUpdate(this.actionItems.nowPlayingModel.key, percentage);
-                //        }
-                //        break;
-                //case Media.Event.PLAY:
-                //        this.play();
-                //        break;
-                //case Media.Event.PAUSE:
-                //        Mojo.Log.info("[Media.Event.PAUSE] %s", this.audioPlayer.paused);
-                //        this.pause();
-                //        break;
-                //case Media.Event.ENDED:
-                //        this.stop();
-                //        break;
-			 case Media.Event.CANPLAYTHROUGH:
-				this.audioPlayer.play();
+			//case Media.Event.X_PALM_CONNECT:
+			//        this.audioPlayerCanPlay = true;
+			//        break;
+			//case Media.Event.X_PALM_DISCONNECT:
+			//        this.audioPlayerCanPlay = false;
+			//        break;
+			case Media.Event.DURATIONCHANGE:
 				break;
-			 case Media.Event.ERROR:
+			case Media.Event.PROGRESS:
+				var totalDuration = this.audioPlayer.duration;
+				var bufferedStart = this.audioPlayer.buffered.start(0);
+				var bufferedMedia = this.audioPlayer.buffered.end(0);
+				if(bufferedMedia !== undefined) {
+					// Calculate percent complete
+					var percentage = (!isNaN(totalDuration) && !isNaN(bufferedMedia) && totalDuration !== 0) ? bufferedMedia / totalDuration : 0;
+					var percentageStart = (!isNaN(totalDuration) && !isNaN(bufferedStart) && totalDuration !== 0) ? bufferedStart : 0;
+
+					Mojo.Log.info("[Media.Event.Progress] Start: %s, End: %s", percentageStart, percentage);
+
+					// Update the UI
+				}
+				break;
+			//case Media.Event.PLAY:
+			//        this.play();
+			//        break;
+			//case Media.Event.PAUSE:
+			//        Mojo.Log.info("[Media.Event.PAUSE] %s", this.audioPlayer.paused);
+			//        this.pause();
+			//        break;
+			//case Media.Event.ENDED:
+			//        this.stop();
+			//        break;
+			case Media.Event.CANPLAYTHROUGH:
+				// Check if we are supposed to jump to a specfic point
+				// If so do not start playing yet
+				if(!this.resume) {
+					this.audioPlayer.play();
+				} else if(this.resume && !this.isPlaying()) {
+					Mojo.Log.info("[NowPlayingAudioAssistant.Media.CANPLAYTHROUGH] Resuming at %s", this.podcastItem.currentTime);
+					this.audioPlayer.currentTime = this.podcastItem.currentTime;
+					this.audioPlayer.play();
+					this.resume = false;
+				}
+				break;
+			case Media.Event.ERROR:
 				//MediaError.MEDIA_ERR_ABORTED=1	Equals HTML5 aborted error value.
 				//MediaError.MEDIA_ERR_DECODE=2	Equals HTML5 decode error value.
 				//MediaError.MEDIA_ERR_NETWORK=3	Equals HTML5 network error value.
@@ -249,7 +265,7 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 				}
 				Mojo.Log.error("[NowPlayingAudioAssistant.Media.ERROR] %s", error);
 				break;
-                default:
+			default:
 				Mojo.Log.info("[NowPlayingAudioAssistant.audioEvent] %s", event.type);
 				break;
         }
