@@ -43,13 +43,13 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	var renderedInfo = Mojo.View.render(
 		{
 			object: {
-				title: this.podcast.title,
-				author: this.podcast.author,
-				category: this.podcast.category,
-				language: this.podcast.language,
-				copyright: this.podcast.copyright,
+				title: Mojo.Format.runTextIndexer(this.podcast.title),
+				author: Mojo.Format.runTextIndexer(this.podcast.author),
+				category: Mojo.Format.runTextIndexer(this.podcast.category),
+				language: Mojo.Format.runTextIndexer(this.podcast.language),
+				copyright: Mojo.Format.runTextIndexer(this.podcast.copyright),
 				image: this.podcast.getImage(),
-				episodeTitle: this.podcastItem.title,
+				episodeTitle: Mojo.Format.runTextIndexer(this.podcastItem.title),
 				episodeDescription: Mojo.Format.runTextIndexer(this.podcastItem.description)
 			},
 			template: 'now-playing-audio/now-playing-audio-scene-template'

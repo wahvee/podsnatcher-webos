@@ -7,12 +7,12 @@ function InfoAssistant(podcast) {
 	var renderedInfo = Mojo.View.render(
 		{
 			object: {
-				title: podcast.title,
-				author: podcast.author,
-				category: podcast.category,
-				language: podcast.language,
-				copyright: podcast.copyright,
-				description: podcast.description,
+				title: Mojo.Format.runTextIndexer(podcast.title),
+				author: Mojo.Format.runTextIndexer(podcast.author),
+				category: Mojo.Format.runTextIndexer(podcast.category),
+				language: Mojo.Format.runTextIndexer(podcast.language),
+				copyright: Mojo.Format.runTextIndexer(podcast.copyright),
+				description: Mojo.Format.runTextIndexer(podcast.description),
 				image: podcast.getImage()
 			},
 			template: 'info/info-scene-template'
