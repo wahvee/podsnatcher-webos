@@ -8,7 +8,7 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 	this.podcast = AppAssistant.db.podcastContainingItem(this.podcastItem.key);
 	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
 	this.playPauseBtnListener = this.handlePlayPauseToggle.bindAsEventListener(this);
-	this.timerUpdateSceneHandler = this.updateUIOnTimer.bind(this);
+	this.timerUpdateSceneHandler = this.updateSceneOnTimer.bind(this);
 	this.resume = this.podcastItem.currentTime > 0;
 	this.sceneUpdateTimer = undefined;
 
@@ -83,6 +83,7 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 NowPlayingAudioAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
+	// Make sure the Scene is displaying correct info when the scene
 	if(this.isPlaying()) {
 		this.playPauseElement.removeClassName('play');
 		this.playPauseElement.addClassName('pause');
@@ -183,7 +184,7 @@ NowPlayingAudioAssistant.prototype.handlePlayPauseToggle = function(event) {
  * Handle updating the UI elements like the slider position and the now
  * playing times.
  */
-NowPlayingAudioAssistant.prototype.updateUIOnTimer = function() {
+NowPlayingAudioAssistant.prototype.updateSceneOnTimer = function() {
 	if(this.isPlaying()) {
 		this.timePlayed.update(this.audioPlayer.currentTime.secondsToDuration());
 		this.timeRemaining.update((this.audioPlayer.duration - this.audioPlayer.currentTime).secondsToDuration());
@@ -250,6 +251,9 @@ NowPlayingAudioAssistant.prototype.timerToggle = function(action) {
 
 NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 	switch(event.type) {
+		case Media.Event.SEEKED:
+			this.updateSceneOnTimer();
+			break;
 		case Media.Event.PROGRESS:
 			var totalDuration = this.audioPlayer.duration;
 			var bufferedStart = this.audioPlayer.buffered.start(0);
