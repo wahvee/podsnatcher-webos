@@ -1,4 +1,5 @@
 [
+    {"source": "app/wahvee-progress-slider.js"},
     {"source": "app/lib/pfeed/pfeed.js"},
     {"source": "app/lib/pfeed/pfeed-item.js"},
     {"source": "app/lib/pfeed/prss-item.js"},

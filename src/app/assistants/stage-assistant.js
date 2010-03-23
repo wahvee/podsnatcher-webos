@@ -7,9 +7,10 @@ StageAssistant.prototype.setup = function() {
 
 	// Push the splash screen onto the stage
 	this.controller.pushScene({
-		name: "splash",
+		name: "now-playing-audio",
 		transition: Mojo.Transition.zoomFade
 	});
+	this.controller.setWindowOrientation("free");
 };
 
 // handleCommand - Setup handlers for menus:
