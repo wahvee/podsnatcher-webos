@@ -1,39 +1,32 @@
 #player-controls-slider {
 	width: 85%;
 	margin: 0 auto;
-	position: relative;
-	background-color: #EFEFEF;
-}
-
-.wahvee-progress-slider {
-	overflow: hidden;
 }
 
 .wahvee-progress-slider-btn {
-	width: 25px;
-	height: 25px;
+	width: 26px;
+	height: 26px;
 	float: left;
 	background-color: #0000FF;
-	/*overflow: hidden;*/
-	z-index: 2000;
+	z-index: 2;
 	position: relative;
 }
 
 .wahvee-progress-display {
-	height: 5px;
-	width: 100%;
+	height: 6px;
+	width: 75%;
 	float: left;
 	background-color: #FF0000;
-	z-index: 1000;
+	z-index: 1;
 	position: relative;
-	top: 0px;
 }
 
 .wahvee-progress-background {
-	height: 5px;
+	height: 6px;
 	width: 100%;
 	float: left;
 	background-color: #00FF00;
 	z-index: 0;
 	position: relative;
+	top: -16px;
 }
