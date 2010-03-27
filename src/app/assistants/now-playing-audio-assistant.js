@@ -13,7 +13,7 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 
 	this.sliderModel = {
 		currentTime: 0,
-		progressUpper: .1,
+		progressUpper: .5,
 		progressLower: 0
 	};
 }

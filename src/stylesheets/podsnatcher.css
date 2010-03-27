@@ -14,7 +14,7 @@
 
 .wahvee-progress-display {
 	height: 6px;
-	width: 75%;
+	width: 0%;
 	float: left;
 	background-color: #FF0000;
 	z-index: 1;

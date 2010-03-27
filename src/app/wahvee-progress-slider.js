@@ -33,5 +33,27 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		
 		// Add the generated HTML to the template
 		this.controller.element.update(html);
+		
+		this.setDownloadPercentage();
+	},
+	positionSlider: function() {
+	
+	},
+	setDownloadPercentage: function() {
+		var percentage = (this.controller.model[this.progressEndProperty] >= 0 && this.controller.model[this.progressEndProperty] <= 1) ? this.controller.model[this.progressEndProperty] : 1;
+		
+		Mojo.Log.info("Set percentage to: ", percentage * 100);
+		var progBar = this.controller.get(this.divPrefix + "-progress");
+		progBar.setStyle({
+			width: percentage * 100 + "%"
+		});
+	},
+	handleModelChanged: function() {
+		this.setDownloadPercentage();
+		this.set
+	},
+	handleSliderDrag: function(event) {
+		
+		Mojo.Event.send(this.controller.element, Mojo.Event.sliderDragStart);
 	}
 });
