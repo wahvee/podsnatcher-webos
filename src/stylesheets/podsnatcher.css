@@ -8,11 +8,12 @@
 .wahvee-progress-slider-btn {
 	width: 26px;
 	height: 26px;
-	margin-left: -13px;
+	margin: -16px 0 0 -13px;
 	float: left;
 	background-color: #0000FF;
 	z-index: 2;
 	position: relative;
+	opacity: 0.2;
 }
 
 .wahvee-progress-slider-brn-drag {
@@ -35,5 +36,4 @@
 	background-color: #00FF00;
 	z-index: 0;
 	position: relative;
-	top: -16px;
 }

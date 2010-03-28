@@ -42,6 +42,8 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		this.controller.listen(this.slider, Mojo.Event.dragEnd, this.dragStopHandler);
 		this.controller.listen(this.slider, Mojo.Event.dragging, this.draggingHandler);
 
+		Mojo.Drag.setupDropContainer(this.controller.element, this);
+
 		this.setDownloadPercentage();
 		this.setPositionSlider();
 	},
@@ -70,7 +72,14 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	 * When the user starts trying to drag the slider-btn, make it draggable.
 	 */
 	dragStartHandlerFunc: function(event) {
-		this.slider.addClassName("wahvee-progress-slider-brn-drag");
+		//this.slider.addClassName("wahvee-progress-slider-brn-drag");
+		Mojo.Drag.startDragging(this.controller.scene, this.slider, event.down, {
+			draggingClass: "wahvee-progress-slider-brn-drag",
+			preventVertical: true,
+			preventDropReset: true,
+			minHorizontalPixel: 0,
+			maxHorizontalPixel: 200
+		});
 	},
 	/**
 	 * function called whenever the item is first dragged over this container.
@@ -82,11 +91,14 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	 * function called whenever the item moves over this container.
 	 */
 	draggingHandlerFunc: function(event) {
-		event.stop();
-		event.target.setStyle({
-			left: 
-		});
-		Mojo.Log.info("[WahveeProgressSlider] Dragging");
+		//event.stop();
+		//event.target.setStyle({
+		//	left:
+		//});
+		//Mojo.Log.info("[WahveeProgressSlider] Dragging");
+	},
+	dragDrop: function(element) {
+	
 	},
 	cleanup: function() {
 		this.controller.stopListening(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
