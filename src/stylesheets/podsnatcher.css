@@ -1,15 +1,22 @@
 #player-controls-slider {
 	width: 85%;
 	margin: 0 auto;
+	
+	margin-top: 150px;
 }
 
 .wahvee-progress-slider-btn {
 	width: 26px;
 	height: 26px;
+	margin-left: -13px;
 	float: left;
 	background-color: #0000FF;
 	z-index: 2;
 	position: relative;
+}
+
+.wahvee-progress-slider-brn-drag {
+	background-color: #BF5FFF;
 }
 
 .wahvee-progress-display {

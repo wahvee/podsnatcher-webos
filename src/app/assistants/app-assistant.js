@@ -2,11 +2,11 @@ function AppAssistant(appController, params) {
 	AppAssistant.PodcastDownloadStage = "PodcastDownload";
 	AppAssistant.PodcastDownloadFinishStage = "PodcastFinished";
 	AppAssistant.showNowPlaying = false;
-};
+}
 
 AppAssistant.prototype.setup = function(event) {
 	// Test that MD5 is working properly.
-	if(!md5_vm_test()) {
+	if (!md5_vm_test()) {
 		Mojo.Log.error("[MD5] Failed");
 	} else {
 		Mojo.Log.info("[MD5] Passed");
@@ -31,38 +31,67 @@ AppAssistant.prototype.handleLaunch = function(launchParams) {
 	var stageController = Mojo.Controller.stageController;
 
 	// No parameters
-	if(launchParams.blank()) {
+	if (launchParams.blank()) {
 		// Check if the user just clicked the icon again
-		if(stageController) {
+		if (stageController) {
 			stageController.activate();
 		}
 	}
 };
 
 AppAssistant.prototype.handleLaunchParams = function(launchParams) {
-	Mojo.Log.info ("[AppAssistant.handleLaunchParams] %s", (launchParams.blank()) ? "launchParams is blank" : launchParams);
+	Mojo.Log.info("[AppAssistant.handleLaunchParams] %s", (launchParams.blank()) ? "launchParams is blank" : launchParams);
 
 };
 
 // Add a menu items for the main screen
-AppAssistant.appMenuAttr = {omitDefaultItems: true};
+AppAssistant.appMenuAttr = {
+	omitDefaultItems: true
+};
 AppAssistant.appMenuModel = {
 	visible: true,
 	items: [
 		Mojo.Menu.editItem,
-		{label: $L("Podcast Actions"), toggleCmd: 'podcast-actions', items: [
-			{label: $L("Add/Remove Podcasts ..."), command: 'do-add-remove'},
-			{label: $L("Update All Podcasts"), command: 'do-refresh-all'},
-			{label: $L("Refresh Album Art"), disabled: true, command: 'refresh-all-album-art'}
-		]},
-		{label: $L("Filter List"), toggleCmd: 'filter-list', items: [
-			{label: $L("Unheard"), command: 'set-show-new'},
-			{label: $L("Listened"), command: 'set-show-old'},
-			{label: $L("Downloaded"), command: 'set-show-downloaded'},
-		]},
+		{
+		label: $L("Podcast Actions"),
+		toggleCmd: 'podcast-actions',
+		items: [
+			{
+			label: $L("Add/Remove Podcasts ..."),
+			command: 'do-add-remove'
+		},
+			{
+			label: $L("Update All Podcasts"),
+			command: 'do-refresh-all'
+		},
+			{
+			label: $L("Refresh Album Art"),
+			disabled: true,
+			command: 'refresh-all-album-art'
+		}
+			]
+	},
+		{
+		label: $L("Filter List"),
+		toggleCmd: 'filter-list',
+		items: [
+			{
+			label: $L("Unheard"),
+			command: 'set-show-new'
+		},
+			{
+			label: $L("Listened"),
+			command: 'set-show-old'
+		},
+			{
+			label: $L("Downloaded"),
+			command: 'set-show-downloaded'
+		}
+			]
+	},
 		Mojo.Menu.prefsItem,
 		Mojo.Menu.helpItem
-	]
+		]
 };
 
 AppAssistant.addRemoveMenuModel = {
@@ -70,5 +99,5 @@ AppAssistant.addRemoveMenuModel = {
 	items: [
 		Mojo.Menu.editItem,
 		Mojo.Menu.helpItem
-	]
+		]
 };

@@ -3,6 +3,9 @@
  */
 Mojo.Widget.WahveeProgressSlider = Class.create({
 	initialize: function() {
+		this.dragStartHandler = this.dragStartHandlerFunc.bindAsEventListener(this);
+		this.dragStopHandler = this.dragStopHandlerFunc.bindAsEventListener(this);
+		this.draggingHandler = this.draggingHandlerFunc.bindAsEventListener(this);
 	},
 	setup: function() {
 		// The HTML element for this widget is found in...this.controller.element
@@ -11,49 +14,81 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		this.sliderValueProperty = this.controller.attributes.sliderProperty || "slider";
 		this.progressStartProperty = this.controller.attributes.progressStartProperty || "progressLowerValue";
 		this.progressEndProperty = this.controller.attributes.progressProperty || "progressUpperValue";
-		this.maxValue = this.controller.model.maxValue || 1;
-		this.minValue = this.controller.model.minValue || 0;
-		
+		this.sliderMaxValue = this.controller.model.sliderMaxValue || 1;
+		this.sliderMinValue = this.controller.model.sliderMinValue || 0;
+
 		// Now render the widget
 		this.renderWidget();
 	},
 	renderWidget: function() {
 		var sliderTemplate = "wahvee-progress-slider/wahvee-progress-slider";
-		var physicalWidthOfSlider = this.controller.element.getWidth();
-		var physicalHeightOfSlider = this.controller.element.getHeight();
-		
-		var html = Mojo.View.render(
-			{
-				object: {
-					divPrefix: this.divPrefix
-				},
-				template: sliderTemplate
-			}
-		);
-		
+		//var physicalHeightOfSlider = this.controller.element.getHeight();
+		var html = Mojo.View.render({
+			object: {
+				divPrefix: this.divPrefix
+			},
+			template: sliderTemplate
+		});
+
 		// Add the generated HTML to the template
 		this.controller.element.update(html);
-		
+		// Get the two elements to be drawn/positioned by this widget
+		this.background = this.controller.get(this.divPrefix + "-background");
+		this.progressBar = this.controller.get(this.divPrefix + "-progress");
+		this.slider = this.controller.get(this.divPrefix + "-slider-btn");
+
+		// Start listening for dragging of the slider button
+		this.controller.listen(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
+		this.controller.listen(this.slider, Mojo.Event.dragEnd, this.dragStopHandler);
+		this.controller.listen(this.slider, Mojo.Event.dragging, this.draggingHandler);
+
 		this.setDownloadPercentage();
+		this.setPositionSlider();
 	},
-	positionSlider: function() {
-	
+	setPositionSlider: function() {
+		this.sliderMaxValue = this.controller.model.sliderMaxValue || 1;
+		this.sliderMinValue = this.controller.model.sliderMinValue || 0;
+		var sliderValue = (this.controller.model[this.sliderValueProperty] >= this.sliderMinValue && this.controller.model[this.sliderValueProperty] <= this.sliderMaxValue) ? this.controller.model[this.sliderValueProperty] : this.sliderMaxValue;
+		//var physicalWidthOfSlider = this.controller.element.getWidth();
+		var percentage = sliderValue / this.sliderMaxValue;
+
+		this.slider.setStyle({
+			left: percentage * 100 + "%"
+		});
 	},
 	setDownloadPercentage: function() {
 		var percentage = (this.controller.model[this.progressEndProperty] >= 0 && this.controller.model[this.progressEndProperty] <= 1) ? this.controller.model[this.progressEndProperty] : 1;
-		
-		Mojo.Log.info("Set percentage to: ", percentage * 100);
-		var progBar = this.controller.get(this.divPrefix + "-progress");
-		progBar.setStyle({
+		this.progressBar.setStyle({
 			width: percentage * 100 + "%"
 		});
 	},
 	handleModelChanged: function() {
 		this.setDownloadPercentage();
-		this.set
+		this.setPositionSlider();
 	},
-	handleSliderDrag: function(event) {
-		
-		Mojo.Event.send(this.controller.element, Mojo.Event.sliderDragStart);
+	/**
+	 * When the user starts trying to drag the slider-btn, make it draggable.
+	 */
+	dragStartHandlerFunc: function(event) {
+		this.slider.addClassName("wahvee-progress-slider-brn-drag");
+	},
+	/**
+	 * function called whenever the item is first dragged over this container.
+	 */
+	dragStopHandlerFunc: function(event) {
+		this.slider.removeClassName("wahvee-progress-slider-brn-drag");
+	},
+	/**
+	 * function called whenever the item moves over this container.
+	 */
+	draggingHandlerFunc: function(event) {
+		event.stop();
+		event.target.setStyle({
+			left: 
+		});
+		Mojo.Log.info("[WahveeProgressSlider] Dragging");
+	},
+	cleanup: function() {
+		this.controller.stopListening(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
 	}
 });

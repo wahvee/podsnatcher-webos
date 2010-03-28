@@ -26,7 +26,7 @@ AddRemoveAssistant.prototype.setup = function() {
 		Mojo.Controller.stageController.setWindowOrientation("up");
 		this.controller.setupWidget("podcastList", this.podcastListAttributes, this.podcastListModel);
 		this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, addRemoveMenuModel);
-	} catch (func_error) {
+	} catch(func_error) {
 		Mojo.Log.error("[Create Widgets] %s", func_error.message);
 	}
 
@@ -35,7 +35,7 @@ AddRemoveAssistant.prototype.setup = function() {
 		this.controller.listen("podcastList", Mojo.Event.listTap, this.handleListTap.bindAsEventListener(this));
 		this.controller.listen("podcastList", Mojo.Event.listAdd, this.handleListAdd.bindAsEventListener(this));
 		//this.controller.listen("podcastList", Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
-	} catch (func_error) {
+	} catch(func_error) {
 		Mojo.Log.error("[Listening Setup] %s", func_error.message);
 	}
 };
