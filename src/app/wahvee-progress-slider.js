@@ -73,12 +73,14 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	 */
 	dragStartHandlerFunc: function(event) {
 		//this.slider.addClassName("wahvee-progress-slider-brn-drag");
+		var position = this.controller.element.positionedOffset();
+		var physicalWidthOfSlider = this.controller.element.getWidth();
 		Mojo.Drag.startDragging(this.controller.scene, this.slider, event.down, {
 			draggingClass: "wahvee-progress-slider-brn-drag",
 			preventVertical: true,
 			preventDropReset: true,
-			minHorizontalPixel: 0,
-			maxHorizontalPixel: 200
+			minHorizontalPixel: position.left,
+			maxHorizontalPixel: position.left + physicalWidthOfSlider
 		});
 	},
 	/**

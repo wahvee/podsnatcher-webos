@@ -13,7 +13,7 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 		sliderMinValue: 0,
 		sliderMaxValue: 100,
 		currentTime: 50,
-		progressUpper: 0.5,
+		progressUpper: 0,
 		progressLower: 0
 	};
 }
