@@ -60,8 +60,10 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	},
 	setDownloadPercentage: function() {
 		var percentage = (this.controller.model[this.progressEndProperty] >= 0 && this.controller.model[this.progressEndProperty] <= 1) ? this.controller.model[this.progressEndProperty] : 1;
+		var lowPercent = (this.controller.model[this.progressStartProperty] >= 0 && this.controller.model[this.progressStartProperty] <= 1) ? this.controller.model[this.progressStartProperty] : 1;
 		this.progressBar.setStyle({
-			width: percentage * 100 + "%"
+			left: lowPercent * 100 + "%", // Lower bound of the percentage
+			width: percentage * 100 + "%" // Upper bound of the percentage
 		});
 	},
 	handleModelChanged: function() {
@@ -93,16 +95,28 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	 * function called whenever the item moves over this container.
 	 */
 	draggingHandlerFunc: function(event) {
-		//event.stop();
-		//event.target.setStyle({
-		//	left:
-		//});
-		//Mojo.Log.info("[WahveeProgressSlider] Dragging");
+		var offset = event.target.getWidth() / 2;
+		this.determineSliderValue(event.target.offsetLeft + offset);
 	},
 	dragDrop: function(element) {
-	
+		var offset = element.getWidth() / 2;
+		this.determineSliderValue(element.offsetLeft + offset);
+	},
+	determineSliderValue: function(x) {
+		var position = this.controller.element.positionedOffset();
+		var physicalWidthOfSlider = this.controller.element.getWidth();
+		// Physical area able to allow sliding
+		this.sliderMaxValue = this.controller.model.sliderMaxValue || 1;
+		this.sliderMinValue = this.controller.model.sliderMinValue || 0;
+		var x1 = position.left;
+		var x2 = position.left + physicalWidthOfSlider;
+		var sliderValue = (((this.sliderMaxValue - this.sliderMinValue) * (x - x1)) / (x2 - x1)) + this.sliderMinValue;
+		this.controller.model[this.sliderValueProperty] = sliderValue;
+		Mojo.Event.send(this.controller.element, Mojo.Event.propertyChange, {value: this.controller.model[this.sliderValueProperty]});
 	},
 	cleanup: function() {
 		this.controller.stopListening(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
+		this.controller.stopListening(this.slider, Mojo.Event.dragEnd, this.dragStopHandler);
+		this.controller.stopListening(this.slider, Mojo.Event.dragging, this.draggingHandler);
 	}
 });
