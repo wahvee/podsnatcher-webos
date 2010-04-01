@@ -340,7 +340,7 @@ img#now-playing-audio-image {
 }
 #podcast-list .palm-row.palm-swipe-delete {
   background: none;
-  border-width: 24px 20px;                 
+  border-width: 24px 20px;
   -webkit-box-sizing: border-box;
   -webkit-border-image: url(../images/palm-delete.png) 24 20 24 20 repeat repeat;
 }
@@ -401,7 +401,6 @@ img#podsnatcher-logo {
 #player-controls-slider {
 	width: 85%;
 	margin: 0 auto;
-	background-color:#CC0033;
 }
 #playingTime {
 	width: 85%;

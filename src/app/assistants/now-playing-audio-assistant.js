@@ -6,6 +6,7 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 
 	this.podcastItem = podcastToPlay;
 	this.podcast = AppAssistant.db.podcastContainingItem(this.podcastItem.key);
+	this.seekingEventListener = this.userSeeking.bindAsEventListener(this);
 	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
 	this.playPauseBtnListener = this.handlePlayPauseToggle.bindAsEventListener(this);
 	this.timerUpdateSceneHandler = this.updateSceneOnTimer.bind(this);
@@ -78,6 +79,7 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	this.setSource();
 
 	/* add event handlers to listen to events from widgets */
+	this.controller.listen("player-controls-slider", Mojo.Event.propertyChange, this.seekingEventListener);
 };
 
 NowPlayingAudioAssistant.prototype.activate = function(event) {
@@ -98,11 +100,11 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 	//this.audioPlayer.addEventListener(Media.Event.CANPLAY, this.audioEventListener);
 	this.audioPlayer.addEventListener(Media.Event.CANPLAYTHROUGH, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener);
-	//this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.DURATIONCHANGE, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.EMPTIED, this.audioEventListener);
 	this.audioPlayer.addEventListener(Media.Event.ENDED, this.audioEventListener);
 	this.audioPlayer.addEventListener(Media.Event.ERROR, this.audioEventListener);
-	//this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEventListener);
+	this.audioPlayer.addEventListener(Media.Event.LOAD, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.LOADEDFIRSTFRAME, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.LOADEDMETADATA, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.LOADSTART, this.audioEventListener);
@@ -188,6 +190,8 @@ NowPlayingAudioAssistant.prototype.updateSceneOnTimer = function() {
 	if(this.isPlaying()) {
 		this.timePlayed.update(this.audioPlayer.currentTime.secondsToDuration());
 		this.timeRemaining.update((this.audioPlayer.duration - this.audioPlayer.currentTime).secondsToDuration());
+		this.sliderModel.currentTime = this.audioPlayer.currentTime;
+		this.controller.modelChanged(this.sliderModel);
 	}
 };
 
@@ -207,11 +211,11 @@ NowPlayingAudioAssistant.prototype.deactivate = function(event) {
 	//this.audioPlayer.stopObserving(Media.Event.CANPLAY, this.audioEventListener);
 	this.audioPlayer.stopObserving(Media.Event.CANPLAYTHROUGH, this.audioEventListener);
 	//this.audioPlayer.stopObserving(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.DURATIONCHANGE, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.DURATIONCHANGE, this.audioEventListener);
 	//this.audioPlayer.stopObserving(Media.Event.EMPTIED, this.audioEventListener);
 	this.audioPlayer.stopObserving(Media.Event.ENDED, this.audioEventListener);
 	this.audioPlayer.stopObserving(Media.Event.ERROR, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.LOAD, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.LOAD, this.audioEventListener);
 	//this.audioPlayer.stopObserving(Media.Event.LOADEDFIRSTFRAME, this.audioEventListener);
 	//this.audioPlayer.stopObserving(Media.Event.LOADEDMETADATA, this.audioEventListener);
 	//this.audioPlayer.stopObserving(Media.Event.LOADSTART, this.audioEventListener);
@@ -225,6 +229,7 @@ NowPlayingAudioAssistant.prototype.deactivate = function(event) {
 	this.audioPlayer.stopObserving(Media.Event.WAITING, this.audioEventListener);
 
 	this.controller.stopListening(this.playPauseElement, Mojo.Event.tap, this.playPauseBtnListener);
+	this.controller.stopListening("player-controls-slider", Mojo.Event.propertyChange, this.seekingEventListener);
 };
 
 NowPlayingAudioAssistant.prototype.cleanup = function(event) {
@@ -249,10 +254,23 @@ NowPlayingAudioAssistant.prototype.timerToggle = function(action) {
 	}
 };
 
+NowPlayingAudioAssistant.prototype.userSeeking = function(event) {
+	if(event.type === Mojo.Event.propertyChange) {
+		event.stop();
+		// Actually fast forward to the time
+		this.audioPlayer.currentTime = this.event.value;
+	}
+}
+
 NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 	switch(event.type) {
 		case Media.Event.SEEKED:
 			this.updateSceneOnTimer();
+			break;
+		case Media.Event.LOAD:
+			// Update the UI
+			this.sliderModel.progressUpper = 1;
+			this.controller.modelChanged(this.sliderModel);
 			break;
 		case Media.Event.PROGRESS:
 			var totalDuration = this.audioPlayer.duration;
@@ -267,6 +285,12 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 
 				// Update the UI
 				this.sliderModel.progressUpper = percentage;
+				this.controller.modelChanged(this.sliderModel);
+			}
+			break;
+		case Media.Event.DURATIONCHANGE:
+			if(!isNaN(this.audioPlayer.duration)) {
+				this.sliderModel.sliderMaxValue = this.audioPlayer.duration;
 				this.controller.modelChanged(this.sliderModel);
 			}
 			break;
