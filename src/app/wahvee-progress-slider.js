@@ -46,14 +46,18 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		this.setPositionSlider();
 	},
 	setPositionSlider: function() {
+		var position = this.controller.element.positionedOffset();
+		var physicalWidthOfSlider = this.controller.element.getWidth();
+		// Physical area able to allow sliding
 		this.sliderMaxValue = this.controller.model.sliderMaxValue || 1;
 		this.sliderMinValue = this.controller.model.sliderMinValue || 0;
+		var x1 = position.left;
+		var x2 = position.left + physicalWidthOfSlider;
 		var sliderValue = (this.controller.model[this.sliderValueProperty] >= this.sliderMinValue && this.controller.model[this.sliderValueProperty] <= this.sliderMaxValue) ? this.controller.model[this.sliderValueProperty] : this.sliderMaxValue;
-		//var physicalWidthOfSlider = this.controller.element.getWidth();
-		var percentage = sliderValue / this.sliderMaxValue;
+		var sliderXPos = (((x2 - x1) * (sliderValue - this.sliderMinValue)) / (this.sliderMaxValue - this.sliderMinValue)) + x1;
 
 		this.slider.setStyle({
-			left: percentage * 100 + "%"
+			left: sliderXPos + "px"
 		});
 	},
 	setDownloadPercentage: function() {
