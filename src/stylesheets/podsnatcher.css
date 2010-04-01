@@ -1,22 +1,22 @@
 #player-controls-slider {
 	width: 85%;
 	margin: 0 auto;
-	
 	margin-top: 150px;
 }
 
 .wahvee-progress-slider-btn {
 	width: 26px;
 	height: 26px;
-	margin: -16px 0 0 -13px;
-	float: left;
+	margin: 0 0 0 -13px;
 	background-color: #0000FF;
 	z-index: 2;
-	position: relative;
+	position: absolute;
+	top: 0px;
+	left: 0px;
 	opacity: 0.2;
 }
 
-.wahvee-progress-slider-brn-drag {
+.wahvee-progress-slider-btn-drag {
 	background-color: #BF5FFF;
 }
 
@@ -30,6 +30,12 @@
 }
 
 .wahvee-progress-background {
+	/** Margin is 10px because the height is 6px
+	 * this is then subtracted from the height of the button
+	 * which is 26px, which leaves 20px. Which is then divided
+	 * in half.
+	 */
+	margin-top: 10px;
 	height: 6px;
 	width: 100%;
 	float: left;

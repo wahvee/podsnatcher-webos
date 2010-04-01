@@ -4,7 +4,6 @@
 Mojo.Widget.WahveeProgressSlider = Class.create({
 	initialize: function() {
 		this.dragStartHandler = this.dragStartHandlerFunc.bindAsEventListener(this);
-		this.dragStopHandler = this.dragStopHandlerFunc.bindAsEventListener(this);
 		this.draggingHandler = this.draggingHandlerFunc.bindAsEventListener(this);
 	},
 	setup: function() {
@@ -39,7 +38,6 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 
 		// Start listening for dragging of the slider button
 		this.controller.listen(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
-		this.controller.listen(this.slider, Mojo.Event.dragEnd, this.dragStopHandler);
 		this.controller.listen(this.slider, Mojo.Event.dragging, this.draggingHandler);
 
 		Mojo.Drag.setupDropContainer(this.controller.element, this);
@@ -78,18 +76,13 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		var position = this.controller.element.positionedOffset();
 		var physicalWidthOfSlider = this.controller.element.getWidth();
 		Mojo.Drag.startDragging(this.controller.scene, this.slider, event.down, {
-			draggingClass: "wahvee-progress-slider-brn-drag",
+			draggingClass: "wahvee-progress-slider-btn-drag",
 			preventVertical: true,
 			preventDropReset: true,
 			minHorizontalPixel: position.left,
 			maxHorizontalPixel: position.left + physicalWidthOfSlider
 		});
-	},
-	/**
-	 * function called whenever the item is first dragged over this container.
-	 */
-	dragStopHandlerFunc: function(event) {
-		this.slider.removeClassName("wahvee-progress-slider-brn-drag");
+		Mojo.Event.send(this.controller.element, Mojo.Event.sliderDragStart); //allow applications to see this event
 	},
 	/**
 	 * function called whenever the item moves over this container.
@@ -98,10 +91,20 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		var offset = event.target.getWidth() / 2;
 		this.determineSliderValue(event.target.offsetLeft + offset);
 	},
+	/**
+	 * Called by the Mojo.Drag events.
+	 */
 	dragDrop: function(element) {
+		this.slider.removeClassName("wahvee-progress-slider-btn-drag");
 		var offset = element.getWidth() / 2;
 		this.determineSliderValue(element.offsetLeft + offset);
+		Mojo.Event.send(this.controller.element, Mojo.Event.sliderDragEnd); //allow applications to see this event
 	},
+	/**
+	 * Function is given an x position, this value must be greater than the minimum
+	 * slider position and less than the largest slider position. The value of the slider
+	 * is then created and the value is stored in the model.
+	 */
 	determineSliderValue: function(x) {
 		var position = this.controller.element.positionedOffset();
 		var physicalWidthOfSlider = this.controller.element.getWidth();
@@ -116,7 +119,6 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	},
 	cleanup: function() {
 		this.controller.stopListening(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
-		this.controller.stopListening(this.slider, Mojo.Event.dragEnd, this.dragStopHandler);
 		this.controller.stopListening(this.slider, Mojo.Event.dragging, this.draggingHandler);
 	}
 });
