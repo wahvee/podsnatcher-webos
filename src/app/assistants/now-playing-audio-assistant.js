@@ -7,8 +7,11 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 	this.podcastItem = podcastToPlay;
 	this.podcast = AppAssistant.db.podcastContainingItem(this.podcastItem.key);
 	this.seekingEventListener = this.userSeeking.bindAsEventListener(this);
+	this.seekedEventListener = this.userSeeked.bindAsEventListener(this);
 	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
 	this.playPauseBtnListener = this.handlePlayPauseToggle.bindAsEventListener(this);
+	this.forwardBtnListener = this.handleForwardButton.bindAsEventListener(this);
+	this.rewindBtnListener = this.handleRewindButton.bindAsEventListener(this);
 	this.timerUpdateSceneHandler = this.updateSceneOnTimer.bind(this);
 	this.resume = this.podcastItem.currentTime > 0;
 	this.sceneUpdateTimer = undefined;
@@ -35,7 +38,7 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
 	this.playPauseElement = this.controller.get('play-pause-toggle');
 	this.forward = this.controller.get('fastforward');
-	this.back = this.controller.get('rewind');
+	this.rewind = this.controller.get('rewind');
 	this.timePlayed = this.controller.get('timePlayed');
 	this.timeRemaining = this.controller.get('timeRemaining');
 	this.progressSlider = this.controller.get("player-controls-slider");
@@ -79,7 +82,6 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	this.setSource();
 
 	/* add event handlers to listen to events from widgets */
-	this.controller.listen("player-controls-slider", Mojo.Event.propertyChange, this.seekingEventListener);
 };
 
 NowPlayingAudioAssistant.prototype.activate = function(event) {
@@ -117,7 +119,12 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 	//this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEventListener);
 	this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEventListener);
 
+	this.controller.listen("player-controls-slider", Mojo.Event.propertyChange, this.seekedEventListener);
+	this.controller.listen("player-controls-slider", Mojo.Event.dragging, this.seekingEventListener);
+
 	this.controller.listen(this.playPauseElement, Mojo.Event.tap, this.playPauseBtnListener);
+	this.controller.listen(this.forward, Mojo.Event.tap, this.forwardBtnListener);
+	this.controller.listen(this.rewind, Mojo.Event.tap, this.rewindBtnListener);
 };
 
 /**
@@ -182,6 +189,22 @@ NowPlayingAudioAssistant.prototype.handlePlayPauseToggle = function(event) {
 	}
 };
 
+NowPlayingAudioAssistant.prototype.handleForwardButton = function(event) {
+	event.stop();
+	if(this.isPlaying()) {
+		this.audioPlayer.currentTime += 20;
+		this.audioPlayer.play();
+	}
+};
+
+NowPlayingAudioAssistant.prototype.handleRewindButton = function(event) {
+	event.stop();
+	if(this.isPlaying()) {
+		this.audioPlayer.currentTime -= 15;
+		this.audioPlayer.play();
+	}
+};
+
 /**
  * Handle updating the UI elements like the slider position and the now
  * playing times.
@@ -229,7 +252,10 @@ NowPlayingAudioAssistant.prototype.deactivate = function(event) {
 	this.audioPlayer.stopObserving(Media.Event.WAITING, this.audioEventListener);
 
 	this.controller.stopListening(this.playPauseElement, Mojo.Event.tap, this.playPauseBtnListener);
-	this.controller.stopListening("player-controls-slider", Mojo.Event.propertyChange, this.seekingEventListener);
+	this.controller.stopListening(this.forward, Mojo.Event.tap, this.forwardBtnListener);
+	this.controller.stopListening(this.rewind, Mojo.Event.tap, this.rewindBtnListener);
+	this.controller.stopListening("player-controls-slider", Mojo.Event.propertyChange, this.seekedEventListener);
+	this.controller.stopListening("player-controls-slider", Mojo.Event.dragging, this.seekingEventListener);
 };
 
 NowPlayingAudioAssistant.prototype.cleanup = function(event) {
@@ -247,7 +273,7 @@ NowPlayingAudioAssistant.prototype.timerToggle = function(action) {
 		}
 
 		if(action == 'start') {
-			this.sceneUpdateTimer = setInterval(this.timerUpdateSceneHandler, 500);
+			this.sceneUpdateTimer = setInterval(this.timerUpdateSceneHandler, 1000);
 		}
 	} catch(error) {
 		Mojo.Log.error("[NowPlayingAudioAssistant.timerToggle] %s", error.message);
@@ -255,11 +281,19 @@ NowPlayingAudioAssistant.prototype.timerToggle = function(action) {
 };
 
 NowPlayingAudioAssistant.prototype.userSeeking = function(event) {
-	if(event.type === Mojo.Event.propertyChange) {
-		event.stop();
-		// Actually fast forward to the time
-		this.audioPlayer.currentTime = this.event.value;
+	event.stop();
+	if(this.isPlaying()) {
+		this.audioPlayer.pause();
 	}
+	this.timePlayed.update(event.value.secondsToDuration());
+}
+
+NowPlayingAudioAssistant.prototype.userSeeked = function(event) {
+	event.stop();
+	Mojo.Log.info("[NowPlayingAudioAssistant.userSeeked] %s", event.value);
+	// Actually fast forward to the time
+	this.audioPlayer.currentTime = event.value;
+	this.timePlayed.update(event.value.secondsToDuration());
 }
 
 NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
@@ -281,7 +315,7 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 				var percentage = (!isNaN(totalDuration) && !isNaN(bufferedMedia) && totalDuration !== 0) ? bufferedMedia / totalDuration : 0;
 				var percentageStart = (!isNaN(totalDuration) && !isNaN(bufferedStart) && totalDuration !== 0) ? bufferedStart : 0;
 
-				Mojo.Log.info("[Media.Event.Progress] Start: %s, End: %s", percentageStart, percentage);
+				//Mojo.Log.info("[Media.Event.Progress] Start: %s, End: %s", percentageStart, percentage);
 
 				// Update the UI
 				this.sliderModel.progressUpper = percentage;
@@ -290,8 +324,8 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 			break;
 		case Media.Event.DURATIONCHANGE:
 			if(!isNaN(this.audioPlayer.duration)) {
-				this.sliderModel.sliderMaxValue = this.audioPlayer.duration;
-				this.controller.modelChanged(this.sliderModel);
+				// Set the maximum value to be the duration
+				$("player-controls-slider").mojo.updateDraggingArea(0, this.audioPlayer.duration);
 			}
 			break;
 		case Media.Event.PLAY:

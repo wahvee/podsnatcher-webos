@@ -5,7 +5,6 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	initialize: function() {
 		this.seeking = false;
 		this.dragStartHandler = this.dragStartHandlerFunc.bindAsEventListener(this);
-		this.draggingHandler = this.draggingHandlerFunc.bindAsEventListener(this);
 	},
 	setup: function() {
 		// The HTML element for this widget is found in...this.controller.element
@@ -49,7 +48,6 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 
 		// Start listening for dragging of the slider button
 		this.controller.listen(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
-		this.controller.listen(this.slider, Mojo.Event.dragging, this.draggingHandler);
 
 		Mojo.Drag.setupDropContainer(this.controller.element, this);
 
@@ -68,8 +66,11 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		var x2 = position.left + physicalWidthOfSlider;
 		var sliderModelValue = this.controller.model[this.sliderValueProperty];
 		var sliderValue = (sliderModelValue >= this.sliderMinValue && sliderModelValue <= this.sliderMaxValue) ? sliderModelValue : this.sliderMaxValue;
-		var sliderXPos = (((x2 - x1) * (sliderValue - this.sliderMinValue)) / this.sliderValDifference) + x1;
-
+		var xdiff = x2 - x1;
+		var slidOffset = sliderValue - this.sliderMinValue;
+		var sliderXPos = xdiff * slidOffset;
+		sliderXPos /= this.sliderValDifference;
+		sliderXPos += x1;
 		this.slider.setStyle({
 			left: sliderXPos + "px"
 		});
@@ -109,15 +110,16 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	/**
 	 * function called whenever the item moves over this container.
 	 */
-	draggingHandlerFunc: function(event) {
-		//this.determineSliderValue(event.target.offsetLeft + this.offset);
+	dragHover: function(element) {
+		var pos = this.determineSliderValue(this.slider.offsetLeft + this.offset);
+		Mojo.Event.send.defer(this.controller.element, Mojo.Event.dragging, {value: pos});
 	},
 	/**
 	 * Called by the Mojo.Drag events.
 	 */
 	dragDrop: function(element) {
 		this.slider.removeClassName("wahvee-progress-slider-btn-drag");
-		this.determineSliderValue(element.offsetLeft + this.offset);
+		this.updateModel();
 		Mojo.Event.send(this.controller.element, Mojo.Event.sliderDragEnd); //allow applications to see this event
 		this.seeking = false;
 	},
@@ -132,12 +134,21 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		// Physical area able to allow sliding
 		var x1 = position.left;
 		var x2 = position.left + physicalWidthOfSlider;
-		var sliderValue = ((this.sliderValDifference * (x - x1)) / (x2 - x1)) + this.sliderMinValue;
-		this.controller.model[this.sliderValueProperty] = sliderValue;
-		Mojo.Event.send(this.controller.element, Mojo.Event.propertyChange, {value: sliderValue});
+		var xdiff = x2 - x1;
+		var xoffset = x - x1;
+		var sliderValue = this.sliderValDifference * xoffset;
+		sliderValue /= xdiff;
+		sliderValue += this.sliderMinValue;
+		return sliderValue;
+	},
+	updateModel: function() {
+		var pos = this.determineSliderValue(this.slider.offsetLeft);
+		if (pos !== this.controller.model[this.sliderValueProperty]) {
+			this.controller.model[this.sliderValueProperty] = pos;
+			Mojo.Event.send(this.controller.element, Mojo.Event.propertyChange, {value: pos});
+		}
 	},
 	cleanup: function() {
 		this.controller.stopListening(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
-		this.controller.stopListening(this.slider, Mojo.Event.dragging, this.draggingHandler);
 	}
 });
