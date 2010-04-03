@@ -8,7 +8,8 @@
 	left: 0px;
 }
 
-.wahvee-progress-slider-btn-drag {
+.wahvee-progress-slider-btn-drag,
+.selected {
 	background-color: #BF5FFF;
 }
 
