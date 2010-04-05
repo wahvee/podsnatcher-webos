@@ -77,7 +77,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		});
 	},
 	setDownloadPercentage: function() {
-		var modelPercent = this.controller.model[this.progressEndProperty].toPrecision(3);
+		var modelPercent = this.controller.model[this.progressEndProperty].roundNumber(2);
 		var modelLowPercent = this.controller.model[this.progressStartProperty];
 		if(this.percent < modelPercent) {
 			this.percent = modelPercent;
