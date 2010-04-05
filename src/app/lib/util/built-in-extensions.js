@@ -26,6 +26,15 @@ if(typeof Number.secondsToDuration !== 'function') {
 	Mojo.Log.info("[Number.secondsToDuration] is defined.");
 }
 
+if(typeof Number.roundNumber !== 'function') {
+	Mojo.Log.info("[Number.roundNumber] is not defined.");
+	Number.prototype.roundNumber = function(dec) {
+		return Math.round( Math.round( this * Math.pow( 10, dec + 1 ) ) / Math.pow( 10, 1 ) ) / Math.pow(10, dec);
+	}
+} else {
+	Mojo.Log.info("[Number.roundNumber] is defined.");
+}
+
 // Add method to String to test if it is a valid pathname
 if(typeof String.isPath !== 'function') {
 	Mojo.Log.info("[String.isPath] is not defined.");

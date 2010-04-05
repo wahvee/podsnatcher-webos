@@ -15,6 +15,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		this.progressEndProperty = this.controller.attributes.progressProperty || "progressUpperValue";
 		this.sliderMaxValue = this.controller.attributes.sliderMaxValue || 1;
 		this.sliderMinValue = this.controller.attributes.sliderMinValue || 0;
+		this.percent = 0;
 		this.sliderValDifference = this.sliderMaxValue - this.sliderMinValue;
 		this.sliderPhysicalMax = 100;
 		this.sliderPhysicalMin = 0;
@@ -76,14 +77,15 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		});
 	},
 	setDownloadPercentage: function() {
-		var modelPercent = this.controller.model[this.progressEndProperty];
+		var modelPercent = this.controller.model[this.progressEndProperty].toPrecision(3);
 		var modelLowPercent = this.controller.model[this.progressStartProperty];
-		var percentage = (modelPercent >= 0 && modelPercent <= 1) ? modelPercent : 1;
-		var lowPercent = (modelLowPercent >= 0 && modelLowPercent <= 1) ? modelLowPercent : 1;
-		this.progressBar.setStyle({
-			left: lowPercent * 100 + "%", // Lower bound of the percentage
-			width: percentage * 100 + "%" // Upper bound of the percentage
-		});
+		if(this.percent < modelPercent) {
+			this.percent = modelPercent;
+			this.progressBar.setStyle({
+				//left: lowPercent * 100 + "%", // Lower bound of the percentage
+				width: modelPercent * 100 + "%" // Upper bound of the percentage
+			});
+		}
 	},
 	handleModelChanged: function() {
 		if(!this.seeking) {

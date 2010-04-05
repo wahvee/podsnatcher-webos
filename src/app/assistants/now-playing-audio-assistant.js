@@ -63,11 +63,6 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	this.controller.get("now-playing-audio-scene-container").update(renderedInfo);
 
 	/* setup widgets here */
-	this.controller.setupWidget(
-		"player-controls-slider",
-		this.sliderAttributes,
-		this.sliderModel
-	);
 
 	// Load the MediaExtension library
 	this.libs = MojoLoader.require({ name: "mediaextension", version: "1.0"});
@@ -77,6 +72,19 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	this.extObj = this.libs.mediaextension.MediaExtension.getInstance(this.audioPlayer);
 	// Set the media class
 	this.extObj.audioClass = Media.AudioClass.MEDIA;
+
+	// Fix for making the slider render correctly if resuming play-back screen
+	if(this.isPlaying()) {
+		Mojo.Log.error("Setting duration to: %s", this.audioPlayer.duration);
+		this.sliderModel.sliderMaxValue = this.audioPlayer.duration;
+		this.sliderModel.currentTime = this.audioPlayer.currentTime;
+	}
+
+	this.controller.setupWidget(
+		"player-controls-slider",
+		this.sliderAttributes,
+		this.sliderModel
+	);
 
 	// Tell the audio object what to play
 	this.setSource();
