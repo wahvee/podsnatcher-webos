@@ -97,6 +97,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	 * When the user starts trying to drag the slider-btn, make it draggable.
 	 */
 	dragStartHandlerFunc: function(event) {
+		event.stop();
 		this.seeking = true;
 		var position = this.controller.element.positionedOffset();
 		var physicalWidthOfSlider = this.controller.element.getWidth();
