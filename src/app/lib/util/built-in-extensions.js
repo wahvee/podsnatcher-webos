@@ -14,9 +14,9 @@ if (typeof Number.secondsToDuration !== 'function') {
 	Mojo.Log.info("[Number.secondsToDuration] is not defined.");
 	Number.prototype.secondsToDuration = function() {
 		// divide your field by seconds per hour (60*60) => hrs
-		var hour = Math.floor(this / 3600).toPaddedString(2);
+		var hour = (Math.floor(this / 3600) % 24).toPaddedString(2);
 		// divide rest by seconds per minute (60) => mins
-		var min = Math.floor(this / 60).toPaddedString(2);
+		var min = (Math.floor(this / 60) % 60).toPaddedString(2);
 		// divide rest by seconds per second (1) => secs
 		var sec = Math.floor(this % 60).toPaddedString(2);
 
