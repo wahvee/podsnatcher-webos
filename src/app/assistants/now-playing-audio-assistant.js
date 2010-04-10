@@ -6,6 +6,8 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 
 	this.podcastItem = podcastToPlay;
 	this.podcast = AppAssistant.db.podcastContainingItem(this.podcastItem.key);
+	this.minimize = this.deactivate.bindAsEventListener(this);
+	this.maximize = this.activate.bindAsEventListener(this);
 	this.seekingEventListener = this.userSeeking.bindAsEventListener(this);
 	this.seekedEventListener = this.userSeeked.bindAsEventListener(this);
 	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
@@ -90,6 +92,8 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	this.setSource();
 
 	/* add event handlers to listen to events from widgets */
+	this.controller.listen(this.controller.stageController.document, Mojo.Event.stageActivate, this.maximize);
+	this.controller.listen(this.controller.stageController.document, Mojo.Event.stageDeactivate, this.minimize);
 };
 
 NowPlayingAudioAssistant.prototype.activate = function(event) {
@@ -101,7 +105,7 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 		this.playPauseElement.addClassName('pause');
 		this.timerToggle('start');
 	}
-
+	
 	// Audio events
 	//this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEventListener);
@@ -126,7 +130,7 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 	this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEventListener);
 	this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEventListener);
-
+	
 	this.controller.listen("player-controls-slider", Mojo.Event.propertyChange, this.seekedEventListener);
 	this.controller.listen("player-controls-slider", Mojo.Event.dragging, this.seekingEventListener);
 
@@ -270,8 +274,8 @@ NowPlayingAudioAssistant.prototype.deactivate = function(event) {
 NowPlayingAudioAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as
 	   a result of being popped off the scene stack */
-	// Stop the timer
-	this.timerToggle('stop');
+	this.controller.stopListening(this.controller.stageController.document, Mojo.Event.stageActivate, this.maximize);
+	this.controller.stopListening(this.controller.stageController.document, Mojo.Event.stageDeactivate, this.minimize);
 };
 
 NowPlayingAudioAssistant.prototype.timerToggle = function(action) {
