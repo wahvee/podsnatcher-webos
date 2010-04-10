@@ -82,7 +82,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		if(this.percent < modelPercent) {
 			this.percent = modelPercent;
 			this.progressBar.setStyle({
-				left: lowPercent * 100 + "%", // Lower bound of the percentage
+				//left: modelLowPercent * 100 + "%", // Lower bound of the percentage
 				width: modelPercent * 100 + "%" // Upper bound of the percentage
 			});
 		}
