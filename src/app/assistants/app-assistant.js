@@ -23,7 +23,7 @@ AppAssistant.prototype.setup = function(event) {
  */
 AppAssistant.prototype.cleanup = function cleanup() {
 	// Clean-up all of the event listeners for the HTML5 Audio object
-	$("audio-element").stopObserving();
+	this.controller.get("audio-element").stopObserving();
 };
 
 AppAssistant.prototype.handleLaunch = function(launchParams) {

@@ -3,16 +3,15 @@ function SplashAssistant() {
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
-
-	// Give a status on the screen
-	this.status = $('status-text');
-	this.status.update("Connecting to Database");
 }
 
 SplashAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
 
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
+	// Give a status on the screen
+	this.status = this.controller.get('status-text');
+	this.status.update("Connecting to Database");
 
 	/* setup widgets here */
 

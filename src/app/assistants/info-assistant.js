@@ -19,7 +19,7 @@ function InfoAssistant(podcast) {
 		}
 	);
 
-	$('info-scene-container').update(renderedInfo);
+	this.controller.get('info-scene-container').update(renderedInfo);
 }
 
 InfoAssistant.prototype.setup = function() {

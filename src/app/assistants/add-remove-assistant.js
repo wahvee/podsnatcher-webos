@@ -83,5 +83,5 @@ AddRemoveAssistant.prototype.handleListDelete = function(event) {
 
 	// Notify that index was removed
 	// Updates the display
-	$("podcastList").mojo.noticeRemovedItems(event.index, 0);
+	this.controller.get("podcastList").mojo.noticeRemovedItems(event.index, 0);
 };

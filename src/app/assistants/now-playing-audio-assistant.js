@@ -229,7 +229,7 @@ NowPlayingAudioAssistant.prototype.updateSceneOnTimer = function() {
 NowPlayingAudioAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
-	   this.timerToggle('stop');
+	this.timerToggle('stop');
 
 	// Store the current playing position
 	Mojo.Log.info("[NowPlayingAudioAssistant.deactivate] Saving current position: %s", this.audioPlayer.currentTime);
@@ -334,7 +334,7 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 		case Media.Event.DURATIONCHANGE:
 			if(!isNaN(this.audioPlayer.duration)) {
 				// Set the maximum value to be the duration
-				$("player-controls-slider").mojo.updateDraggingArea(0, this.audioPlayer.duration);
+				this.controller.get("player-controls-slider").mojo.updateDraggingArea(0, this.audioPlayer.duration);
 			}
 			break;
 		case Media.Event.PLAY:

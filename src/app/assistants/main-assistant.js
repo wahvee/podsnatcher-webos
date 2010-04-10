@@ -47,7 +47,7 @@ MainAssistant.prototype.setup = function() {
 
 	/* setup widgets here */
 	try {
-		//this.videoPlayer = $('video-object');
+		//this.videoPlayer = this.controller.get('video-object');
 		//this.videoPlayer = VideoTag.extendElement(this.videoPlayer, this.controller);
 		this.audioPlayer = this.controller.get("audio-element");
 
@@ -61,13 +61,13 @@ MainAssistant.prototype.setup = function() {
 	/* add event handlers to listen to events from widgets */
 	try {
 		// Listen for user to flick the album-art to change podcasts
-		this.controller.listen($('album-art-area-right'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
-		this.controller.listen($('album-art-area-left'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
-		this.controller.listen($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
-		this.controller.listen($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
-		this.controller.listen($('album-art'), Mojo.Event.tap, this.handleAlbumArtTap.bindAsEventListener(this));
-		this.controller.listen($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
-		this.controller.listen($('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
+		this.controller.listen(this.controller.get('album-art-area-right'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
+		this.controller.listen(this.controller.get('album-art-area-left'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
+		this.controller.listen(this.controller.get('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
+		this.controller.listen(this.controller.get('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
+		this.controller.listen(this.controller.get('album-art'), Mojo.Event.tap, this.handleAlbumArtTap.bindAsEventListener(this));
+		this.controller.listen(this.controller.get('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
+		this.controller.listen(this.controller.get('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
 		// Update the display
 		this.podcastDisplayUpdate();
 		// Check if the DB needs to be forced to update
@@ -111,12 +111,12 @@ MainAssistant.prototype.cleanup = function(event) {
 		this.controller.stopListening(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
 		this.controller.stopListening(document, "shakeend", this.handleShaking.bindAsEventListener(this));
 
-		this.controller.stopListening($('album-art-area-right'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
-		this.controller.stopListening($('album-art-area-left'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
-		this.controller.stopListening($('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
-		this.controller.stopListening($('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
-		this.controller.stopListening($('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
-		this.controller.stopListening($('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
+		this.controller.stopListening(this.controller.get('album-art-area-right'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
+		this.controller.stopListening(this.controller.get('album-art-area-left'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
+		this.controller.stopListening(this.controller.get('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
+		this.controller.stopListening(this.controller.get('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
+		this.controller.stopListening(this.controller.get('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
+		this.controller.stopListening(this.controller.get('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
 
 		this.audioPlayer.stopObserving(Media.Event.TIMEUPDATE, this.audioEventListener);
 	} catch(eventErrors) {
@@ -178,7 +178,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 	// Protect from crashing
 	try {
 		// Get the item from the screen
-		var node = $(key);
+		var node = this.controller.get(key);
 
 		// Check to make sure the node trying to update
 		// is even currently drawn on the scene (list)
@@ -290,16 +290,16 @@ MainAssistant.prototype.handleItemDownload = function(event) {
 MainAssistant.prototype.podcastDisplayUpdate = function() {
 	try {
 		var currPodcast = AppAssistant.db.currentPodcast();
-		$('album-art').removeChild($('image'));
-		$('album-art').appendChild(new Element('img', {
+		this.controller.get('album-art').removeChild(this.controller.get('image'));
+		this.controller.get('album-art').appendChild(new Element('img', {
 			id: 'image',
 			src: (Object.isFunction(currPodcast.getImage)) ? currPodcast.getImage() : '',
 			alt: '',
 			height: '144px',
 			width: '144px'
 		}));
-		//$('episodeList').mojo.revealItem(0, true);
-		$('podcastTitle').update((currPodcast.title === undefined) ? "" : currPodcast.title);
+		//this.controller.get('episodeList').mojo.revealItem(0, true);
+		this.controller.get('podcastTitle').update((currPodcast.title === undefined) ? "" : currPodcast.title);
 
 		// Populate the list dependant upon the list mode
 		switch(this.mode) {
@@ -363,9 +363,9 @@ MainAssistant.prototype.handleAlbumArtTap = function(event) {
 MainAssistant.prototype.handleAlbumArtFlick = function(event) {
 	// Stop the event from propagating
 	event.stop();
-	var start = $("album-art").cumulativeOffset().left;
+	var start = this.controller.get("album-art").cumulativeOffset().left;
 	if(event.velocity.x >= 500) {
-		Mojo.Animation.animateStyle($("album-art"), 'left', 'bezier', {
+		Mojo.Animation.animateStyle(this.controller.get("album-art"), 'left', 'bezier', {
 			from: start,
 			to: this.animationFinish,
 			duration: this.animationDuration,
@@ -373,7 +373,7 @@ MainAssistant.prototype.handleAlbumArtFlick = function(event) {
 			onComplete: this.switchPodcast.bind(this, 'previous')
 		});
 	} else if(event.velocity.x <= - 500) {
-		Mojo.Animation.animateStyle($("album-art"), 'left', 'bezier', {
+		Mojo.Animation.animateStyle(this.controller.get("album-art"), 'left', 'bezier', {
 			from: start,
 			to: -this.animationFinish,
 			duration: this.animationDuration,
@@ -404,11 +404,11 @@ MainAssistant.prototype.switchPodcast = function(next) {
 		this.podcastDisplayUpdate();
 	}
 	// Move the image to it's new starting position
-	$('album-art').setStyle({
+	this.controller.get('album-art').setStyle({
 		left: start + "px"
 	});
 	// Perform the animation
-	Mojo.Animation.animateStyle($('album-art'), 'left', 'bezier', {
+	Mojo.Animation.animateStyle(this.controller.get('album-art'), 'left', 'bezier', {
 		from: start,
 		to: finish,
 		duration: this.animationDuration,
@@ -518,7 +518,7 @@ MainAssistant.prototype.handleListClick = function(event) {
 		case 'video/x-m4v':
 		case 'video/quicktime':
 			Mojo.Log.info("[MainAssistant.handleListClick] Playing Video");
-			//$('video-object').toggleClassName('video');
+			//this.controller.get('video-object').toggleClassName('video');
 			//this.videoPlayer.src = event.item.enclosure;
 			// Make sure the audio stops then play some videos
 			this.stop();
