@@ -82,7 +82,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		if(this.percent < modelPercent) {
 			this.percent = modelPercent;
 			this.progressBar.setStyle({
-				//left: lowPercent * 100 + "%", // Lower bound of the percentage
+				left: lowPercent * 100 + "%", // Lower bound of the percentage
 				width: modelPercent * 100 + "%" // Upper bound of the percentage
 			});
 		}
@@ -115,7 +115,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	 */
 	dragHover: function(element) {
 		var pos = this.determineSliderValue(this.slider.offsetLeft + this.offset);
-		Mojo.Event.send.defer(this.controller.element, Mojo.Event.dragging, {value: pos});
+		Mojo.Event.send(this.controller.element, Mojo.Event.dragging, {value: pos});
 	},
 	/**
 	 * Called by the Mojo.Drag events.
@@ -145,7 +145,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		return sliderValue;
 	},
 	updateModel: function() {
-		var pos = this.determineSliderValue(this.slider.offsetLeft);
+		var pos = this.determineSliderValue(this.slider.offsetLeft + this.offset);
 		if (pos !== this.controller.model[this.sliderValueProperty]) {
 			this.controller.model[this.sliderValueProperty] = pos;
 			Mojo.Event.send(this.controller.element, Mojo.Event.propertyChange, {value: pos});
