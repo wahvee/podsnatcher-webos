@@ -3,7 +3,9 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
-
+	this.animationDuration = 0.25;
+	this.animationType = 'ease-in';
+	this.controlShown = false;
 	this.podcastItem = podcastToPlay;
 	this.podcast = AppAssistant.db.podcastContainingItem(this.podcastItem.key);
 	this.minimize = this.deactivate.bindAsEventListener(this);
@@ -14,7 +16,9 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 	this.playPauseBtnListener = this.handlePlayPauseToggle.bindAsEventListener(this);
 	this.forwardBtnListener = this.handleForwardButton.bindAsEventListener(this);
 	this.rewindBtnListener = this.handleRewindButton.bindAsEventListener(this);
-	this.timerUpdateSceneHandler = this.updateSceneOnTimer.bind(this);
+	this.timerUpdateSceneHandler = this.updateSceneOnTimer.bindAsEventListener(this);
+	this.toggleControlAreaListener = this.handlePlayerAreaTap.bindAsEventListener(this);
+	this.hideControlAreaListener = this.handleSceneTap.bindAsEventListener(this);
 	this.resume = this.podcastItem.currentTime > 0;
 	this.sceneUpdateTimer = undefined;
 
@@ -38,12 +42,6 @@ function NowPlayingAudioAssistant(podcastToPlay) {
 
 NowPlayingAudioAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
-	this.playPauseElement = this.controller.get('play-pause-toggle');
-	this.forward = this.controller.get('fastforward');
-	this.rewind = this.controller.get('rewind');
-	this.timePlayed = this.controller.get('timePlayed');
-	this.timeRemaining = this.controller.get('timeRemaining');
-	this.progressSlider = this.controller.get("player-controls-slider");
 
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
 	var renderedInfo = Mojo.View.render(
@@ -65,6 +63,14 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	this.controller.get("now-playing-audio-scene-container").update(renderedInfo);
 
 	/* setup widgets here */
+	this.podcastDescription = this.controller.get('podcast-description');
+	this.playerControlArea = this.controller.get('player-controls-slider-area');
+	this.playPauseElement = this.controller.get('play-pause-toggle');
+	this.forward = this.controller.get('fastforward');
+	this.rewind = this.controller.get('rewind');
+	this.timePlayed = this.controller.get('timePlayed');
+	this.timeRemaining = this.controller.get('timeRemaining');
+	this.progressSlider = this.controller.get("player-controls-slider");
 
 	// Load the MediaExtension library
 	this.libs = MojoLoader.require({ name: "mediaextension", version: "1.0"});
@@ -90,6 +96,8 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 
 	// Tell the audio object what to play
 	this.setSource();
+	// Decide to show the player controls
+	this.togglePlayerControls(this.controlShown);
 
 	/* add event handlers to listen to events from widgets */
 	this.controller.listen(this.controller.stageController.document, Mojo.Event.stageActivate, this.maximize);
@@ -137,6 +145,10 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 	this.controller.listen(this.playPauseElement, Mojo.Event.tap, this.playPauseBtnListener);
 	this.controller.listen(this.forward, Mojo.Event.tap, this.forwardBtnListener);
 	this.controller.listen(this.rewind, Mojo.Event.tap, this.rewindBtnListener);
+
+	this.controller.listen(this.playerControlArea, Mojo.Event.tap, this.toggleControlAreaListener);
+	this.controller.listen(this.controller.stageController.document, Mojo.Event.tap, this.hideControlAreaListener);
+	this.controller.listen(this.podcastDescription, Mojo.Event.flick, this.hideControlAreaListener);
 };
 
 /**
@@ -218,6 +230,24 @@ NowPlayingAudioAssistant.prototype.handleRewindButton = function(event) {
 };
 
 /**
+ * ALways hides the player controls.
+ */
+NowPlayingAudioAssistant.prototype.handleSceneTap = function(event) {
+	if(this.controlShown) {
+		this.togglePlayerControls(false);
+	}
+};
+
+/**
+ * This method is used toggle if the player area is either showing
+ * or hiding.
+ */
+NowPlayingAudioAssistant.prototype.handlePlayerAreaTap = function(event) {
+	event.stop();
+	this.togglePlayerControls(!this.controlShown);
+};
+
+/**
  * Handle updating the UI elements like the slider position and the now
  * playing times.
  */
@@ -230,54 +260,10 @@ NowPlayingAudioAssistant.prototype.updateSceneOnTimer = function() {
 	}
 };
 
-NowPlayingAudioAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
-	this.timerToggle('stop');
-
-	// Store the current playing position
-	Mojo.Log.info("[NowPlayingAudioAssistant.deactivate] Saving current position: %s", this.audioPlayer.currentTime);
-	this.podcastItem.savePosition(this.audioPlayer.currentTime);
-
-	// Clean-up all the events on the audio player object
-	//this.audioPlayer.stopObserving(Media.Event.X_PALM_CONNECT, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.X_PALM_DISCONNECT, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.X_PALM_WATCHDOG, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.ABORT, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.CANPLAY, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.CANPLAYTHROUGH, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.DURATIONCHANGE, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.EMPTIED, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.ENDED, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.ERROR, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.LOAD, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.LOADEDFIRSTFRAME, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.LOADEDMETADATA, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.LOADSTART, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.PAUSE, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.PLAY, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.PROGRESS, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.SEEKED, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.SEEKING, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.STALLED, this.audioEventListener);
-	//this.audioPlayer.stopObserving(Media.Event.TIMEUPDATE, this.audioEventListener);
-	this.audioPlayer.stopObserving(Media.Event.WAITING, this.audioEventListener);
-
-	this.controller.stopListening(this.playPauseElement, Mojo.Event.tap, this.playPauseBtnListener);
-	this.controller.stopListening(this.forward, Mojo.Event.tap, this.forwardBtnListener);
-	this.controller.stopListening(this.rewind, Mojo.Event.tap, this.rewindBtnListener);
-	this.controller.stopListening("player-controls-slider", Mojo.Event.propertyChange, this.seekedEventListener);
-	this.controller.stopListening("player-controls-slider", Mojo.Event.dragging, this.seekingEventListener);
-};
-
-NowPlayingAudioAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as
-	   a result of being popped off the scene stack */
-	this.controller.stopListening(this.controller.stageController.document, Mojo.Event.stageActivate, this.maximize);
-	this.controller.stopListening(this.controller.stageController.document, Mojo.Event.stageDeactivate, this.minimize);
-};
-
+/**
+ * Function starts/stops the display update from happening.
+ * @param action {string} The acceptable values are either: start or stop. 'start' will start the display update; where 'stop' will stop it.
+ */
 NowPlayingAudioAssistant.prototype.timerToggle = function(action) {
 	try {
 		if((this.sceneUpdateTimer !== undefined && action == 'start') || action == 'stop') {
@@ -291,6 +277,29 @@ NowPlayingAudioAssistant.prototype.timerToggle = function(action) {
 	} catch(error) {
 		Mojo.Log.error("[NowPlayingAudioAssistant.timerToggle] %s", error.message);
 	}
+};
+
+/**
+ * Function shows or hides the player controls at the bottom of the screen. It stores
+ * the controlShown parameter to be whatever is passed in.
+ * @param show {boolean} If true shows the player controls, false hides them.
+ */
+NowPlayingAudioAssistant.prototype.togglePlayerControls = function(show) {
+	// Player controls are shown: bottom = 0;
+	// Player controls are hidden: bottom = -63px;
+	var startPosition = (!show) ? 0 : -63;
+	var endPosition = (show) ? 0 : -63;
+	this.controlShown = show;
+	//this.playerControlArea.setStyle({
+	//	bottom: endPosition + "px"
+	//});
+
+	Mojo.Animation.animateStyle(this.playerControlArea, 'bottom', 'bezier', {
+		from: startPosition,
+		to: endPosition,
+		duration: this.animationDuration,
+		curve: this.animationType
+	});
 };
 
 NowPlayingAudioAssistant.prototype.userSeeking = function(event) {
@@ -400,4 +409,52 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 			Mojo.Log.info("[NowPlayingAudioAssistant.audioEvent] %s", event.type);
 			break;
 	}
+};
+
+NowPlayingAudioAssistant.prototype.deactivate = function(event) {
+	/* remove any event handlers you added in activate and do any other cleanup that should happen before
+	   this scene is popped or another scene is pushed on top */
+	this.timerToggle('stop');
+
+	// Store the current playing position
+	Mojo.Log.info("[NowPlayingAudioAssistant.deactivate] Saving current position: %s", this.audioPlayer.currentTime);
+	this.podcastItem.savePosition(this.audioPlayer.currentTime);
+
+	// Clean-up all the events on the audio player object
+	//this.audioPlayer.stopObserving(Media.Event.X_PALM_CONNECT, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.X_PALM_DISCONNECT, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.X_PALM_WATCHDOG, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.ABORT, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.CANPLAY, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.CANPLAYTHROUGH, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.CANSHOWFIRSTFRAME, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.DURATIONCHANGE, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.EMPTIED, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.ENDED, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.ERROR, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.LOAD, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.LOADEDFIRSTFRAME, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.LOADEDMETADATA, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.LOADSTART, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.PAUSE, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.PLAY, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.PROGRESS, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.SEEKED, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.SEEKING, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.STALLED, this.audioEventListener);
+	//this.audioPlayer.stopObserving(Media.Event.TIMEUPDATE, this.audioEventListener);
+	this.audioPlayer.stopObserving(Media.Event.WAITING, this.audioEventListener);
+
+	this.controller.stopListening(this.playPauseElement, Mojo.Event.tap, this.playPauseBtnListener);
+	this.controller.stopListening(this.forward, Mojo.Event.tap, this.forwardBtnListener);
+	this.controller.stopListening(this.rewind, Mojo.Event.tap, this.rewindBtnListener);
+	this.controller.stopListening("player-controls-slider", Mojo.Event.propertyChange, this.seekedEventListener);
+	this.controller.stopListening("player-controls-slider", Mojo.Event.dragging, this.seekingEventListener);
+};
+
+NowPlayingAudioAssistant.prototype.cleanup = function(event) {
+	/* this function should do any cleanup needed before the scene is destroyed as
+	   a result of being popped off the scene stack */
+	this.controller.stopListening(this.controller.stageController.document, Mojo.Event.stageActivate, this.maximize);
+	this.controller.stopListening(this.controller.stageController.document, Mojo.Event.stageDeactivate, this.minimize);
 };
