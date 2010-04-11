@@ -299,6 +299,7 @@ NowPlayingAudioAssistant.prototype.userSeeking = function(event) {
 		this.audioPlayer.pause();
 	}
 	this.timePlayed.update(event.value.secondsToDuration());
+	this.timeRemaining.update((this.audioPlayer.duration - event.value).secondsToDuration());
 }
 
 NowPlayingAudioAssistant.prototype.userSeeked = function(event) {
@@ -306,7 +307,9 @@ NowPlayingAudioAssistant.prototype.userSeeked = function(event) {
 	Mojo.Log.info("[NowPlayingAudioAssistant.userSeeked] %s", event.value);
 	// Actually fast forward to the time
 	this.audioPlayer.currentTime = event.value;
+	this.audioPlayer.play();
 	this.timePlayed.update(event.value.secondsToDuration());
+	this.timeRemaining.update((this.audioPlayer.duration - event.value).secondsToDuration());
 }
 
 NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
