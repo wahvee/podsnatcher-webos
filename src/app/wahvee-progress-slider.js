@@ -3,7 +3,13 @@
  */
 Mojo.Widget.WahveeProgressSlider = Class.create({
 	initialize: function() {
+		this.sliderPhysicalMax = 100;
+		this.sliderPhysicalMin = 0;
+		this.offset = 0;
+		this.lastPos = 0;
+		this.percent = 0;
 		this.seeking = false;
+
 		this.dragStartHandler = this.dragStartHandlerFunc.bindAsEventListener(this);
 		this.draggingHandler = this.dragging.bindAsEventListener(this);
 	},
@@ -16,12 +22,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		this.progressEndProperty = this.controller.attributes.progressProperty || "progressUpperValue";
 		this.sliderMaxValue = this.controller.attributes.sliderMaxValue || 1;
 		this.sliderMinValue = this.controller.attributes.sliderMinValue || 0;
-		this.percent = 0;
 		this.sliderValDifference = this.sliderMaxValue - this.sliderMinValue;
-		this.sliderPhysicalMax = 100;
-		this.sliderPhysicalMin = 0;
-		this.offset = 0;
-		this.lastPos = 0;
 
 		// Now render the widget
 		this.renderWidget();
@@ -29,7 +30,11 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		// Make the dragging area expandable
 		this.controller.exposeMethods(['updateDraggingArea']);
 	},
+	/**
+	 * Sets up the widget for it's first time use on the screen.
+	 */
 	renderWidget: function() {
+		// Path to the template
 		var sliderTemplate = "wahvee-progress-slider/wahvee-progress-slider";
 		//var physicalHeightOfSlider = this.controller.element.getHeight();
 		var html = Mojo.View.render({
@@ -53,16 +58,26 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		this.controller.listen(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
 		this.controller.listen(this.slider, Mojo.Event.dragging, this.draggingHandler);
 
+		// Setup the container to do the drop positioning (keeps it within the bounds)
 		Mojo.Drag.setupDropContainer(this.controller.element, this);
 
+		// Update the download percentage drawn on screen and the slider percentage
 		this.setDownloadPercentage();
 		this.setPositionSlider();
 	},
+	/**
+	 * Function is called and sets the sliders min and max values. This does not effect,
+	 * their actual physical widths or postiions. It just affects the number that is
+	 * calculated and returned as the sliders value.
+	 */
 	updateDraggingArea: function(newMin, newMax) {
 		this.sliderMaxValue = newMax;
 		this.sliderMinValue = newMin;
 		this.sliderValDifference = this.sliderMaxValue - this.sliderMinValue;
 	},
+	/**
+	 * Actually positions the slider on the screen.
+	 */
 	setPositionSlider: function() {
 		var position = this.controller.element.positionedOffset();
 		var physicalWidthOfSlider = this.controller.element.getWidth();
@@ -79,6 +94,9 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 			left: sliderXPos + "px"
 		});
 	},
+	/**
+	 * Update the screen to show the download percentage.
+	 */
 	setDownloadPercentage: function() {
 		var modelPercent = this.controller.model[this.progressEndProperty].roundNumber(2);
 		var modelLowPercent = this.controller.model[this.progressStartProperty];
@@ -152,6 +170,10 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		sliderValue += this.sliderMinValue;
 		return sliderValue;
 	},
+	/**
+	 * @private
+	 * Cause the model to change. Send an event to anyone who is listening.
+	 */
 	updateModel: function() {
 		var pos = this.determineSliderValue(this.slider.offsetLeft + this.offset);
 		if (pos !== this.controller.model[this.sliderValueProperty]) {
@@ -159,6 +181,10 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 			Mojo.Event.send(this.controller.element, Mojo.Event.propertyChange, {value: pos});
 		}
 	},
+	/**
+	 * @private
+	 * This is about to be destroyed. So I need to remove the event listeners.
+	 */
 	cleanup: function() {
 		this.controller.stopListening(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
 		this.controller.stopListening(this.slider, Mojo.Event.dragging, this.draggingHandler);
