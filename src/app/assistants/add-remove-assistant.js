@@ -35,8 +35,8 @@ AddRemoveAssistant.prototype.setup = function() {
 		this.controller.listen("podcastList", Mojo.Event.listTap, this.handleListTap.bindAsEventListener(this));
 		this.controller.listen("podcastList", Mojo.Event.listAdd, this.handleListAdd.bindAsEventListener(this));
 		//this.controller.listen("podcastList", Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
-	} catch(func_error) {
-		Mojo.Log.error("[Listening Setup] %s", func_error.message);
+	} catch(listen_error) {
+		Mojo.Log.error("[Listening Setup] %s", listen_error.message);
 	}
 };
 

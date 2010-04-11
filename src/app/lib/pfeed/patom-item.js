@@ -27,7 +27,7 @@ var PAtomItem = Class.create(PFeedItem, {
 		prefix = prefix.toLowerCase();
 		var ns = {
 			"atom": "http://www.w3.org/2005/Atom"
-		}
+		};
 		return ns[prefix] || null;
 	}
 });

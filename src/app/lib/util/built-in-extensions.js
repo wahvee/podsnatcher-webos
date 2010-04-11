@@ -21,7 +21,7 @@ if (typeof Number.secondsToDuration !== 'function') {
 		var sec = Math.floor(this % 60).toPaddedString(2);
 
 		return hour + ":" + min + ":" + sec;
-	}
+	};
 } else {
 	Mojo.Log.info("[Number.secondsToDuration] is defined.");
 }
@@ -30,7 +30,7 @@ if (typeof Number.roundNumber !== 'function') {
 	Mojo.Log.info("[Number.roundNumber] is not defined.");
 	Number.prototype.roundNumber = function(dec) {
 		return Math.round(Math.round(this * Math.pow(10, dec + 1)) / Math.pow(10, 1)) / Math.pow(10, dec);
-	}
+	};
 } else {
 	Mojo.Log.info("[Number.roundNumber] is defined.");
 }
@@ -41,7 +41,7 @@ if (typeof String.isPath !== 'function') {
 	String.prototype.isPath = function() {
 		var regEx = new RegExp("/[^/]+$", "i");
 		return regEx.test(this);
-	}
+	};
 } else {
 	Mojo.Log.info("[String.isPath] is defined.");
 }
@@ -52,13 +52,13 @@ if (typeof Object.isBoolean !== 'function') {
 	Mojo.Log.info("[Object.isBoolean] is not defined.");
 	Object.isBoolean = function(o) {
 		return typeof o === 'boolean';
-	}
+	};
 } else {
 	Mojo.Log.info("[Object.isBoolean] is defined.");
 }
 
 function isNull(val) {
-	return (val == null);
+	return (val === null);
 }
 
 function createUUID() {

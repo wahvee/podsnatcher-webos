@@ -355,7 +355,7 @@ MainAssistant.prototype.handleAlbumArtTap = function(event) {
 		name: 'info',
 		transition: Mojo.Transition.zoomFade
 	},AppAssistant.db.currentPodcast());
-}
+};
 
 /**
  * If the user flicks the album art to switch to the next podcast.
@@ -445,6 +445,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 				break;
 		}
 	} else {
+		var msg;
 		switch(command.type) {
 			case PodcastStorage.SavingDatabaseFailure:
 				Mojo.Log.error("[MainAssistant.SavingDatabaseFailure] %s", command.error.message);
@@ -479,7 +480,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 						this.spinnerModel.spinning = false;
 						this.controller.modelChanged(this.spinnerModel);
 					}
-					var msg = "Update of " + command.podcast.key + " failed. " + command.message;
+					msg = "Update of " + command.podcast.key + " failed. " + command.message;
 					Mojo.Controller.errorDialog(msg);
 				} catch(error) {
 					Mojo.Log.error("[MainAssistant.PodcastUpdateFailure] %s", error.message);
@@ -496,7 +497,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 			case PFeedItem.CacheError:
 				// Something went wrong
 				this.listItemUpdate(command.key);
-				var msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed."
+				msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed.";
 				Mojo.Controller.errorDialog(msg);
 				break;
 			case PFeedItem.EnclosureCached:
@@ -567,14 +568,12 @@ MainAssistant.prototype.clearSource = function() {
 
 
 MainAssistant.prototype.audioEvent = function(event) {
-	switch(event.type) {
-		case Media.Event.TIMEUPDATE:
-			if(this.nowPlayingNode) {
-				this.nowPlayingNode.select('.episodeLength')[0].update(this.audioPlayer.currentTime.secondsToDuration());
-			}
-			break;
+	if(event.type === Media.Event.TIMEUPDATE) {
+		if(this.nowPlayingNode) {
+			this.nowPlayingNode.select('.episodeLength')[0].update(this.audioPlayer.currentTime.secondsToDuration());
+		}
 	}
-}
+};
 
 MainAssistant.ListMode = {};
 MainAssistant.ListMode.New = 'new';

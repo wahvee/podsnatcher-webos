@@ -175,7 +175,7 @@ Podcast.prototype.imgTicket = undefined;
  */
 Podcast.prototype.hasItems = function() {
 	return this.items.size() > 0;
-}
+};
 
 /**
  * Gets an array of the items in the database, that
@@ -214,7 +214,7 @@ Podcast.prototype.getNewItems = function (sortAscending) {
 	// Sort by date...
 	arr.sort((sortAscending) ? sortByDateAscending : sortByDateDescending);
 	return arr;
-}
+};
 
 /**
  * Gets an array of the items in the database that
@@ -247,13 +247,13 @@ Podcast.prototype.getDownloadedItems = function (sortAscending) {
 					title: item.title,
 					currentTime: item.currentTime.secondsToDuration()
 				}
-			)
+			);
 		}
 	});
 	// Sort by date...
 	arr.sort((sortAscending) ? sortByDateAscending : sortByDateDescending);
 	return arr;
-}
+};
 
 /**
  * Gets an array of the items in the database
@@ -286,13 +286,13 @@ Podcast.prototype.getListenedItems = function (sortAscending) {
 					title: item.title,
 					currentTime: item.currentTime.secondsToDuration()
 				}
-			)
+			);
 		}
 	});
 	// Sort by date...
 	arr.sort((sortAscending) ? sortByDateAscending : sortByDateDescending);
 	return arr;
-}
+};
 
 /**
  * Clears all cached info for this podcast, includes

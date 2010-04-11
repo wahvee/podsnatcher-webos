@@ -105,7 +105,7 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 		this.playPauseElement.addClassName('pause');
 		this.timerToggle('start');
 	}
-	
+
 	// Audio events
 	//this.audioPlayer.addEventListener(Media.Event.X_PALM_CONNECT, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.X_PALM_DISCONNECT, this.audioEventListener);
@@ -130,7 +130,7 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 	this.audioPlayer.addEventListener(Media.Event.STALLED, this.audioEventListener);
 	//this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEventListener);
 	this.audioPlayer.addEventListener(Media.Event.WAITING, this.audioEventListener);
-	
+
 	this.controller.listen("player-controls-slider", Mojo.Event.propertyChange, this.seekedEventListener);
 	this.controller.listen("player-controls-slider", Mojo.Event.dragging, this.seekingEventListener);
 
@@ -300,7 +300,7 @@ NowPlayingAudioAssistant.prototype.userSeeking = function(event) {
 	}
 	this.timePlayed.update(event.value.secondsToDuration());
 	this.timeRemaining.update((this.audioPlayer.duration - event.value).secondsToDuration());
-}
+};
 
 NowPlayingAudioAssistant.prototype.userSeeked = function(event) {
 	event.stop();
@@ -310,7 +310,7 @@ NowPlayingAudioAssistant.prototype.userSeeked = function(event) {
 	this.audioPlayer.play();
 	this.timePlayed.update(event.value.secondsToDuration());
 	this.timeRemaining.update((this.audioPlayer.duration - event.value).secondsToDuration());
-}
+};
 
 NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 	switch(event.type) {

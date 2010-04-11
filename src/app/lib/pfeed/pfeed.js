@@ -134,7 +134,7 @@ var PFeed = Class.create({
 			"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
 			"atom": "http://www.w3.org/2005/Atom",
 			"itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd"
-		}
+		};
 		return ns[prefix] || null;
 	}
 });
