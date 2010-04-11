@@ -5,6 +5,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	initialize: function() {
 		this.seeking = false;
 		this.dragStartHandler = this.dragStartHandlerFunc.bindAsEventListener(this);
+		this.draggingHandler = this.dragging.bindAsEventListener(this);
 	},
 	setup: function() {
 		// The HTML element for this widget is found in...this.controller.element
@@ -20,6 +21,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 		this.sliderPhysicalMax = 100;
 		this.sliderPhysicalMin = 0;
 		this.offset = 0;
+		this.lastPos = 0;
 
 		// Now render the widget
 		this.renderWidget();
@@ -49,6 +51,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 
 		// Start listening for dragging of the slider button
 		this.controller.listen(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
+		this.controller.listen(this.slider, Mojo.Event.dragging, this.draggingHandler);
 
 		Mojo.Drag.setupDropContainer(this.controller.element, this);
 
@@ -113,9 +116,14 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	/**
 	 * function called whenever the item moves over this container.
 	 */
-	dragHover: function(element) {
+	dragging: function(event) {
+		event.stop();
 		var pos = this.determineSliderValue(this.slider.offsetLeft + this.offset);
-		Mojo.Event.send(this.controller.element, Mojo.Event.dragging, {value: pos});
+		pos = pos.roundNumber(2);
+		if(this.lastPos != pos) {
+			this.lastPos = pos;
+			Mojo.Event.send(this.controller.element, Mojo.Event.dragging, {value: pos});
+		}
 	},
 	/**
 	 * Called by the Mojo.Drag events.
@@ -153,5 +161,6 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	},
 	cleanup: function() {
 		this.controller.stopListening(this.slider, Mojo.Event.dragStart, this.dragStartHandler);
+		this.controller.stopListening(this.slider, Mojo.Event.dragging, this.draggingHandler);
 	}
 });
