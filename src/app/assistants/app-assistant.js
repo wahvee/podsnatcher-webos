@@ -21,7 +21,7 @@ AppAssistant.prototype.setup = function(event) {
 /**
  * Called when the App is being distroyed.
  */
-AppAssistant.prototype.cleanup = function cleanup() {
+AppAssistant.prototype.cleanup = function() {
 	// Clean-up all of the event listeners for the HTML5 Audio object
 	this.controller.get("audio-element").stopObserving();
 };
