@@ -19,7 +19,7 @@ var Podcast = Class.create(PFeed, {
 		try {
 			// Call the initialize method of it's extended object
 			$super();
-			if(Object.isString(feedURL)) {
+			if (Object.isString(feedURL)) {
 				// Store path to feed URL
 				this.url = feedURL;
 				// MD5 Hash of feed URL (unique cookie ID)
@@ -30,11 +30,27 @@ var Podcast = Class.create(PFeed, {
 				this.copy(feedURL);
 			}
 
-			this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {podcast: this}, Mojo.Controller.stageController.document);
-			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {podcast: this}, Mojo.Controller.stageController.document);
-			this.podcastItemDeleted = Mojo.Event.make(Podcast.PodcastItemDeleted, {key: '', item: undefined}, Mojo.Controller.stageController.document);
-			this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {podcast: this}, Mojo.Controller.stageController.document);
-			this.imageCached = Mojo.Event.make(Podcast.ImageCached, {podcast: this}, Mojo.Controller.stageController.document);
+			this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {
+				podcast: this
+			},
+			Mojo.Controller.stageController.document);
+			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {
+				podcast: this
+			},
+			Mojo.Controller.stageController.document);
+			this.podcastItemDeleted = Mojo.Event.make(Podcast.PodcastItemDeleted, {
+				key: '',
+				item: undefined
+			},
+			Mojo.Controller.stageController.document);
+			this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {
+				podcast: this
+			},
+			Mojo.Controller.stageController.document);
+			this.imageCached = Mojo.Event.make(Podcast.ImageCached, {
+				podcast: this
+			},
+			Mojo.Controller.stageController.document);
 		} catch(error) {
 			Mojo.Log.error("[Podcast] %s", error.message);
 		}
@@ -64,7 +80,7 @@ var Podcast = Class.create(PFeed, {
 	 * @returns {string} A path to the album-art image. Either local or remote.
 	 */
 	getImage: function() {
-		if(this.isImageCached()) {
+		if (this.isImageCached()) {
 			return this.imgPath;
 		} else {
 			this.cacheImage();
@@ -81,16 +97,16 @@ var Podcast = Class.create(PFeed, {
 	 * @param key {string} The key to a podcast item that should be downloaded.
 	 */
 	cacheEnclosure: function(key) {
-	   var itemToCache = this.getItem(key);
-	   if(itemToCache) {
-			 itemToCache.cacheEnclosure();
-	   } else {
-			 Mojo.Log.error("[Podcast.cacheEnclosure] Cannot find key: %s", key);
-	   }
+		var itemToCache = this.getItem(key);
+		if (itemToCache) {
+			itemToCache.cacheEnclosure();
+		} else {
+			Mojo.Log.error("[Podcast.cacheEnclosure] Cannot find key: %s", key);
+		}
 	},
 	cancelCache: function(key) {
 		var itemToCache = this.getItem(key);
-		if(itemToCache) {
+		if (itemToCache) {
 			itemToCache.cancelCache();
 		} else {
 			Mojo.Log.error("[Podcast.cancelCache] Cannot find key: %s", key);
@@ -101,7 +117,7 @@ var Podcast = Class.create(PFeed, {
 	 */
 	clearCachedImage: function() {
 		try {
-			if(this.isImageCached()) {
+			if (this.isImageCached()) {
 				var mojoController = Mojo.Controller.stageController.activeScene();
 				mojoController.serviceRequest('palm://com.palm.downloadmanager', {
 					method: 'deleteDownloadedFile',
@@ -124,28 +140,28 @@ var Podcast = Class.create(PFeed, {
 	},
 	cacheImage: function() {
 		try {
-			 if(this.imgURL !== undefined && !this.imgURL.blank()) {
-			var mojoController = Mojo.Controller.stageController.activeScene();
-			mojoController.serviceRequest('palm://com.palm.downloadmanager', {
-				method: 'download',
-				parameters: {
-					target: this.imgURL,
-					targetDir: "/media/internal/PodSnatcher/.cache",
-					keepFilenameOnRedirect: true
-				},
-				onSuccess: function(response) {
-					if(response.returnValue) {
-						Mojo.Log.info("[Podcast.cacheImage] (%s) %s", response.ticket, response.target);
-						this.imgPath = response.target;
-						this.imgTicket = response.ticket;
-						Mojo.Controller.stageController.sendEventToCommanders(this.imageCached);
+			if (this.imgURL !== undefined && !this.imgURL.blank()) {
+				var mojoController = Mojo.Controller.stageController.activeScene();
+				mojoController.serviceRequest('palm://com.palm.downloadmanager', {
+					method: 'download',
+					parameters: {
+						target: this.imgURL,
+						targetDir: "/media/internal/PodSnatcher/.cache",
+						keepFilenameOnRedirect: true
+					},
+					onSuccess: function(response) {
+						if (response.returnValue) {
+							Mojo.Log.info("[Podcast.cacheImage] (%s) %s", response.ticket, response.target);
+							this.imgPath = response.target;
+							this.imgTicket = response.ticket;
+							Mojo.Controller.stageController.sendEventToCommanders(this.imageCached);
+						}
+					}.bind(this),
+					onFailure: function(e) {
+						Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s");
 					}
-				}.bind(this),
-				onFailure: function(e) {
-					Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s");
-				}
-			});
-			 }
+				});
+			}
 		} catch(error) {
 			Mojo.Log.error("[Podcast.cacheImage] Failed downloading album-art. %s", error.message);
 		}
@@ -183,8 +199,8 @@ Podcast.prototype.hasItems = function() {
  * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default false.
  * @returns {Array} An array that is either empty [] or filled.
  */
-Podcast.prototype.getNewItems = function (sortAscending) {
-	if(Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
+Podcast.prototype.getNewItems = function(sortAscending) {
+	if (Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
 		sortAscending = false;
 	}
 
@@ -200,15 +216,13 @@ Podcast.prototype.getNewItems = function (sortAscending) {
 	var arr = [];
 	// Loop all of the items
 	this.items.values().each(function(item, index) {
-		if(!item.listened) {
-			arr.push(
-				{
-					key: item.key,
-					date: item.published,
-					title: item.title,
-					currentTime: item.currentTime.secondsToDuration()
-				}
-			);
+		if (!item.listened) {
+			arr.push({
+				key: item.key,
+				date: item.published,
+				title: item.title,
+				currentTime: item.currentTime.secondsToDuration()
+			});
 		}
 	});
 	// Sort by date...
@@ -222,8 +236,8 @@ Podcast.prototype.getNewItems = function (sortAscending) {
  * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default false.
  * @returns {Array} An array that is either empty [] or filled.
  */
-Podcast.prototype.getDownloadedItems = function (sortAscending) {
-	if(Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
+Podcast.prototype.getDownloadedItems = function(sortAscending) {
+	if (Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
 		sortAscending = false;
 	}
 
@@ -239,15 +253,13 @@ Podcast.prototype.getDownloadedItems = function (sortAscending) {
 	var arr = [];
 	// Loop all of the items
 	this.items.values().each(function(item, index) {
-		if(item.isEnclosureCached()) {
-			arr.push(
-				{
-					key: item.key,
-					date: item.published,
-					title: item.title,
-					currentTime: item.currentTime.secondsToDuration()
-				}
-			);
+		if (item.isEnclosureCached()) {
+			arr.push({
+				key: item.key,
+				date: item.published,
+				title: item.title,
+				currentTime: item.currentTime.secondsToDuration()
+			});
 		}
 	});
 	// Sort by date...
@@ -261,8 +273,8 @@ Podcast.prototype.getDownloadedItems = function (sortAscending) {
  * @param {Boolean} Whether to sort array by date ascending (true) or descending (false). Default false.
  * @returns {Array} An array that is either empty [] or filled.
  */
-Podcast.prototype.getListenedItems = function (sortAscending) {
-	if(Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
+Podcast.prototype.getListenedItems = function(sortAscending) {
+	if (Object.isUndefined(sortAscending) || !Object.isBoolean(sortAscending)) {
 		sortAscending = false;
 	}
 
@@ -278,15 +290,13 @@ Podcast.prototype.getListenedItems = function (sortAscending) {
 	var arr = [];
 	// Loop all of the items
 	this.items.values().each(function(item, index) {
-		if(item.value.listened) {
-			arr.push(
-				{
-					key: item.key,
-					date: item.published,
-					title: item.title,
-					currentTime: item.currentTime.secondsToDuration()
-				}
-			);
+		if (item.listened) {
+			arr.push({
+				key: item.key,
+				date: item.published,
+				title: item.title,
+				currentTime: item.currentTime.secondsToDuration()
+			});
 		}
 	});
 	// Sort by date...
@@ -303,7 +313,8 @@ Podcast.prototype.clearAllCached = function() {
 	this.items.each(function(item, index) {
 		// Delete the downloaded things from each podcast
 		this.deleteItem(item.value.key, false);
-	}, this);
+	},
+	this);
 	// Delete the image/album-art
 	this.clearCachedImage();
 };
@@ -315,40 +326,40 @@ Podcast.prototype.clearAllCached = function() {
  */
 Podcast.prototype.addItem = function(objToAdd) {
 	var item;
-	if(this.type === 'rss') {
+	if (this.type === 'rss') {
 		item = new PRssItem(objToAdd);
-	} else if(this.type === 'atom') {
+	} else if (this.type === 'atom') {
 		item = new PAtomItem(objToAdd);
 	} else {
 		Mojo.Log.error("[Podcast.addItem] Uknown type: %s", this.type);
 	}
 
 	// If this object has been created, add it to the Hash.
-	if(!Object.isUndefined(item)) {
+	if (!Object.isUndefined(item)) {
 		this.items.set(item.key, item);
 	}
 };
 
 /**
-* Deletes a podcast item. This includes removing any cached info for the
-* given podcast item, and marking it as listened.
-* @param key {string} The key that represents a specific item.
-* @param sendEvent {Boolean} Opitional parameter. Should events be triggered? Default to true.
-*/
+ * Deletes a podcast item. This includes removing any cached info for the
+ * given podcast item, and marking it as listened.
+ * @param key {string} The key that represents a specific item.
+ * @param sendEvent {Boolean} Opitional parameter. Should events be triggered? Default to true.
+ */
 Podcast.prototype.deleteItem = function(key, sendEvent) {
-	if(Object.isUndefined(sendEvent) || isNull(sendEvent)) {
+	if (Object.isUndefined(sendEvent) || isNull(sendEvent)) {
 		sendEvent = true;
 	}
 	var itemToDelete = this.getItem(key);
 
-	if(itemToDelete !== undefined) {
+	if (itemToDelete !== undefined) {
 		Mojo.Log.info("[Podcast.deleteItem] Deleting %s", itemToDelete.title);
-		if(itemToDelete instanceof PFeedItem) {
+		if (itemToDelete instanceof PFeedItem) {
 			itemToDelete.markAsOld();
 			itemToDelete.removeCache(sendEvent);
 		}
 		// See if event should be sent
-		if(sendEvent) {
+		if (sendEvent) {
 			// Send event that the podcast is being deleted
 			this.podcastItemDeleted.key = itemToDelete.key;
 			this.podcastItemDeleted.item = itemToDelete;
@@ -366,14 +377,13 @@ Podcast.prototype.simpleObject = function() {
 	var clone = Object.clone(this);
 	var arrKeys = Object.keys(this);
 	arrKeys.each(function(key) {
-		if(!(Object.isString(clone[key]) || Object.isNumber(clone[key]) || Object.isHash(clone[key])) ||
-					(Object.isString(clone[key]) && clone[key].blank())) {
-				delete clone[key];
-			}
+		if (! (Object.isString(clone[key]) || Object.isNumber(clone[key]) || Object.isHash(clone[key])) || (Object.isString(clone[key]) && clone[key].blank())) {
+			delete clone[key];
+		}
 	});
 
 	// Items should be a Hash
-	if(clone.items instanceof Hash) {
+	if (clone.items instanceof Hash) {
 		var arr = [];
 		// Make an array of the items
 		clone.items.each(function(item, index) {
@@ -382,7 +392,9 @@ Podcast.prototype.simpleObject = function() {
 		// Delete the Hash
 		delete clone.items;
 		// Replaced as an array
-		Object.extend(clone, {items: arr});
+		Object.extend(clone, {
+			items: arr
+		});
 	}
 	return clone;
 };
@@ -402,14 +414,11 @@ Podcast.prototype.copy = function(objToExtendFrom) {
 		//    it is not undefined and is not null
 		//    and it is a String and not blank
 		//    or it is a Number
-		if(!Object.isUndefined(objToExtendFrom[key])
-			&& !isNull(objToExtendFrom[key])
-			&& ((Object.isString(objToExtendFrom[key]) && !objToExtendFrom[key].blank())
-				|| Object.isNumber(objToExtendFrom[key]))
-		) {
+		if (!Object.isUndefined(objToExtendFrom[key]) && !isNull(objToExtendFrom[key]) && ((Object.isString(objToExtendFrom[key]) && !objToExtendFrom[key].blank()) || Object.isNumber(objToExtendFrom[key]))) {
 			this[key] = objToExtendFrom[key];
 		}
-	}, this);
+	},
+	this);
 };
 
 /**
@@ -417,11 +426,11 @@ Podcast.prototype.copy = function(objToExtendFrom) {
  */
 Podcast.prototype.updateFeed = function(newUrl) {
 	// Set to path to feed if specified
-	if(Object.isString(newUrl) && !newUrl.blank()) {
-		this.url = newUrl;		// Store path to feed URL
+	if (Object.isString(newUrl) && !newUrl.blank()) {
+		this.url = newUrl; // Store path to feed URL
 	}
 	// Make sure the URL is not blank, and is set
-	if(Object.isString(this.url) && !this.url.blank()) {
+	if (Object.isString(this.url) && !this.url.blank()) {
 		var temp = new Ajax.Request(this.url, {
 			asynchronous: true,
 			method: 'get',
@@ -430,7 +439,7 @@ Podcast.prototype.updateFeed = function(newUrl) {
 			sanitizeJSON: false,
 			onSuccess: function(transport) {
 				try {
-					if(!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML) && transport.status === 200) {
+					if (!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML) && transport.status === 200) {
 						// Turn the XML response into a JSON Object
 						// PFeed method
 						this.parse(transport.responseXML);
@@ -440,15 +449,17 @@ Podcast.prototype.updateFeed = function(newUrl) {
 						// Check if we should be redirecting
 						// FIX FOR REDIRECTION ISSUE!
 						var redirect = transport.getHeader("Location");
-						if(!isNull(redirect)) {
+						if (!isNull(redirect)) {
 							Mojo.Log.info("[Podcast.updateFeed] Need to redirect %s", redirect);
 							this.updateFeed(redirect);
 						} else {
-							Object.extend(this.podcastUpdateFailure, {message: "(" + transport.status + ") XML was empty!"});
+							Object.extend(this.podcastUpdateFailure, {
+								message: "(" + transport.status + ") XML was empty!"
+							});
 							Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 						}
 					}
-				} catch (error) {
+				} catch(error) {
 					Mojo.Log.error("[Podcast.getFeed try catch error] %s", error.message);
 					Object.extend(this.podcastUpdateFailure, error);
 					Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
@@ -460,7 +471,7 @@ Podcast.prototype.updateFeed = function(newUrl) {
 			}.bind(this),
 			onLoading: function() {
 				Mojo.Controller.stageController.sendEventToCommanders(this.podcastStartUpdate);
-			}.bind(this)//,
+			}.bind(this) //,
 			//onInteractive: function() {
 			//	Mojo.Log.info("[Podcast.getFeed] onInteractive");
 			//}.bind(this)
