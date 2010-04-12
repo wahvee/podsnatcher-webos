@@ -9,7 +9,7 @@
 }
 
 .wahvee-progress-slider-btn-drag,
-.selected {
+.wahvee-progress-slider-btn-drag.selected {
 	background-color: #BF5FFF;
 }
 
