@@ -146,9 +146,11 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 	this.controller.listen(this.forward, Mojo.Event.tap, this.forwardBtnListener);
 	this.controller.listen(this.rewind, Mojo.Event.tap, this.rewindBtnListener);
 
+	// Listen for events to control the display or hiding of the player control area at the bottom of the screen
 	this.controller.listen(this.playerControlArea, Mojo.Event.tap, this.toggleControlAreaListener);
 	this.controller.listen(this.controller.stageController.document, Mojo.Event.tap, this.hideControlAreaListener);
 	this.controller.listen(this.podcastDescription, Mojo.Event.flick, this.hideControlAreaListener);
+	this.controller.listen(this.podcastDescription, Mojo.Event.dragStart, this.hideControlAreaListener);
 };
 
 /**
@@ -252,11 +254,15 @@ NowPlayingAudioAssistant.prototype.handlePlayerAreaTap = function(event) {
  * playing times.
  */
 NowPlayingAudioAssistant.prototype.updateSceneOnTimer = function() {
-	if(this.isPlaying()) {
+	// Check to make sure the control panel is on the stage,
+	// and make sure the user is playing something. Otherwise, stop screen updating, wasting battery
+	if(this.isPlaying() && this.controlShown) {
 		this.timePlayed.update(this.audioPlayer.currentTime.secondsToDuration());
 		this.timeRemaining.update((this.audioPlayer.duration - this.audioPlayer.currentTime).secondsToDuration());
 		this.sliderModel.currentTime = this.audioPlayer.currentTime;
 		this.controller.modelChanged(this.sliderModel);
+	} else {
+		this.timerToggle('stop');
 	}
 };
 
@@ -290,9 +296,17 @@ NowPlayingAudioAssistant.prototype.togglePlayerControls = function(show) {
 	var startPosition = (!show) ? 0 : -63;
 	var endPosition = (show) ? 0 : -63;
 	this.controlShown = show;
-	//this.playerControlArea.setStyle({
-	//	bottom: endPosition + "px"
-	//});
+
+	// Make sure the timer is running if the user is playing and control
+	// panel is showing
+	if(this.controlShown && this.isPlaying()) {
+		this.timerToggle('start');
+		this.audioPlayer.addEventListener(Media.Event.PROGRESS, this.audioEventListener);
+	} else {
+		// Stop listening for events
+		this.timerToggle('stop');
+		this.audioPlayer.stopObserving(Media.Event.PROGRESS, this.audioEventListener);
+	}
 
 	Mojo.Animation.animateStyle(this.playerControlArea, 'bottom', 'bezier', {
 		from: startPosition,
@@ -450,6 +464,11 @@ NowPlayingAudioAssistant.prototype.deactivate = function(event) {
 	this.controller.stopListening(this.rewind, Mojo.Event.tap, this.rewindBtnListener);
 	this.controller.stopListening("player-controls-slider", Mojo.Event.propertyChange, this.seekedEventListener);
 	this.controller.stopListening("player-controls-slider", Mojo.Event.dragging, this.seekingEventListener);
+
+	this.controller.stopListening(this.playerControlArea, Mojo.Event.tap, this.toggleControlAreaListener);
+	this.controller.stopListening(this.controller.stageController.document, Mojo.Event.tap, this.hideControlAreaListener);
+	this.controller.stopListening(this.podcastDescription, Mojo.Event.flick, this.hideControlAreaListener);
+	this.controller.stopListening(this.podcastDescription, Mojo.Event.dragStart, this.hideControlAreaListener);
 };
 
 NowPlayingAudioAssistant.prototype.cleanup = function(event) {
