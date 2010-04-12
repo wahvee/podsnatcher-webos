@@ -179,6 +179,7 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 	try {
 		// Get the item from the screen
 		var node = this.controller.get(key);
+		var itemModel = AppAssistant.db.getItem(key);
 
 		// Check to make sure the node trying to update
 		// is even currently drawn on the scene (list)
