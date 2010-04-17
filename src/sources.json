@@ -12,6 +12,7 @@
     {"source": "/usr/palm/frameworks/media/media.js"},
     {"source": "app/assistants/app-assistant.js"},
     {"source": "app/assistants/stage-assistant.js"},
+    {"source": "app/assistants/add-feed-assistant.js"},
     {
         "scenes": "main",
         "source": "app/assistants/main-assistant.js"
