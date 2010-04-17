@@ -19,6 +19,12 @@ function PodcastStorage(name) {
 				  (key, podcastKey, id, link, title, description, published, author, enclosure, enclosurePath, enclosureTicket, enclosureType, enclosureLength, listened, currentTime) \
 				  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
+	// SQL to delete the podcast from podcast table
+	this.sqlDeletePodcast = "DELETE FROM podcasts WHERE key = ?;";
+
+	// SQL to delete the podcast from the podcast_item table
+	this.sqlDeletePodcastItem = "DELETE FROM podcast_item WHERE podcastKey = ?;";
+
 	this.dbName = (name && Object.isString(name)) ? "ext:" + name : "ext:podSnatcherDb";
 	this.requiresUpdate = false;
 
@@ -28,20 +34,24 @@ function PodcastStorage(name) {
 
 	// Called when trying to connect to the database
 	this.connectToDatabaseEvent = Mojo.Event.make(PodcastStorage.ConnectionToDatabase, {});
-	this.failedConnectionToDatabaseEvent = Mojo.Event.make(PodcastStorage.FailedConnectionToDatabase, {error: undefined});
+	this.failedConnectionToDatabaseEvent = Mojo.Event.make(PodcastStorage.FailedConnectionToDatabase, {error: {}});
 
 	// Event called when program loaded for first time
 	this.firstRunEvent = Mojo.Event.make(PodcastStorage.FirstRun, {});
 
 	// Called when trying to load info from the database
 	this.loadingDatabaseSuccess = Mojo.Event.make(PodcastStorage.LoadingDatabaseSuccess, {});
-	this.loadingDatabaseFailure = Mojo.Event.make(PodcastStorage.LoadingDatabaseFailure, {error: undefined});
+	this.loadingDatabaseFailure = Mojo.Event.make(PodcastStorage.LoadingDatabaseFailure, {error: {}});
 
 	// Events to be called when saving
 	this.saveAllSuccess = Mojo.Event.make(PodcastStorage.SaveAllSuccess, {});
 	this.savePodcastSuccess = Mojo.Event.make(PodcastStorage.SavePodcastSuccess, {podcast: undefined});
 	this.savePodcastItemSuccess = Mojo.Event.make(PodcastStorage.SavePodcastItemSuccess, {item: undefined});
-	this.saveFailure = Mojo.Event.make(PodcastStorage.SaveFailure, {error: undefined});
+	this.saveFailure = Mojo.Event.make(PodcastStorage.SaveFailure, {error: {}});
+
+	// Events to be called when deleting
+	this.deletePodcastSuccess = Mojo.Event.make(PodcastStorage.DeletePodcastSuccess, {podcast: undefined});
+	this.deletePodcastFailure = Mojo.Event.make(PodcastStorage.DeletePodcastFailure, {error: {}});
 };
 
 /**
@@ -123,12 +133,15 @@ PodcastStorage.prototype.loadDatabase = function() {
 		}
 
 		// If no podcasts were created,
-		if(response.rows.length === 0) {
+		if(this.isFirstRun && response.rows.length === 0) {
 			this.loadingDatabaseFailure.error = {
 				code: 99,
 				message: "There are no podcasts in the database."
 			}
 			Mojo.Controller.stageController.sendEventToCommanders(this.loadingDatabaseFailure);
+		} else if(response.rows.length === 0) {
+			// Perform the event PodcastStorage.LoadingDatabaseSuccess
+			Mojo.Controller.stageController.sendEventToCommanders(this.loadingDatabaseSuccess);
 		}
 	}.bind(this);
 
@@ -249,6 +262,13 @@ PodcastStorage.prototype.previousPodcast = function() {
 };
 
 /**
+ * Detects if a Podcast is already in the database.
+ */
+PodcastStorage.prototype.podcastExists = function(key) {
+	return !Object.isUndefined(this.getPodcast(key));
+};
+
+/**
  * @private
  * Find a podcast by it's unique id (key). Returns
  * the instance of the podcast. Undefined if not found.
@@ -258,6 +278,54 @@ PodcastStorage.prototype.getPodcast = function(key) {
 	return this.listOfPodcasts.detect(function(podcast, index) {
 		return podcast.key === key;
 	});
+};
+
+/**
+ *@private
+ * Deletes an entire podcast from the database. This will permenantly erase
+ * all data and will not be recoverable.
+ * @param key {string} The key of the podcast to be deleted.
+ */
+PodcastStorage.prototype._deletePodcast = function(key) {
+	// Get the podcast instance to be deleted
+	var podcast = this.getPodcast(key);
+
+	var onSuccess = function(tx, response) {
+		// Event to let it be known that the podcast was deleted
+		this.deletePodcastSuccess.podcast = podcast;
+		Mojo.Controller.stageController.sendEventToCommanders(this.deletePodcastSuccess);
+	}.bind(this);
+
+	var onFailure = function(tx, error) {
+		// error.message is a human-readable string
+		// error.code is a numeric error code
+		Mojo.Log.error("[PodcastStorage._deletePodcast] (%i) Oops. Error was %s", error.code, error.message);
+		Object.extend(this.deletePodcastFailure.error, error);
+		Mojo.Controller.stageController.sendEventToCommanders(this.deletePodcastFailure);
+	}.bind(this);
+
+	// Actually perform the deletion from the database
+	this.db.transaction(
+		function(tx) {
+			tx.executeSql(
+				this.sqlDeletePodcast,
+				[
+					podcast.key
+				],
+				null,
+				onFailure
+			);
+
+			tx.executeSql(
+				this.sqlDeletePodcastItem,
+				[
+					podcast.key
+				],
+				onSuccess,
+				onFailure
+			);
+		}.bind(this)
+	);
 };
 
 /**
@@ -362,6 +430,29 @@ PodcastStorage.prototype.savePodcast = function(key, triggerSaveAll, saveOnlyPod
 };
 
 /**
+ * Function takes in a URL and then tries to add it to the user's database.
+ * Checks to make sure the URL does not already exist in the datbase, and that the url
+ * parameter is indeed a URL.
+ * @param url {string} The URL to the podcast feed.
+ * @param title {stirng} Optional value that will over-ride whatever the title is from the feed.
+ * @param autoDelete {boolean} Delete the cached object once completed playing.
+ * @param numToKeepCached {Number} The number of cached items to keep on hand.
+ * @returns True if it can be added to the database, false if it cannot.
+ */
+PodcastStorage.prototype.addNewPodcast= function(url, title, autoDelete, numToKeepCached) {
+	var hash = hex_md5(url);
+
+	if(!this.podcastExists(hash) && url.isUrl()) {
+		Mojo.Log.info("Can add this podcast!");
+
+		return hash;
+	} else {
+		return undefined;
+	}
+
+};
+
+/**
  * Deletes a podcast from the db. Clears all cached information
  * as well.
  */
@@ -371,14 +462,15 @@ PodcastStorage.prototype.deletePodcast = function(key) {
 		var podcastToDelete = this.getPodcast(key);
 		// Check if podcast found
 		if(podcastToDelete) {
+			Mojo.Log.error("I'm here!");
 			// Get the index of the podcast to be deleted
 			var podcastIndex = this.listOfPodcasts.indexOf(podcastToDelete);
 			// Tell it to delete all of it's cached information
 			podcastToDelete.clearAllCached();
+			// Save the db
+			this._deletePodcast(key);
 			// Delete that object from the array
 			this.listOfPodcasts.splice(podcastIndex, 1);
-			// Save the db
-			// TODO: Implement delete from database
 		}
 	} catch(error) {
 		Mojo.Log.error("[PodcastStorage.deletePodcast] %s", error.message);
@@ -643,6 +735,9 @@ PodcastStorage.SaveAllSuccess = 'onDBSaveSuccess';
 PodcastStorage.SavePodcastSuccess = 'onSavePodcastSuccess';
 PodcastStorage.SavePodcastItemSuccess = 'onSavePodcastItemSuccess';
 PodcastStorage.SavingDatabaseFailure = 'onDBSaveFailure';
+
+PodcastStorage.DeletePodcastSuccess = 'onDBDeletePodcastSuccess';
+PodcastStorage.DeletePodcastFailure = 'onDBDeletePodcastFailure';
 
 PodcastStorage.LoadingDatabaseSuccess = 'onDBLoadSuccess';
 PodcastStorage.LoadingDatabaseFailure = 'onDBLoadFailure';

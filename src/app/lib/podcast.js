@@ -312,7 +312,7 @@ Podcast.prototype.clearAllCached = function() {
 	// Loop all of the items
 	this.items.each(function(item, index) {
 		// Delete the downloaded things from each podcast
-		this.deleteItem(item.value.key, false);
+		this.markAsListened(item.value.key, false);
 	},
 	this);
 	// Delete the image/album-art
@@ -341,12 +341,12 @@ Podcast.prototype.addItem = function(objToAdd) {
 };
 
 /**
- * Deletes a podcast item. This includes removing any cached info for the
- * given podcast item, and marking it as listened.
+ * Marks the item given by key as listened. Additionally, the function also
+ * removes any cached info for the given podcast item.
  * @param key {string} The key that represents a specific item.
  * @param sendEvent {Boolean} Opitional parameter. Should events be triggered? Default to true.
  */
-Podcast.prototype.deleteItem = function(key, sendEvent) {
+Podcast.prototype.markAsListened = function(key, sendEvent) {
 	if (Object.isUndefined(sendEvent) || isNull(sendEvent)) {
 		sendEvent = true;
 	}

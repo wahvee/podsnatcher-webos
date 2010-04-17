@@ -257,7 +257,7 @@ MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNo
  */
 MainAssistant.prototype.handleListDelete = function(event) {
 	// event.item.key
-	AppAssistant.db.currentPodcast().deleteItem(event.item.key);
+	AppAssistant.db.currentPodcast().markAsListened(event.item.key, true);
 };
 
 MainAssistant.prototype.handleItemDownload = function(event) {

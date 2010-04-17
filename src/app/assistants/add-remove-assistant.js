@@ -34,7 +34,7 @@ AddRemoveAssistant.prototype.setup = function() {
 	try {
 		this.controller.listen("podcastList", Mojo.Event.listTap, this.handleListTap.bindAsEventListener(this));
 		this.controller.listen("podcastList", Mojo.Event.listAdd, this.handleListAdd.bindAsEventListener(this));
-		//this.controller.listen("podcastList", Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
+		this.controller.listen("podcastList", Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
 	} catch(listen_error) {
 		Mojo.Log.error("[Listening Setup] %s", listen_error.message);
 	}
@@ -68,8 +68,14 @@ AddRemoveAssistant.prototype.handleListTap = function(event) {
  */
 AddRemoveAssistant.prototype.handleListAdd = function(event) {
 	event.stop();
-	Mojo.Log.info("[AddRemoveAssistant.handleListTap]");
+	Mojo.Log.info("[AddRemoveAssistant.handleListAdd]");
 
+	this.controller.showDialog({
+		template: 'add-remove/add-feed-dialog',
+		assistant: new AddFeedAssistant(this)
+	});
+
+	//Mojo.Controller.errorDialog("Ok");
 	// Change the model
 	this.controller.modelChanged(this.podcastListModel);
 };
@@ -80,8 +86,7 @@ AddRemoveAssistant.prototype.handleListAdd = function(event) {
 AddRemoveAssistant.prototype.handleListDelete = function(event) {
 	event.stop();
 	AppAssistant.db.deletePodcast(event.item.key);
-
 	// Notify that index was removed
 	// Updates the display
-	this.controller.get("podcastList").mojo.noticeRemovedItems(event.index, 0);
+	this.controller.get("podcastList").mojo.noticeRemovedItems(event.index, 1);
 };
