@@ -12,7 +12,7 @@
 
 	"copyright": "© Copyright 2010 by Wahvee",
 	"support": {
-		"url": "http://www.wahvee.com/webos",
+		"url": "http://projects.wahvee.com/projects/webos-podsnatcher",
 		"email": {
 			"address": "support@wahvee.com",
 			"subject": "Support"
@@ -20,13 +20,8 @@
 		"resources": [
 			{
 				"type":"web",
-				"label": "FAQ",
-				"url": "http://www.wahvee.com/webos/podsnatcher/faq"
-			},
-			{
-				"type": "web",
-				"label": "Discussion Forums",
-				"url": "http://www.wahvee.com/webos/forums"
+				"label": "Wiki",
+				"url": "http://projects.wahvee.com/projects/webos-podsnatcher/wiki"
 			}
 		]
 	},

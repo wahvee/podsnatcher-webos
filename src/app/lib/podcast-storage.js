@@ -443,8 +443,13 @@ PodcastStorage.prototype.addNewPodcast= function(url, title, autoDelete, numToKe
 	var hash = hex_md5(url);
 
 	if(!this.podcastExists(hash) && url.isUrl()) {
-		Mojo.Log.info("Can add this podcast!");
-
+		// Create a new Podcast object
+		var newLength = this.listOfPodcasts.push(new Podcast(url, title));
+		// Set the newly created podcast as the currently selected podcast
+		this._currentPodcast = newLength - 1;
+		// Update this podcast
+		this.updateCurrent();
+		//Return the key of the newly created item
 		return hash;
 	} else {
 		return undefined;
@@ -462,7 +467,6 @@ PodcastStorage.prototype.deletePodcast = function(key) {
 		var podcastToDelete = this.getPodcast(key);
 		// Check if podcast found
 		if(podcastToDelete) {
-			Mojo.Log.error("I'm here!");
 			// Get the index of the podcast to be deleted
 			var podcastIndex = this.listOfPodcasts.indexOf(podcastToDelete);
 			// Tell it to delete all of it's cached information

@@ -40,10 +40,10 @@ AddFeedAssistant.prototype.setup = function(widget) {
 //
 AddFeedAssistant.prototype.validateAndAdd = function() {
 	Mojo.Log.info("I'm here!");
-	var added = AppAssistant.db.addNewItem(this.urlModel.value, "", true, 0);
+	var added = AppAssistant.db.addNewPodcast(this.urlModel.value, "", true, 0);
 	if(added) {
 		AppAssistant.db.updatePodcast();
 	} else {
-
+		
 	}
 };

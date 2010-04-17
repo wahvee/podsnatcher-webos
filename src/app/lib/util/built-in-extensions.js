@@ -46,6 +46,17 @@ if (typeof String.isPath !== 'function') {
 	Mojo.Log.info("[String.isPath] is defined.");
 }
 
+// Add method to String to test if it is a valid URL
+if (typeof String.isUrl !== 'function') {
+	Mojo.Log.info("[String.isUrl] is not defined.");
+	String.prototype.isUrl = function() {
+		var regexp = /http:\/\/[A-Za-z0-9\.-]{3,}\.[A-Za-z]{3}/;
+		return regexp.test(this);
+	};
+} else {
+	Mojo.Log.info("[String.isUrl] is defined.");
+}
+
 
 // Add method to Object to check if instance is a boolean
 if (typeof Object.isBoolean !== 'function') {
