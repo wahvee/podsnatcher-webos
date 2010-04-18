@@ -51,7 +51,7 @@ AppAssistant.appMenuAttr = {
 AppAssistant.appMenuModel = {
 	visible: true,
 	items: [
-		Mojo.Menu.editItem,
+		/*Mojo.Menu.editItem,*/
 		{
 		label: $L("Podcast Actions"),
 		toggleCmd: 'podcast-actions',
@@ -63,12 +63,12 @@ AppAssistant.appMenuModel = {
 			{
 			label: $L("Update All Podcasts"),
 			command: 'do-refresh-all'
-		},
+		}/*,
 			{
 			label: $L("Refresh Album Art"),
 			disabled: true,
 			command: 'refresh-all-album-art'
-		}
+		}*/
 			]
 	},
 		{
@@ -93,15 +93,18 @@ AppAssistant.appMenuModel = {
 		label: $L("Quick Guide"),
 		command: 'quick-guide'
 	},
-		Mojo.Menu.prefsItem,
+		/*Mojo.Menu.prefsItem,*/
 		Mojo.Menu.helpItem
 		]
 };
 
-AppAssistant.addRemoveMenuModel = {
+AppAssistant.standardModel = {
 	visible: true,
 	items: [
-		Mojo.Menu.editItem,
+		{
+			label: $L("Quick Guide"),
+			command: 'quick-guide'
+		},
 		Mojo.Menu.helpItem
 		]
 };

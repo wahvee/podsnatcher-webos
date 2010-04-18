@@ -22,6 +22,7 @@ function InfoAssistant(podcast) {
 
 InfoAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
+	this.controller.setupWidget(Mojo.Menu.appMenu, AppAssistant.appMenuAttr, AppAssistant.standardModel);
 
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
 	this.controller.get('info-scene-container').update(this.renderedInfo);

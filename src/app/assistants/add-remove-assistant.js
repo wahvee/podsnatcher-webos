@@ -25,7 +25,7 @@ AddRemoveAssistant.prototype.setup = function() {
 	try {
 		Mojo.Controller.stageController.setWindowOrientation("up");
 		this.controller.setupWidget("podcastList", this.podcastListAttributes, this.podcastListModel);
-		this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, addRemoveMenuModel);
+		this.controller.setupWidget(Mojo.Menu.appMenu, AppAssistant.appMenuAttr, AppAssistant.standardModel);
 	} catch(func_error) {
 		Mojo.Log.error("[Create Widgets] %s", func_error.message);
 	}
