@@ -467,6 +467,28 @@ img#podsnatcher-logo {
 }
 /* END style for now-playing-audio scene */
 
+/* style for quick-guide scene */
+#quick-guide-content p {
+	font-size: 12px;
+	margin-top: -25px;
+}
+#quick-guide-content h2 {
+	color: #49708a;
+}
+#quick-guide-content ul {
+	padding: 10px 0px;
+}
+#quick-guide-content ul li {
+	margin: 0;
+	padding: 0;
+}
+#quick-guide-content span.section-title {
+	font-size: 14px;
+	font-weight: bold;
+	color: #49708a;
+}
+/* END style for quick-guide scene */
+
 .palm-row.palm-swipe-delete {
 	-webkit-border-image: none !important;
 	margin-top: 24px;
