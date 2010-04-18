@@ -281,6 +281,28 @@ PodcastStorage.prototype.getPodcast = function(key) {
 };
 
 /**
+ * Gets an array of all the podcasts loaded in memory. This list will
+ * not be instances of of the Podcast object. They will just be shallow
+ * copies that contain "descriptive" data such as: title, description,
+ * image and key.
+ * @returns An shallow copy array of the podcasts.
+ */
+PodcastStorage.prototype.getPodcasts = function() {
+	// Temp array that will be returned
+	var arr = [];
+	// Loop all of the items
+	this.listOfPodcasts.each(function(item, index) {
+		arr.push({
+			key: item.key,
+			title: item.title,
+			description: item.description,
+			image: item.getImage()
+		});
+	});
+	return arr;
+}
+
+/**
  *@private
  * Deletes an entire podcast from the database. This will permenantly erase
  * all data and will not be recoverable.

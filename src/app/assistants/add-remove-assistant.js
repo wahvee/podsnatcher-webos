@@ -12,7 +12,7 @@ function AddRemoveAssistant() {
 	};
 
 	this.podcastListModel = {
-		items: AppAssistant.db.listOfPodcasts
+		items: AppAssistant.db.getPodcasts()
 	};
 }
 
@@ -94,7 +94,7 @@ AddRemoveAssistant.prototype.handleListDelete = function(event) {
 AddRemoveAssistant.prototype.handleCommand = function(command) {
 	switch(command.type) {
 		case Podcast.PodcastUpdateSuccess:
-			this.podcastListModel.items = AppAssistant.db.listOfPodcasts;
+			this.podcastListModel.items = AppAssistant.db.getPodcasts()
 			this.controller.modelChanged(this.podcastListModel);
 			break;
 	}
