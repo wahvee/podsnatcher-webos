@@ -36,5 +36,9 @@
     {
         "scenes": "now-playing-video",
         "source": "app/assistants/now-playing-video-assistant.js"
+    },
+    {
+        "scenes": "quick-guide",
+        "source": "app/assistants/quick-guide-assistant.js"
     }
 ]
