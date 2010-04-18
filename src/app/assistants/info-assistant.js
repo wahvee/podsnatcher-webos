@@ -4,7 +4,7 @@ function InfoAssistant(podcast) {
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
 
-	var renderedInfo = Mojo.View.render(
+	this.renderedInfo = Mojo.View.render(
 		{
 			object: {
 				title: Mojo.Format.runTextIndexer(podcast.title),
@@ -18,14 +18,13 @@ function InfoAssistant(podcast) {
 			template: 'info/info-scene-template'
 		}
 	);
-
-	this.controller.get('info-scene-container').update(renderedInfo);
 }
 
 InfoAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
 
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
+	this.controller.get('info-scene-container').update(this.renderedInfo);
 
 	/* setup widgets here */
 
