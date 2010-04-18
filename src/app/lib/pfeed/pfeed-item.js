@@ -40,19 +40,28 @@ var PFeedItem = Class.create({
 		if(this.key.blank()) { this.key = (!this.link.blank()) ? hex_md5(this.link) : ''; }
 	},
 	savePosition: function(newPosition) {
+		var changed = this.currentTime !== newPosition;
 		this.currentTime = newPosition;
 		this.updatedEvent.key = this.key;
-		Mojo.Controller.stageController.sendEventToCommanders(this.updatedEvent);
+		if(changed) {
+			Mojo.Controller.stageController.sendEventToCommanders(this.updatedEvent);
+		}
 	},
 	markAsOld: function() {
+		var changed = this.listened !== true;
 		this.listened = true;
 		this.updatedEvent.key = this.key;
-		Mojo.Controller.stageController.sendEventToCommanders(this.updatedEvent);
+		if(changed) {
+			Mojo.Controller.stageController.sendEventToCommanders(this.updatedEvent);
+		}
 	},
 	markAsNew: function() {
+		var changed = this.listened !== false;
 		this.listened = false;
 		this.updatedEvent.key = this.key;
-		Mojo.Controller.stageController.sendEventToCommanders(this.updatedEvent);
+		if(changed) {
+			Mojo.Controller.stageController.sendEventToCommanders(this.updatedEvent);
+		}
 	},
 	/**
 	 * Check to see if the current podcast is already in progress
