@@ -90,3 +90,12 @@ AddRemoveAssistant.prototype.handleListDelete = function(event) {
 	// Updates the display
 	this.controller.get("podcastList").mojo.noticeRemovedItems(event.index, 1);
 };
+
+AddRemoveAssistant.prototype.handleCommand = function(command) {
+	switch(command.type) {
+		case Podcast.PodcastUpdateSuccess:
+			this.podcastListModel.items = AppAssistant.db.listOfPodcasts;
+			this.controller.modelChanged(this.podcastListModel);
+			break;
+	}
+};
