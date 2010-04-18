@@ -89,6 +89,10 @@ AppAssistant.appMenuModel = {
 		}
 			]
 	},
+		{
+		label: $L("Quick Guide"),
+		command: 'quick-guide',
+	},
 		Mojo.Menu.prefsItem,
 		Mojo.Menu.helpItem
 		]

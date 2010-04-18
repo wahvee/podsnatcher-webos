@@ -207,7 +207,8 @@ img#image {
 /* style for info-scene and now-playing-audio */
 #mojo-scene-info-scene-scroller,
 #mojo-scene-add-remove-scene-scroller,
-#mojo-scene-now-playing-audio-scene-scroller {
+#mojo-scene-now-playing-audio-scene-scroller,
+#mojo-scene-quick-guide-scene-scroller {
 	background-image: url(../images/background-top.png), url(../images/stripe.png), url(../images/background-bottom.png);
 	background-size: 480px 155px, 480px 27px, 480px 363px;
 	background-position: 0px 0px, 0px 155px, 0px 0px;
@@ -273,7 +274,8 @@ img#image {
 	font-size:13px;
 }
 #podcast-description-footer,
-#podcast-list-footer {
+#podcast-list-footer,
+#quick-guide-footer {
 	background-image: url(../images/info-footer.png);
 	background-repeat:  no-repeat;
 	width: 316px;
@@ -305,7 +307,8 @@ img#now-playing-audio-image {
 .palm-swipe-delete-button {
 	width: 95px !important;
 }
-#podcast-list-container {
+#podcast-list-container,
+#quick-guide-container {
 	background-image: url(../images/info-content.png);
 	background-repeat: repeat-y;
 	width: 316px;
@@ -314,7 +317,8 @@ img#now-playing-audio-image {
 	left: 50%;
 	margin-left: -158px;
 }
-#podcast-list {
+#podcast-list,
+#quick-guide-content {
 	padding-right: 42px;
 	padding-left: 42px;
 	min-height: 320px;
@@ -381,7 +385,7 @@ img#podsnatcher-logo {
 #player-controls-slider-area {
 	width: 100%;
 	position: fixed;
-	bottom: 0px; /* it's -63 instead of 0 for the slide-up-down to work */
+	bottom: 0px;
 	z-index: 2000;
 }
 #player-controls {
@@ -395,18 +399,21 @@ img#podsnatcher-logo {
 	background-color: #49708a;
 	opacity: 0.9;
 	width: 100%;
-	height: 70px; /* it's 75 instead of 12 because the div starts off the bottom of the page and slides up */
+	height: 78px;
 	padding-top: 0px;
 }
 #player-controls-slider {
 	width: 85%;
 	margin: 0 auto;
+	position: relative;
+	top: -10px;
+	right: 6px;
 }
 #playingTime {
 	width: 85%;
 	margin: 0 auto;
 	font-size: 11px;
-	margin-top: 15px;
+	margin-top: 0px;
 	color: #ffffff;
 	font-weight: bold;
 }
