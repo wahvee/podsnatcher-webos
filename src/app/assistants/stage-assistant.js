@@ -17,17 +17,10 @@ StageAssistant.prototype.handleCommand = function(event) {
 	var currentScene = this.controller.activeScene();
 	switch(event.type) {
 		case PodcastStorage.LoadingDatabaseSuccess:
-			if(AppAssistant.db.listOfPodcasts.size() > 0) {
-				this.controller.swapScene({
-					name: "main",
-					transition: Mojo.Transition.zoomFade
-				});
-			} else {
-				this.controller.swapScene({
-					name: "add-remove",
-					transition: Mojo.Transition.zoomFade
-				});
-			}
+			this.controller.swapScene({
+				name: "main",
+				transition: Mojo.Transition.zoomFade
+			});
 			break;
 		case Mojo.Event.commandEnable:
 			if(event.command === 'palm-help-cmd') {

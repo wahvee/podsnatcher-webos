@@ -68,12 +68,6 @@ MainAssistant.prototype.setup = function() {
 		this.controller.listen(this.controller.get('album-art'), Mojo.Event.tap, this.handleAlbumArtTap.bindAsEventListener(this));
 		this.controller.listen(this.controller.get('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
 		this.controller.listen(this.controller.get('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
-		// Update the display
-		this.podcastDisplayUpdate();
-		// Check if the DB needs to be forced to update
-		if(AppAssistant.db.requiresUpdate) {
-			AppAssistant.db.updatePodcasts();
-		}
 	} catch(eventErrors) {
 		      Mojo.Log.error("[MainAssistant.setup] %s", eventErrors.message);
 	}
@@ -88,9 +82,22 @@ MainAssistant.prototype.activate = function(event) {
 		// Wait for screen orientation changes
 		this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
 		this.controller.listen(document, "shakeend", this.handleShaking.bindAsEventListener(this));
-		this.podcastDisplayUpdate();
-
 		this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEventListener);
+		// Update the display
+		this.podcastDisplayUpdate();
+		// Check if the DB needs to be forced to update
+		if(AppAssistant.db.requiresUpdate) {
+			AppAssistant.db.updatePodcasts();
+		}
+		// Check if their are podcasts in the database, if there are then
+		// nothing special needs to happen. If not we need to start
+		// the AddRemove Podcast scene
+		if(AppAssistant.db.listOfPodcasts.size() === 0) {
+			this.controller.stageController.pushScene({
+				name: "add-remove",
+				transition: Mojo.Transition.zoomFade
+			});
+		}
 	} catch(eventErrors) {
 		Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
 	}
@@ -291,29 +298,32 @@ MainAssistant.prototype.handleItemDownload = function(event) {
 MainAssistant.prototype.podcastDisplayUpdate = function() {
 	try {
 		var currPodcast = AppAssistant.db.currentPodcast();
-		this.controller.get('album-art').removeChild(this.controller.get('image'));
-		this.controller.get('album-art').appendChild(new Element('img', {
-			id: 'image',
-			src: (Object.isFunction(currPodcast.getImage)) ? currPodcast.getImage() : '',
-			alt: '',
-			height: '144px',
-			width: '144px'
-		}));
-		//this.controller.get('episodeList').mojo.revealItem(0, true);
-		this.controller.get('podcastTitle').update((currPodcast.title === undefined) ? "" : currPodcast.title);
+		if(currPodcast) {
+			this.controller.get('album-art').removeChild(this.controller.get('image'));
+			this.controller.get('album-art').appendChild(new Element('img', {
+				id: 'image',
+				src: (currPodcast.getImage) ? currPodcast.getImage() : '',
+				alt: '',
+				height: '144px',
+				width: '144px'
+			}));
+			//this.controller.get('episodeList').mojo.revealItem(0, true);
+			this.controller.get('podcastTitle').update((currPodcast.title === undefined) ? "" : currPodcast.title);
 
-		// Populate the list dependant upon the list mode
-		switch(this.mode) {
-			//default:
-			case MainAssistant.ListMode.New:
-				this.episodeListModel.items = (!currPodcast.hasItems()) ? [] : currPodcast.getNewItems();
-				break;
-			case MainAssistant.ListMode.Listened:
-				this.episodeListModel.items = (!currPodcast.hasItems()) ? [] : currPodcast.getListenedItems();
-				break;
-			case MainAssistant.ListMode.Downloaded:
-				this.episodeListModel.items = (!currPodcast.hasItems()) ? [] : currPodcast.getDownloadedItems();
-				break;
+			// Populate the list dependant upon the list mode
+			switch(this.mode) {
+				//default:
+				case MainAssistant.ListMode.New:
+					this.episodeListModel.items = (!currPodcast.hasItems()) ? [] : currPodcast.getNewItems();
+					break;
+				case MainAssistant.ListMode.Listened:
+					this.episodeListModel.items = (!currPodcast.hasItems()) ? [] : currPodcast.getListenedItems();
+					break;
+				case MainAssistant.ListMode.Downloaded:
+					this.episodeListModel.items = (!currPodcast.hasItems()) ? [] : currPodcast.getDownloadedItems();
+					break;
+			}
+
 		}
 		// Change the model
 		this.controller.modelChanged(this.episodeListModel);

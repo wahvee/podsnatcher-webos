@@ -313,8 +313,7 @@ Podcast.prototype.clearAllCached = function() {
 	this.items.each(function(item, index) {
 		// Delete the downloaded things from each podcast
 		this.markAsListened(item.value.key, false);
-	},
-	this);
+	}, this);
 	// Delete the image/album-art
 	this.clearCachedImage();
 };

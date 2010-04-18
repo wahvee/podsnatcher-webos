@@ -322,7 +322,7 @@ NowPlayingAudioAssistant.prototype.userSeeking = function(event) {
 		this.audioPlayer.pause();
 	}
 	this.timePlayed.update(event.value.secondsToDuration());
-	this.timeRemaining.update((this.audioPlayer.duration - event.value).secondsToDuration());
+	this.timeRemaining.update((this.sliderModel.sliderMaxValue - event.value).secondsToDuration());
 };
 
 NowPlayingAudioAssistant.prototype.userSeeked = function(event) {

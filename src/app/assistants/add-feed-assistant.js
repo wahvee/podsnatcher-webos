@@ -4,10 +4,13 @@ function AddFeedAssistant(sceneAssistant) {
 
 AddFeedAssistant.prototype.setup = function(widget) {
 	this.widget = widget;
-
-	// Setup text field for the new feed's URL
-	//
-	this.sceneAssistant.controller.setupWidget("newFeedURL",
+	this.okButton = this.sceneAssistant.controller.get('ok-button');
+	this.errorDialog = this.sceneAssistant.controller.get('error-dialog');
+	this.errorMessage = this.sceneAssistant.controller.get('error-message');
+	// Remove the error message from the screen
+	this.cleanError();
+	// Setup text field for the new podcast URL
+	this.sceneAssistant.controller.setupWidget("new-feed-url",
 		this.urlAttributes = {
 			property: "value",
 			hintText: "RSS or ATOM feed",
@@ -18,32 +21,70 @@ AddFeedAssistant.prototype.setup = function(widget) {
 		},
 		this.urlModel = {value : ""}
 	);
-
 	// Setup button and event handler
-	//
-	this.sceneAssistant.controller.setupWidget("okButton",
-		this.attributes = {},
-		this.model = {
-			buttonLabel: "Add Feed",
-			buttonClass: "addFeedButton",
-			disabled: false
-		}
+	this.okButtonModel = {
+		buttonLabel: $L('Add Feed'),
+		disabled: false
+	};
+	this.sceneAssistant.controller.setupWidget("ok-button",
+		{ type: Mojo.Widget.activityButton },
+		this.okButtonModel
 	);
-
-	Mojo.Event.listen($('okButton'), Mojo.Event.tap, this.validateAndAdd.bindAsEventListener(this));
+	Mojo.Event.listen(this.okButton, Mojo.Event.tap, this.validateAndAdd.bindAsEventListener(this));
 };
 
-// ------------------------------------------------------------------------
-// Add Feed Functions
-//
-// validateAndAdd - called when Add feed OK button is clicked
-//
+/**
+ * This method should check to see if what was typed in was a valid URL. If
+ * it is then tries to add it to the database.
+ */
 AddFeedAssistant.prototype.validateAndAdd = function() {
-	Mojo.Log.info("I'm here!");
-	var added = AppAssistant.db.addNewPodcast(this.urlModel.value, "", true, 0);
-	if(added) {
-		AppAssistant.db.updatePodcast();
+	// Check that the value typed in is a valid url
+	if(this.urlModel.value.isUrl()) {
+		// Now try creating a new podcast from the URL
+		var added = AppAssistant.db.addNewPodcast(this.urlModel.value, "", true, 0);
+		// If no hash is returned then the podcast was already in the database.
+		if(!added) {
+			this.showError("Podcast already in database.");
+			this.okButton.mojo.deactivate();
+		}
 	} else {
-		
+		this.showError("Invalid URL.");
+		this.okButton.mojo.deactivate();
 	}
 };
+
+/**
+ * Clears any error from the screen.
+ */
+AddFeedAssistant.prototype.cleanError = function() {
+	this.errorDialog.hide();
+	this.errorMessage.update("");
+};
+
+/**
+ * Displays an error message on the screen.
+ * @param message {String} The error to be displayed.
+ */
+AddFeedAssistant.prototype.showError = function(message) {
+	this.cleanError();
+	if(message === undefined) { message = "Generic error."; }
+	this.errorDialog.show();
+	// Put message into the HTML
+	this.errorMessage.update(message);
+};
+
+/**
+ * Listen for the events from the sub-system regarding the podcasts updating.
+ */
+AddFeedAssistant.prototype.handleCommand = function(command) {
+	switch(command.type) {
+		case Podcast.PodcastUpdateFailure:
+			this.showError("URL did not contain a feed. " + command.message);
+			this.okButton.mojo.deactivate();
+			AppAssistant.db.deletePodcast(command.podcast.key);
+			break;
+		case Podcast.PodcastUpdateSuccess:
+			this.widget.mojo.close();
+			break;
+	}
+}
