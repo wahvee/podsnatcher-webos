@@ -89,15 +89,6 @@ MainAssistant.prototype.activate = function(event) {
 		if(AppAssistant.db.requiresUpdate) {
 			AppAssistant.db.updatePodcasts();
 		}
-		// Check if their are podcasts in the database, if there are then
-		// nothing special needs to happen. If not we need to start
-		// the AddRemove Podcast scene
-		if(AppAssistant.db.listOfPodcasts.size() === 0) {
-			this.controller.stageController.pushScene({
-				name: "add-remove",
-				transition: Mojo.Transition.zoomFade
-			});
-		}
 	} catch(eventErrors) {
 		Mojo.Log.error("[MainAssistant.activate] %s", eventErrors.message);
 	}

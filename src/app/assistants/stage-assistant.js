@@ -21,6 +21,15 @@ StageAssistant.prototype.handleCommand = function(event) {
 				name: "main",
 				transition: Mojo.Transition.zoomFade
 			});
+			// Check if their are podcasts in the database, if there are then
+			// nothing special needs to happen. If not we need to start
+			// the AddRemove Podcast scene
+			if(AppAssistant.db.listOfPodcasts.size() === 0) {
+				this.controller.pushScene({
+					name: "add-remove",
+					transition: Mojo.Transition.zoomFade
+				});
+			}
 			break;
 		case Mojo.Event.commandEnable:
 			if(event.command === 'palm-help-cmd') {

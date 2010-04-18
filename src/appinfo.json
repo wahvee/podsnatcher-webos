@@ -32,5 +32,6 @@
 	},
 	"theme":"light",
 	"noWindow":false,
-	"noDeprecatedStyles":true
+	"noDeprecatedStyles":true,
+	"timingEnabled":false
 }
