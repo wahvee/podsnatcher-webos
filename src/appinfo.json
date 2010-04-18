@@ -1,7 +1,7 @@
 {
 	"id":"com.wahvee.podsnatcher",
 	"version":"0.9.6",
-	"vendor": "wahvee",
+	"vendor": "Wahvee",
 	"vendorurl": "http://www.wahvee.com",
 	"type": "web",
 	"main": "index.html",
@@ -22,6 +22,11 @@
 				"type":"web",
 				"label": "Wiki",
 				"url": "http://projects.wahvee.com/projects/webos-podsnatcher/wiki"
+			},
+			{
+				"type":"scene",
+				"label":"Quick Guide",
+				"sceneName":"quick-guide"
 			}
 		]
 	},
