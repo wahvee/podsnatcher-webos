@@ -15,6 +15,8 @@ function MainAssistant() {
 	this.nowPlayingKey = '';
 	this.nowPlayingNode = undefined;
 
+	this.downloadingPercentage = new $H();
+
 	this.spinnerAttributes = {
 		spinnerSize: Mojo.Widget.spinnerLarge
 	};
@@ -131,11 +133,14 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 
 	try {
 		// Setup the download btn listener
+		var statusDiv = itemNode.select('.status')[0];
 		var downloadBtn = itemNode.select('.downloadButton')[0];
 		var episodeTitle = itemNode.select('.episodeTitle')[0];
 		var episodeLength = itemNode.select('.episodeLength')[0];
 		// Get the PFeedItem that is being represented by this itemModel
 		var pfeedItem = AppAssistant.db.getItem(itemModel.key);
+		// Get the percentage for the item to be displayed
+		var percentage = this.downloadingPercentage.get(itemModel.key);
 		// Check to make sure the item is not already downloaded
 		// if it is remove the download button
 		if(pfeedItem) {
@@ -152,7 +157,7 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 				// Clean-up
 				statusDiv.removeClassName('playing');
 				episodeTitle.addClassName('withButton');
-				currentTimeDiv.addClassName('withButton');
+				episodeLength.addClassName('withButton');
 			} else if(!pfeedItem.listened) {
 				episodeTitle.addClassName('newEpisode');
 			}
@@ -171,7 +176,7 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
  * using the key parameter of the input.
  * @param key {string} The unique id of the list item, also the key of the PFeedItem
  */
-MainAssistant.prototype.listItemUpdate = function(key, percentage) {
+MainAssistant.prototype.listItemUpdate = function(key) {
 	// Protect from crashing
 	try {
 		// Get the item from the screen
@@ -190,6 +195,8 @@ MainAssistant.prototype.listItemUpdate = function(key, percentage) {
 			var episodeTitle = node.select('.episodeTitle')[0];
 			// Select the download button
 			var downloadBtn = node.select('.downloadButton')[0];
+			// Get the downloaded percentage
+			var percentage = this.downloadingPercentage.get(key);
 			// Check to see if in one of 5 states:
 			// 1. Downloading => itemModel !== undefined && itemModel.isCaching() == true
 			// 2. Downloaded => itemModel.isEnclosureCache() == true
@@ -506,15 +513,18 @@ MainAssistant.prototype.handleCommand = function(command) {
 				break;
 			case PFeedItem.CacheProgress:
 				// Update the downloading
-				this.listItemUpdate(command.key, command.percentage);
+				this.downloadingPercentage.set(command.key, command.percentage);
+				this.listItemUpdate(command.key);
 				break;
 			case PFeedItem.CacheError:
 				// Something went wrong
+				this.downloadingPercentage.unset(command.key);
 				this.listItemUpdate(command.key);
 				msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed.";
 				Mojo.Controller.errorDialog(msg);
 				break;
 			case PFeedItem.EnclosureCached:
+				this.downloadingPercentage.unset(command.key);
 				this.listItemUpdate(command.key);
 				break;
 			default:
