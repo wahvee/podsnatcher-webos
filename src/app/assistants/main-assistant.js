@@ -323,10 +323,23 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 					this.episodeListModel.items = (!currPodcast.hasItems()) ? [] : currPodcast.getDownloadedItems();
 					break;
 			}
-
+			// Change the model
+			this.controller.modelChanged(this.episodeListModel);
+		} else {
+			// No Podcasts are in the datbase, so clear the display
+			this.controller.get('album-art').removeChild(this.controller.get('image'));
+			this.controller.get('album-art').appendChild(new Element('img', {
+				id: 'image',
+				src: './images/default-album-art.png',
+				alt: '',
+				height: '144px',
+				width: '144px'
+			}));
+			this.controller.get('podcastTitle').update("No Podcasts In Database");
+			this.episodeListModel.items = [];
+			// Clear the list
+			this.controller.modelChanged(this.episodeListModel);
 		}
-		// Change the model
-		this.controller.modelChanged(this.episodeListModel);
 	} catch(error) {
 		Mojo.Log.error("[MainAssistant.podcastDisplayUpdate] %s", error.message);
 	}
