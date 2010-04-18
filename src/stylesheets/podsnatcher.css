@@ -395,8 +395,8 @@ img#podsnatcher-logo {
 	background-color: #49708a;
 	opacity: 0.9;
 	width: 100%;
-	height: 50px; /* it's 75 instead of 12 because the div starts off the bottom of the page and slides up */
-	padding-top: 20px;
+	height: 70px; /* it's 75 instead of 12 because the div starts off the bottom of the page and slides up */
+	padding-top: 0px;
 }
 #player-controls-slider {
 	width: 85%;
@@ -406,7 +406,7 @@ img#podsnatcher-logo {
 	width: 85%;
 	margin: 0 auto;
 	font-size: 11px;
-	margin-top: 10px;
+	margin-top: 15px;
 	color: #ffffff;
 	font-weight: bold;
 }

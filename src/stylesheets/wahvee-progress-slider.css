@@ -1,8 +1,12 @@
 .wahvee-progress-slider-btn {
-	width: 26px;
-	height: 26px;
-	margin: 0 0 0 -13px;
-	background-color: #0000FF;
+	/*width: 26px;
+	height: 26px;*/
+	width: 58px;
+	height: 58px;
+	/*margin: 0 0 0 -13px;*/
+	margin: 0 0 0 -29px;
+	/*background-color: #0000FF;*/
+	background-image: url(../images/slider-button.png);
 	z-index: 2;
 	position: absolute;
 	left: 0px;
@@ -10,16 +14,22 @@
 
 .wahvee-progress-slider-btn-drag,
 .wahvee-progress-slider-btn-drag.selected {
-	background-color: #BF5FFF;
+	/*background-color: #BF5FFF;*/
+	background-image: url(../images/slider-button-press.png);
 }
 
 .wahvee-progress-display {
 	height: 6px;
-	width: 0%;
+	width: 40%;
 	float: left;
-	background-color: #FF0000;
+	/*background-color: #FF0000;*/
+	
+	border-width: 0px 3px 0px 3px;
+    -webkit-border-image: url(../images/progress-bar-progress.png) 0 3 0 3 repeat repeat;
+	
 	z-index: 1;
 	position: relative;
+	left: -3px;
 }
 
 .wahvee-progress-background {
@@ -28,11 +38,15 @@
 	 * which is 26px, which leaves 20px. Which is then divided
 	 * in half.
 	 */
-	margin-top: 10px;
+	/*margin-top: 10px;*/
+	margin-top: 26px;
 	height: 6px;
 	width: 100%;
 	float: left;
-	background-color: #00FF00;
+	
+	border-width: 0px 3px 0px 3px;
+	-webkit-border-image: url(../images/progress-bar-background.png) 0 3 0 3 repeat repeat;
+	
 	z-index: 0;
 	position: relative;
 }
