@@ -715,6 +715,8 @@ PodcastStorage.prototype.handleCommand = function(command) {
 				if(this.indexUpdating == this.listOfPodcasts.size()) {
 					// Not updating all anymore
 					this.updatingAll = false;
+					// Requires update is now false
+					this.requiresUpdate = false;
 					// Save the database since updates are done
 					this.saveAllPodcasts();
 					// If they are equal everything is done updating
