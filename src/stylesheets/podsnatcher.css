@@ -99,10 +99,6 @@ img#image {
 	float: none !important;
 }
 
-.playing {
-	background-image: url(../images/background-now-playing.png);
-}
-
 .downloading {
 	background-image: url(../images/background-now-downloading.png);
 }
@@ -115,6 +111,7 @@ img#image {
 	float: left;
 	margin: 6px 0px 0px 0px;
 }
+
 .cancel {
 	background-image: url(../images/cancel.png) !important;
 }
@@ -164,11 +161,22 @@ img#image {
 	padding-left: 0px !important;
 }
 
-.newEpisode {
+.newPFeedItem,
+.newCachedPFeedItem {
 	font-weight: bold;
 	color: #49708a;
 }
 
+.listenedPFeedItem,
+.inProgressPFeedItem,
+.inProgressCachedPFeedItem {
+	color: #FFFFFF;
+}
+
+.inProgressPFeedItem,
+.inProgressCachedPFeedItem {
+	font-style: italic;
+}
 
 
 /* CLICKABLE AREA */

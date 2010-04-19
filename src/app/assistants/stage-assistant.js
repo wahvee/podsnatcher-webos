@@ -60,7 +60,7 @@ StageAssistant.prototype.handleCommand = function(event) {
 						transition: Mojo.Transition.zoomFade
 					});
 				default:
-					Mojo.Log.error("There was an un-recognized app menu command. %s", event.command);
+					Mojo.Log.info("[StageAssistant.handleCommand] There was an un-recognized app menu command. %s", event.command);
 					break;
 			}
 			break;

@@ -123,6 +123,10 @@ MainAssistant.prototype.cleanup = function(event) {
 	}
 };
 
+/**
+ * Called as each item in the list is drawn on the screen. Mostly used to make sure
+ * items have their buttons properly hooked up in the list.
+ */
 MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNode) {
 	// If playing and the key matches the playing key set this item as the
 	// user's selected row. Should keep the UI up to date!!
@@ -132,7 +136,7 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 	}
 
 	try {
-		// Setup the download btn listener
+		// Get instances of all items in the node
 		var statusDiv = itemNode.select('.status')[0];
 		var downloadBtn = itemNode.select('.downloadButton')[0];
 		var episodeTitle = itemNode.select('.episodeTitle')[0];
@@ -144,25 +148,67 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 		// Check to make sure the item is not already downloaded
 		// if it is remove the download button
 		if(pfeedItem) {
-			if(pfeedItem.isEnclosureCached() && downloadBtn && episodeTitle && episodeLength) {
-				// Remove the download button from the scene
-				episodeTitle.removeClassName('withButton');
-				episodeLength.removeClassName('withButton');
-				downloadBtn.remove();
-			} else if(pfeedItem.isCaching() && downloadBtn && episodeTitle && episodeLength) {
-				// Give the downloadBtn the cancel class
-				downloadBtn.addClassName('cancel');
-				statusDiv.addClassName('downloading');
-				statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
-				// Clean-up
-				statusDiv.removeClassName('playing');
-				episodeTitle.addClassName('withButton');
-				episodeLength.addClassName('withButton');
-			} else if(!pfeedItem.listened) {
-				episodeTitle.addClassName('newEpisode');
+			switch(pfeedItem.getStatusIndicator()) {
+				case PFeedItem.Status.NewCaching:
+					// Give the downloadBtn the cancel class
+					downloadBtn.addClassName('cancel');
+					statusDiv.addClassName('downloading');
+					statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
+				// New will be class 'newPFeedItem'
+				case PFeedItem.Status.New:
+					// Remove the episode length since it's a new podcast
+					episodeLength.hide();
+					episodeTitle.addClassName('newPFeedItem');
+					break;
+				// NewCached will be class 'newCachedPFeedItem'
+				case PFeedItem.Status.NewCached:
+					// Remove the episode length since it's a new podcast
+					episodeLength.hide();
+					episodeTitle.removeClassName('withButton');
+					episodeTitle.addClassName('newCachedPFeedItem');
+					downloadBtn.remove();
+					downloadBtn = undefined;
+					break;
+				case PFeedItem.Status.InProgressCaching:
+					// Give the downloadBtn the cancel class
+					downloadBtn.addClassName('cancel');
+					statusDiv.addClassName('downloading');
+					statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
+				// InProgress will be class 'inProgressPFeedItem'
+				case PFeedItem.Status.InProgress:
+					// Set the styles that are needed
+					episodeTitle.addClassName('inProgressPFeedItem');
+					break;
+				// InProgress will be class 'inProgressCachedPFeedItem'
+				case PFeedItem.Status.InProgressCached:
+					// Set the styles that are needed
+					episodeTitle.removeClassName('withButton');
+					episodeLength.removeClassName('withButton');
+					episodeTitle.addClassName('inProgressPFeedItem');
+					downloadBtn.remove();
+					downloadBtn = undefined;
+					break;
+				case PFeedItem.Status.ListenedCaching:
+					// Give the downloadBtn the cancel class
+					downloadBtn.addClassName('cancel');
+					statusDiv.addClassName('downloading');
+					statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
+				// InProgress will be class 'listenedPFeedItem'
+				case PFeedItem.Status.Listened:
+					// Set the styles that are needed
+					episodeLength.hide();
+					episodeTitle.addClassName('listenedPFeedItem');
+					break;
+				case PFeedItem.Status.ListenedCached:
+					// Set the styles that are needed
+					episodeTitle.removeClassName('withButton');
+					episodeLength.removeClassName('withButton');
+					episodeTitle.addClassName('listenedPFeedItem');
+					downloadBtn.remove();
+					downloadBtn = undefined;
+					break;
 			}
 		}
-
 		if(downloadBtn) {
 			downloadBtn.addEventListener(Mojo.Event.tap, this.downloadFunction);
 		}
@@ -261,7 +307,7 @@ MainAssistant.prototype.listItemRemoved = function(listWidget, itemModel, itemNo
  */
 MainAssistant.prototype.handleListDelete = function(event) {
 	// event.item.key
-	AppAssistant.db.currentPodcast().markAsListened(event.item.key, true);
+	AppAssistant.db.currentPodcast().deleteItem(event.item.key, true);
 };
 
 MainAssistant.prototype.handleItemDownload = function(event) {

@@ -202,6 +202,51 @@ PFeedItem.EnclosureCached = 'onEnclosureCached';
 PFeedItem.EnclosureDeleted = 'onEnclosureDeleted';
 PFeedItem.PodcastItemUpdated = 'onPodcastChange';
 
+
+PFeedItem.Status = {};
+PFeedItem.Status.New = 'new';
+PFeedItem.Status.NewCaching = 'newCaching';
+PFeedItem.Status.NewCached = 'newCached';
+PFeedItem.Status.InProgress = 'inProgress';
+PFeedItem.Status.InProgressCaching = 'inProgressCaching';
+PFeedItem.Status.InProgressCached = 'inProgressCached';
+PFeedItem.Status.Listened = 'listened';
+PFeedItem.Status.ListenedCaching = 'listenedCaching';
+PFeedItem.Status.ListenedCached = 'listenedCached';
+
+/**
+ * Calculates what the current status of the item is.
+ * The function will return a status from PFeedItem.Status.
+ * @returns A string that is a status from PFeedItem.Status.
+ */
+PFeedItem.prototype.getStatusIndicator = function() {
+	if(this.listened === false && this.currentTime === 0 && !this.isEnclosureCached()) {
+		if(this.isCaching()) {
+			return PFeedItem.Status.NewCaching;
+		} else {
+			return PFeedItem.Status.New;
+		}
+	} else if(this.listened === false && this.currentTime === 0  && this.isEnclosureCached()) {
+		return PFeedItem.Status.NewCached;
+	} else if(this.listened === false && this.currentTime !== 0 && !this.isEnclosureCached) {
+		if(this.isCaching()) {
+			return PFeedItem.Status.InProgressCaching;
+		} else {
+			return PFeedItem.Status.InProgress;
+		}
+	} else if(this.listened === false && this.currentTime !== 0 && this.isEnclosureCached()) {
+		return PFeedItem.Status.InProgressCached;
+	} else if(this.listened && this.isEnclosureCached()) {
+		return PFeedItem.Status.ListenedCached;
+	} else {
+		if(this.isCaching()) {
+			return PFeedItem.Status.ListenedCaching;
+		} else {
+			return PFeedItem.Status.Listened;
+		}
+	}
+};
+
 PFeedItem.simpleObject = function(instance) {
 	if(instance instanceof PFeedItem) {
 		var copy = Object.clone(instance);
