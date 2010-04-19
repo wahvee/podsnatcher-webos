@@ -161,21 +161,19 @@ img#image {
 	padding-left: 0px !important;
 }
 
-.newPFeedItem,
-.newCachedPFeedItem {
+.newPFeedItem {
 	font-weight: bold;
 	color: #49708a;
 }
 
 .listenedPFeedItem,
-.inProgressPFeedItem,
-.inProgressCachedPFeedItem {
+.inProgressPFeedItem {
 	color: #FFFFFF;
 }
 
-.inProgressPFeedItem,
-.inProgressCachedPFeedItem {
+.inProgressPFeedItem {
 	font-style: italic;
+	font-weight: bold;
 }
 
 

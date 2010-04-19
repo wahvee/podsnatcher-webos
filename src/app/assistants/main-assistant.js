@@ -148,64 +148,54 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 		// Check to make sure the item is not already downloaded
 		// if it is remove the download button
 		if(pfeedItem) {
-			switch(pfeedItem.getStatusIndicator()) {
+			var statusIndicator = pfeedItem.getStatusIndicator();
+			// Check if it is caching, if so set-up the cancel button
+			switch(statusIndicator) {
 				case PFeedItem.Status.NewCaching:
-					// Give the downloadBtn the cancel class
-					downloadBtn.addClassName('cancel');
-					statusDiv.addClassName('downloading');
-					statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
-				// New will be class 'newPFeedItem'
-				case PFeedItem.Status.New:
-					// Remove the episode length since it's a new podcast
-					episodeLength.hide();
-					episodeTitle.addClassName('newPFeedItem');
-					break;
-				// NewCached will be class 'newCachedPFeedItem'
-				case PFeedItem.Status.NewCached:
-					// Remove the episode length since it's a new podcast
-					episodeLength.hide();
-					episodeTitle.removeClassName('withButton');
-					episodeTitle.addClassName('newCachedPFeedItem');
-					downloadBtn.remove();
-					downloadBtn = undefined;
-					break;
 				case PFeedItem.Status.InProgressCaching:
-					// Give the downloadBtn the cancel class
-					downloadBtn.addClassName('cancel');
-					statusDiv.addClassName('downloading');
-					statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
-				// InProgress will be class 'inProgressPFeedItem'
-				case PFeedItem.Status.InProgress:
-					// Set the styles that are needed
-					episodeTitle.addClassName('inProgressPFeedItem');
-					break;
-				// InProgress will be class 'inProgressCachedPFeedItem'
-				case PFeedItem.Status.InProgressCached:
-					// Set the styles that are needed
-					episodeTitle.removeClassName('withButton');
-					episodeLength.removeClassName('withButton');
-					episodeTitle.addClassName('inProgressPFeedItem');
-					downloadBtn.remove();
-					downloadBtn = undefined;
-					break;
 				case PFeedItem.Status.ListenedCaching:
 					// Give the downloadBtn the cancel class
 					downloadBtn.addClassName('cancel');
 					statusDiv.addClassName('downloading');
 					statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
-				// InProgress will be class 'listenedPFeedItem'
-				case PFeedItem.Status.Listened:
-					// Set the styles that are needed
-					episodeLength.hide();
-					episodeTitle.addClassName('listenedPFeedItem');
 					break;
+			}
+			// Hide the episode length
+			switch(statusIndicator) {
+				case PFeedItem.Status.New:
+				case PFeedItem.Status.NewCaching:
+				case PFeedItem.Status.NewCached:
+					episodeLength.hide();
+					break;
+			}
+			// Check if the item is cached, if so hide the download button
+			switch(statusIndicator) {
+				case PFeedItem.Status.NewCached:
+				case PFeedItem.Status.InProgressCached:
 				case PFeedItem.Status.ListenedCached:
-					// Set the styles that are needed
+					// Remove the download button
 					episodeTitle.removeClassName('withButton');
 					episodeLength.removeClassName('withButton');
-					episodeTitle.addClassName('listenedPFeedItem');
 					downloadBtn.remove();
 					downloadBtn = undefined;
+					break;
+			}
+			// Set the actual styling of the title
+			switch(statusIndicator) {
+				case PFeedItem.Status.New:
+				case PFeedItem.Status.NewCaching:
+				case PFeedItem.Status.NewCached:
+					episodeTitle.addClassName('newPFeedItem');
+					break;
+				case PFeedItem.Status.Listened:
+				case PFeedItem.Status.ListenedCaching:
+				case PFeedItem.Status.ListenedCached:
+					episodeTitle.addClassName('listenedPFeedItem');
+					break;
+				case PFeedItem.Status.InProgress:
+				case PFeedItem.Status.InProgressCaching:
+				case PFeedItem.Status.InProgressCached:
+					episodeTitle.addClassName('inProgressPFeedItem');
 					break;
 			}
 		}
