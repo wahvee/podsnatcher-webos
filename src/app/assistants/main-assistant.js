@@ -140,7 +140,7 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 		var statusDiv = itemNode.select('.status')[0];
 		var downloadBtn = itemNode.select('.downloadButton')[0];
 		var episodeTitle = itemNode.select('.episodeTitle')[0];
-		var episodeLength = itemNode.select('.episodeLength')[0];
+		var currentTimeDiv = itemNode.select('.currentTimeDiv')[0];
 		// Get the PFeedItem that is being represented by this itemModel
 		var pfeedItem = AppAssistant.db.getItem(itemModel.key);
 		// Get the percentage for the item to be displayed
@@ -165,7 +165,7 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 				case PFeedItem.Status.New:
 				case PFeedItem.Status.NewCaching:
 				case PFeedItem.Status.NewCached:
-					episodeLength.hide();
+					currentTimeDiv.hide();
 					break;
 			}
 			// Check if the item is cached, if so hide the download button
@@ -175,7 +175,7 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 				case PFeedItem.Status.ListenedCached:
 					// Remove the download button
 					episodeTitle.removeClassName('withButton');
-					episodeLength.removeClassName('withButton');
+					currentTimeDiv.removeClassName('withButton');
 					downloadBtn.remove();
 					downloadBtn = undefined;
 					break;
@@ -217,64 +217,75 @@ MainAssistant.prototype.listItemUpdate = function(key) {
 	try {
 		// Get the item from the screen
 		var node = this.controller.get(key);
-		var itemModel = AppAssistant.db.getItem(key);
+		// Get the PFeedItem that is being represented by this itemModel
+		var pfeedItem = AppAssistant.db.getItem(key);
 
 		// Check to make sure the node trying to update
 		// is even currently drawn on the scene (list)
-		if(node) {
+		if(node && pfeedItem) {
+			// Get the status of the item to be rendered
+			var statusIndicator = pfeedItem.getStatusIndicator();
 			// Get the Item that is currently downloading
 			// Select the progress bar layer
 			var statusDiv = node.select('.status')[0];
 			// Select the time indicator layer
-			var currentTimeDiv = node.select('.episodeLength')[0];
+			var currentTimeDiv = node.select('.currentTimeDiv')[0];
 			// Select the episode title layer
 			var episodeTitle = node.select('.episodeTitle')[0];
 			// Select the download button
 			var downloadBtn = node.select('.downloadButton')[0];
 			// Get the downloaded percentage
 			var percentage = this.downloadingPercentage.get(key);
-			// Check to see if in one of 5 states:
-			// 1. Downloading => itemModel !== undefined && itemModel.isCaching() == true
-			// 2. Downloaded => itemModel.isEnclosureCache() == true
-			// 3. Default => itemModel.isEnclosureCached() == false && itemModel.isCaching() == false
-			// Case 1: Downloading
-			if(itemModel && itemModel.isCaching()) {
-				// Make the inset appear
-				node.addClassName('clicked');
-				// Give the downloadBtn the cancel class
-				downloadBtn.addClassName('cancel');
-				statusDiv.addClassName('downloading');
-				statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
-				// Clean-up
-				statusDiv.removeClassName('playing');
-				episodeTitle.addClassName('withButton');
-				currentTimeDiv.addClassName('withButton');
-
-			// Case 2: Downloaded
-			} else if(itemModel && itemModel.isEnclosureCached()) {
-				// Remove event listener, preventing memory leaks
-				downloadBtn.stopObserving();
-				downloadBtn.remove();
-				currentTimeDiv.removeClassName('withButton');
-				episodeTitle.removeClassName('withButton');
-				// Reset the status div
-				statusDiv.removeClassName('playing');
-				statusDiv.removeClassName('downloading');
-				statusDiv.setStyle({width: '0%'});
-				node.removeClassName('clicked');
-			// Case 3: Default
-			} else {
-				if(downloadBtn === undefined) {
-					// TODO: Need to re-add the download button
-				} else {
-					downloadBtn.removeClassName('cancel');
-				}
-				currentTimeDiv.addClassName('withButton');
-				episodeTitle.addClassName('withButton');
-				statusDiv.removeClassName('playing');
-				statusDiv.removeClassName('downloading');
-				node.removeClassName('clicked');
-				statusDiv.setStyle({width: '0%'});
+			// Check if it is caching, if so set-up the cancel button
+			switch(statusIndicator) {
+				case PFeedItem.Status.NewCaching:
+				case PFeedItem.Status.InProgressCaching:
+				case PFeedItem.Status.ListenedCaching:
+					// Give the downloadBtn the cancel class
+					downloadBtn.addClassName('cancel');
+					statusDiv.addClassName('downloading');
+					statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
+					break;
+			}
+			// Hide the episode length
+			switch(statusIndicator) {
+				case PFeedItem.Status.New:
+				case PFeedItem.Status.NewCaching:
+				case PFeedItem.Status.NewCached:
+					currentTimeDiv.hide();
+					break;
+			}
+			// Check if the item is cached, if so hide the download button
+			switch(statusIndicator) {
+				case PFeedItem.Status.NewCached:
+				case PFeedItem.Status.InProgressCached:
+				case PFeedItem.Status.ListenedCached:
+					// Remove the download button
+					episodeTitle.removeClassName('withButton');
+					currentTimeDiv.removeClassName('withButton');
+					downloadBtn.remove();
+					downloadBtn = undefined;
+					statusDiv.removeClassName('downloading');
+					statusDiv.setStyle({width: "0%"});
+					break;
+			}
+			// Set the actual styling of the title
+			switch(statusIndicator) {
+				case PFeedItem.Status.New:
+				case PFeedItem.Status.NewCaching:
+				case PFeedItem.Status.NewCached:
+					episodeTitle.addClassName('newPFeedItem');
+					break;
+				case PFeedItem.Status.Listened:
+				case PFeedItem.Status.ListenedCaching:
+				case PFeedItem.Status.ListenedCached:
+					episodeTitle.addClassName('listenedPFeedItem');
+					break;
+				case PFeedItem.Status.InProgress:
+				case PFeedItem.Status.InProgressCaching:
+				case PFeedItem.Status.InProgressCached:
+					episodeTitle.addClassName('inProgressPFeedItem');
+					break;
 			}
 		}
 	} catch(error) {
@@ -630,7 +641,7 @@ MainAssistant.prototype.clearSource = function() {
 MainAssistant.prototype.audioEvent = function(event) {
 	if(event.type === Media.Event.TIMEUPDATE) {
 		if(this.nowPlayingNode) {
-			this.nowPlayingNode.select('.episodeLength')[0].update(this.audioPlayer.currentTime.secondsToDuration());
+			this.nowPlayingNode.select('.currentTimeDiv')[0].update(this.audioPlayer.currentTime.secondsToDuration());
 		}
 	}
 };

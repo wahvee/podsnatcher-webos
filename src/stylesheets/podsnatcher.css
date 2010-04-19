@@ -147,7 +147,7 @@ img#image {
 	padding: 2px 4px 0px 4px;
 	font-size: 14px;
 }
-.episodeLength {
+.currentTimeDiv {
 	width: 100%;
 	height: 23px;
 	float: right;
