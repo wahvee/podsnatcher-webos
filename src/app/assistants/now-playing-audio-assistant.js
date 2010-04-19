@@ -403,19 +403,19 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 			var error = '';
 			switch(event.target.error.code) {
 				case event.target.error.MEDIA_ERR_ABORTED:
-					error = "The media was aborted.";
+					error = $L("The media was aborted.");
 					break;
 				case event.target.error.MEDIA_ERR_DECODE:
-					error = "There was an error decoding the file: " + event.target.src;
+					error = $L("There was an error decoding the file: ") + event.target.src;
 					break;
 				case event.target.error.MEDIA_ERR_NETWORK:
-					error = "There was an error with the network.";
+					error = $L("There was an error with the network.");
 					break;
 				case event.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-					error = "The source file is not supported: " + event.target.src;
+					error = $L("The source file is not supported: ") + event.target.src;
 					break;
 				default:
-					error = "Unknown error " + event.target.error.code;
+					error = $L("Unknown error ") + event.target.error.code;
 					break;
 			}
 			Mojo.Log.error("[NowPlayingAudioAssistant.Media.ERROR] %s", error);

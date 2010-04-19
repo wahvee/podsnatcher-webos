@@ -454,7 +454,7 @@ Podcast.prototype.updateFeed = function(newUrl) {
 							this.updateFeed(redirect);
 						} else {
 							Object.extend(this.podcastUpdateFailure, {
-								message: "(" + transport.status + ") XML was empty!"
+								message: "(" + transport.status + $L(") XML was empty!")
 							});
 							Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 						}

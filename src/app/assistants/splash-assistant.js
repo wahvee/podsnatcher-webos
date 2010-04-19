@@ -11,7 +11,7 @@ SplashAssistant.prototype.setup = function() {
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
 	// Give a status on the screen
 	this.status = this.controller.get('status-text');
-	this.status.update("Connecting to Database");
+	this.status.update($L("Connecting to Database"));
 
 	/* setup widgets here */
 
@@ -49,17 +49,17 @@ SplashAssistant.prototype.handleCommand = function(event) {
 			break;
 		case PodcastStorage.ConnectionToDatabase:
 			Mojo.Log.info("[SplashAssistant.ConnectionToDatabase]");
-			this.status.update("Loading the Database.");
+			this.status.update($L("Loading the Database."));
 			AppAssistant.db.loadDatabase();
 			break;
 		case PodcastStorage.FailedConnectionToDatabase:
-			this.status.update("Connection to the database failed. " + event.error.message);
+			this.status.update($L("Connection to the database failed. ") + event.error.message);
 			break;
 		case PodcastStorage.LoadingDatabaseSuccess:
-			this.status.update("Database was successfully loaded.");
+			this.status.update($L("Database was successfully loaded."));
 			break;
 		case PodcastStorage.LoadingDatabaseFailure:
-			this.status.update("There was a problem loading information from the database. " + event.error.message);
+			this.status.update($L("There was a problem loading information from the database. ") + event.error.message);
 			break;
 	}
 };

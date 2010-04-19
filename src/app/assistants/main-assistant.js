@@ -379,7 +379,7 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 				height: '144px',
 				width: '144px'
 			}));
-			this.controller.get('podcastTitle').update("No Podcasts In Database");
+			this.controller.get('podcastTitle').update($L("No Podcasts In Database"));
 			this.episodeListModel.items = [];
 			// Clear the list
 			this.controller.modelChanged(this.episodeListModel);
@@ -527,7 +527,7 @@ MainAssistant.prototype.handleCommand = function(command) {
 				} else {
 				    // TODO Dashboard please...
 				    var title = command.podcast.title;
-				    var message = (title === undefined) ? "Updating podcast..." : "Updating " + title;
+				    var message = (title === undefined) ? $L("Updating podcast...") : $L("Updating ") + title;
 				    Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
 				}
 				break;
@@ -548,7 +548,9 @@ MainAssistant.prototype.handleCommand = function(command) {
 						this.spinnerModel.spinning = false;
 						this.controller.modelChanged(this.spinnerModel);
 					}
-					msg = "Update of " + command.podcast.key + " failed. " + command.message;
+					//msg = $L("Update of ") + command.podcast.key + $L(" failed. ") + command.message;
+					msg = $L("Update of #{key} failed. #{message}");
+					msg = Mojo.View.render({object: {key: command.podcast.key, message: command.message}, template: msg});
 					Mojo.Controller.errorDialog(msg);
 				} catch(error) {
 					Mojo.Log.error("[MainAssistant.PodcastUpdateFailure] %s", error.message);
@@ -567,7 +569,9 @@ MainAssistant.prototype.handleCommand = function(command) {
 				// Something went wrong
 				this.downloadingPercentage.unset(command.key);
 				this.listItemUpdate(command.key);
-				msg = "[Code " + command.completionStatusCode + "] Cache of " + command.url + " failed.";
+				//msg = $L("[Code ") + command.completionStatusCode + $L("] Cache of ") + command.url + $L(" failed.");
+				msg = $L("[Code #{completionStatusCode}] Cache of #{url} failed.");
+				msg = Mojo.View.render({object: command, template: msg});
 				Mojo.Controller.errorDialog(msg);
 				break;
 			case PFeedItem.EnclosureCached:

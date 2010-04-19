@@ -4,16 +4,19 @@ function AddFeedAssistant(sceneAssistant) {
 
 AddFeedAssistant.prototype.setup = function(widget) {
 	this.widget = widget;
-	this.okButton = this.sceneAssistant.controller.get('ok-button');
+	this.okButton = this.sceneAssistant.controller.get('ok-button'); // Same as $('ok-button')
 	this.errorDialog = this.sceneAssistant.controller.get('error-dialog');
 	this.errorMessage = this.sceneAssistant.controller.get('error-message');
+	this.title = this.sceneAssistant.controller.get('palm-dialog-title');
+	// set title
+	this.title.update($L("Add New Podcast"));
 	// Remove the error message from the screen
 	this.cleanError();
 	// Setup text field for the new podcast URL
 	this.sceneAssistant.controller.setupWidget("new-feed-url",
 		this.urlAttributes = {
 			property: "value",
-			hintText: "RSS or ATOM feed",
+			hintText: $L("RSS or ATOM feed"),
 			focus: true,
 			limitResize: true,
 			textReplacement: false,
@@ -44,11 +47,11 @@ AddFeedAssistant.prototype.validateAndAdd = function() {
 		var added = AppAssistant.db.addNewPodcast(this.urlModel.value, "", true, 0);
 		// If no hash is returned then the podcast was already in the database.
 		if(!added) {
-			this.showError("Podcast already in database.");
+			this.showError($L("Podcast already in database."));
 			this.okButton.mojo.deactivate();
 		}
 	} else {
-		this.showError("Invalid URL.");
+		this.showError($L("Invalid URL."));
 		this.okButton.mojo.deactivate();
 	}
 };
@@ -67,7 +70,7 @@ AddFeedAssistant.prototype.cleanError = function() {
  */
 AddFeedAssistant.prototype.showError = function(message) {
 	this.cleanError();
-	if(message === undefined) { message = "Generic error."; }
+	if(message === undefined) { message = $L("Generic error."); }
 	this.errorDialog.show();
 	// Put message into the HTML
 	this.errorMessage.update(message);
@@ -79,7 +82,7 @@ AddFeedAssistant.prototype.showError = function(message) {
 AddFeedAssistant.prototype.handleCommand = function(command) {
 	switch(command.type) {
 		case Podcast.PodcastUpdateFailure:
-			this.showError("URL did not contain a feed. " + command.message);
+			this.showError($L("URL did not contain a feed. ") + command.message);
 			this.okButton.mojo.deactivate();
 			AppAssistant.db.deletePodcast(command.podcast.key);
 			break;

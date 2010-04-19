@@ -77,7 +77,7 @@ PodcastStorage.prototype.connectToDatabase = function() {
 		if(error == 2) {
 			error = {
 				code: error,
-				message: "Invalid database version"
+				message: $L("Invalid database version")
 			};
 
 		}
@@ -136,7 +136,7 @@ PodcastStorage.prototype.loadDatabase = function() {
 		if(this.isFirstRun && response.rows.length === 0) {
 			this.loadingDatabaseFailure.error = {
 				code: 99,
-				message: "There are no podcasts in the database."
+				message: $L("There are no podcasts in the database.")
 			}
 			Mojo.Controller.stageController.sendEventToCommanders(this.loadingDatabaseFailure);
 		} else if(response.rows.length === 0) {
