@@ -228,7 +228,7 @@ PFeedItem.prototype.getStatusIndicator = function() {
 		}
 	} else if(this.listened === false && this.currentTime === 0  && this.isEnclosureCached()) {
 		return PFeedItem.Status.NewCached;
-	} else if(this.listened === false && this.currentTime !== 0 && !this.isEnclosureCached) {
+	} else if(this.listened === false && this.currentTime !== 0 && !this.isEnclosureCached()) {
 		if(this.isCaching()) {
 			return PFeedItem.Status.InProgressCaching;
 		} else {
