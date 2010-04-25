@@ -4,6 +4,7 @@ function MainAssistant() {
 	 * to the scene controller (this.controller) has not be established yet, so any initialization
 	 * that needs the scene controller should be done in the setup function below. */
 	// Set the display to show new podcasts only
+	this.sceneUpdateTimer = undefined;
 	this.mode = MainAssistant.ListMode.New;
 	this.videoPlayer = {};
 	this.screenWidth = Mojo.Environment.DeviceInfo.screenWidth;
@@ -39,7 +40,7 @@ function MainAssistant() {
 
 	// Setting up the event listener callbacks
 	this.downloadFunction = this.handleItemDownload.bind(this);
-	this.audioEventListener = this.audioEvent.bindAsEventListener(this);
+	this.timerUpdateSceneHandler = this.updateSceneOnTimer.bindAsEventListener(this);
 }
 
 MainAssistant.prototype.setup = function() {
@@ -88,7 +89,10 @@ MainAssistant.prototype.activate = function(event) {
 		// Wait for screen orientation changes
 		this.controller.listen(document, Mojo.Event.orientationChange, this.handleOrientation.bindAsEventListener(this));
 		this.controller.listen(document, "shakeend", this.handleShaking.bindAsEventListener(this));
-		this.audioPlayer.addEventListener(Media.Event.TIMEUPDATE, this.audioEventListener);
+		// Start the time update if playing
+		if(this.isPlaying()) {
+			this.timerToggle('start');
+		}
 		// Update the display
 		this.podcastDisplayUpdate();
 		// Check if the DB needs to be forced to update
@@ -125,7 +129,7 @@ MainAssistant.prototype.cleanup = function(event) {
 		this.controller.stopListening(this.controller.get('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
 		this.controller.stopListening(this.controller.get('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
 
-		this.audioPlayer.stopObserving(Media.Event.TIMEUPDATE, this.audioEventListener);
+		this.timerToggle('stop');
 	} catch(eventErrors) {
 		Mojo.Log.error("[MainAssistant.cleanup] %s", eventErrors.message);
 	}
@@ -669,11 +673,52 @@ MainAssistant.prototype.clearSource = function() {
 };
 
 
-MainAssistant.prototype.audioEvent = function(event) {
-	if(event.type === Media.Event.TIMEUPDATE) {
-		if(this.nowPlayingNode) {
-			this.nowPlayingNode.select('.currentTimeDiv')[0].update(this.audioPlayer.currentTime.secondsToDuration());
+/**
+ * Function starts/stops the display update from happening.
+ * @param action {string} The acceptable values are either: start or stop. 'start' will start the display update; where 'stop' will stop it.
+ */
+MainAssistant.prototype.timerToggle = function(action) {
+	try {
+		if((this.sceneUpdateTimer !== undefined && action == 'start') || action == 'stop') {
+			clearInterval(this.sceneUpdateTimer);
+			this.sceneUpdateTimer = undefined;
 		}
+
+		if(action == 'start') {
+			this.sceneUpdateTimer = setInterval(this.timerUpdateSceneHandler, 1000);
+		}
+	} catch(error) {
+		Mojo.Log.error("[MainAssistant.timerToggle] %s", error.message);
+	}
+};
+
+
+MainAssistant.prototype.updateSceneOnTimer = function() {
+	if(this.nowPlayingNode && this.isPlaying()) {
+		this.nowPlayingNode.select('.currentTimeDiv')[0].update(this.audioPlayer.currentTime.secondsToDuration());
+	} else {
+		this.timerToggle('stop');
+	}
+};
+
+/**
+ * Checks to see if the Audio object is currently playing. The is playing algorithm is based on:
+ * "A media element is said to be potentially playing when its paused attribute is false, the readyState
+ * attribute is either HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA, the element has not ended playback,
+ * playback has not stopped due to errors, and the element has not paused for user interaction."
+ * This is from: http://www.whatwg.org/specs/web-apps/current-work/multipage/video.html#potentially-playing
+ */
+MainAssistant.prototype.isPlaying = function() {
+	if(this.audioPlayer) {
+		return (
+			!this.audioPlayer.paused && (
+				this.audioPlayer.readyState === this.audioPlayer.HAVE_FUTURE_DATA ||
+				this.audioPlayer.readyState === this.audioPlayer.HAVE_ENOUGH_DATA
+			) &&
+			!this.audioPlayer.ended
+		);
+	} else {
+		return false;
 	}
 };
 
