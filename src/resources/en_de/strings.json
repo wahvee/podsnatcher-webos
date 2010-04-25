@@ -1,5 +1,5 @@
 {	
-	"Add New Podcast",
+	"Add New Podcast": "",
 	"RSS or ATOM feed": "",
 	"Add Feed": "",
 	"Podcast already in database.": "",
@@ -15,7 +15,7 @@
 	"Listened": "",
 	"Downloaded": "",
 	"Quick Guide": "",
-	"No Podcasts In Database": "",
+	"There are no podcasts in the database.": "",
 	"Updating podcast...": "",
 	"Updating ": "",
 	"Update of #{key} failed. #{message}": "",

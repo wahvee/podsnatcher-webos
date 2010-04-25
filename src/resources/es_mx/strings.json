@@ -1,12 +1,11 @@
-{	
-	"Add New Podcast",
+{
+	"Add New Podcast": "",
 	"RSS or ATOM feed": "",
 	"Add Feed": "",
 	"Podcast already in database.": "",
 	"Invalid URL.": "",
 	"Generic error.": "",
 	"URL did not contain a feed. ": "",
-	"Add New Podcast": "",
 	"Podcast Actions": "",
 	"Add/Remove Podcasts ...": "",
 	"Update All Podcasts": "",
@@ -15,7 +14,7 @@
 	"Listened": "",
 	"Downloaded": "",
 	"Quick Guide": "",
-	"No Podcasts In Database": "",
+	"There are no podcasts in the database.": "",
 	"Updating podcast...": "",
 	"Updating ": "",
 	"Update of #{key} failed. #{message}": "",
