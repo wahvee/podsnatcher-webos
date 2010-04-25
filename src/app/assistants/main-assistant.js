@@ -258,6 +258,11 @@ MainAssistant.prototype.listItemUpdate = function(key) {
 					statusDiv.addClassName('downloading');
 					statusDiv.setStyle({width: (Object.isUndefined(percentage) ? 0 : percentage) + "%"});
 					break;
+				default:
+					downloadBtn.removeClassName('cancel');
+					statusDiv.removeClassName('downloading');
+					statusDiv.setStyle({width: "0%"});
+					break;
 			}
 			// Hide the episode length
 			switch(statusIndicator) {
