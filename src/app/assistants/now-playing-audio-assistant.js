@@ -176,10 +176,12 @@ NowPlayingAudioAssistant.prototype.isPlaying = function() {
  * Take the enclosure path from the podcast item object and set the HTML5 Audio object to play it.
  */
 NowPlayingAudioAssistant.prototype.setSource = function() {
-	//Mojo.Log.info("Audio Src: %s", this.audioPlayer.currentSrc);
+	// Have to remove file:// from the string
+	var currentSrc = this.audioPlayer.currentSrc.replace('file:///','/');
+	//Mojo.Log.info("Audio Src: %s", currentSrc);
 	//Mojo.Log.info("Podcast Src: %s", this.podcastItem.getEnclosure());
 	//Mojo.Log.info(Object.keys(this.audioPlayer));
-	if(this.audioPlayer.currentSrc !== this.podcastItem.getEnclosure()) {
+	if(currentSrc !== this.podcastItem.getEnclosure()) {
 		this.clearSource();
 		this.audioPlayer.src = this.podcastItem.getEnclosure();
 		this.audioPlayer.load();
