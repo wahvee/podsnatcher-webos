@@ -1,15 +1,11 @@
 .wahvee-progress-slider-btn {
-	/*width: 26px;
-	height: 26px;*/
 	width: 90px;
 	height: 90px;
-	/*margin: 0 0 0 -13px;*/
-	margin: 0 0 0 -45px;
 	/*background-color: #0000FF;*/
 	background-image: url(../images/slider-button.png);
 	z-index: 2;
 	position: absolute;
-	left: 0px;
+	left: -45px;
 }
 
 .wahvee-progress-slider-btn-drag,
@@ -23,10 +19,10 @@
 	width: 0%;
 	float: left;
 	/*background-color: #FF0000;*/
-	
+
 	border-width: 0px 6px 0px 6px;
     -webkit-border-image: url(../images/progress-bar-progress.png) 0 6 0 6 repeat repeat;
-	
+
 	z-index: 1;
 	position: relative;
 	left: -6px;
@@ -43,10 +39,10 @@
 	height: 11px;
 	width: 100%;
 	float: left;
-	
+
 	border-width: 0px 6px 0px 6px;
 	-webkit-border-image: url(../images/progress-bar-background.png) 0 6 0 6 repeat repeat;
-	
+
 	z-index: 0;
 	position: relative;
 }

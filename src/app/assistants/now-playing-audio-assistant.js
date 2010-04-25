@@ -98,7 +98,7 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	// Tell the audio object what to play
 	this.setSource();
 	// Decide to show the player controls
-	this.togglePlayerControls(this.controlShown);
+	//this.togglePlayerControls(this.controlShown);
 
 	/* add event handlers to listen to events from widgets */
 	this.controller.listen(this.controller.stageController.document, Mojo.Event.stageActivate, this.maximize);

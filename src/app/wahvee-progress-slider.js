@@ -79,10 +79,10 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	 * Actually positions the slider on the screen.
 	 */
 	setPositionSlider: function() {
-		var position = this.controller.element.positionedOffset();
-		var physicalWidthOfSlider = this.controller.element.getWidth();
-		var x1 = position.left;
-		var x2 = position.left + physicalWidthOfSlider;
+		var position = this.background.offsetLeft;
+		var physicalWidthOfSlider = this.background.getWidth();
+		var x1 = position - this.offset;
+		var x2 = physicalWidthOfSlider - this.offset + position;
 		var sliderModelValue = this.controller.model[this.sliderValueProperty];
 		var sliderValue = (sliderModelValue >= this.sliderMinValue && sliderModelValue <= this.sliderMaxValue) ? sliderModelValue : this.sliderMaxValue;
 		var xdiff = x2 - x1;
@@ -120,14 +120,14 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	dragStartHandlerFunc: function(event) {
 		event.stop();
 		this.seeking = true;
-		var position = this.controller.element.positionedOffset();
-		var physicalWidthOfSlider = this.controller.element.getWidth();
+		var position = this.background.offsetLeft;
+		var physicalWidthOfSlider = this.background.getWidth();
 		Mojo.Drag.startDragging(this.controller.scene, this.slider, event.down, {
 			draggingClass: "wahvee-progress-slider-btn-drag",
 			preventVertical: true,
 			preventDropReset: true,
-			minHorizontalPixel: position.left,
-			maxHorizontalPixel: position.left + physicalWidthOfSlider
+			minHorizontalPixel: position - this.offset,
+			maxHorizontalPixel: physicalWidthOfSlider - this.offset + position
 		});
 		Mojo.Event.send(this.controller.element, Mojo.Event.sliderDragStart); //allow applications to see this event
 	},
@@ -136,7 +136,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	 */
 	dragging: function(event) {
 		event.stop();
-		var pos = this.determineSliderValue(this.slider.offsetLeft + this.offset);
+		var pos = this.determineSliderValue(this.slider.offsetLeft);
 		pos = pos.roundNumber(2);
 		if(this.lastPos != pos) {
 			this.lastPos = pos;
@@ -158,11 +158,11 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	 * is then created and the value is stored in the model.
 	 */
 	determineSliderValue: function(x) {
-		var position = this.controller.element.positionedOffset();
-		var physicalWidthOfSlider = this.controller.element.getWidth();
+		var position = this.background.offsetLeft;
+		var physicalWidthOfSlider = this.background.getWidth();
 		// Physical area able to allow sliding
-		var x1 = position.left;
-		var x2 = position.left + physicalWidthOfSlider;
+		var x1 = position - this.offset;
+		var x2 = physicalWidthOfSlider - this.offset + position;
 		var xdiff = x2 - x1;
 		var xoffset = x - x1;
 		var sliderValue = this.sliderValDifference * xoffset;
@@ -175,7 +175,7 @@ Mojo.Widget.WahveeProgressSlider = Class.create({
 	 * Cause the model to change. Send an event to anyone who is listening.
 	 */
 	updateModel: function() {
-		var pos = this.determineSliderValue(this.slider.offsetLeft + this.offset);
+		var pos = this.determineSliderValue(this.slider.offsetLeft);
 		if (pos !== this.controller.model[this.sliderValueProperty]) {
 			this.controller.model[this.sliderValueProperty] = pos;
 			Mojo.Event.send(this.controller.element, Mojo.Event.propertyChange, {value: pos});
