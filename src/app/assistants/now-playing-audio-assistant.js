@@ -310,7 +310,8 @@ NowPlayingAudioAssistant.prototype.togglePlayerControls = function(show) {
 		from: startPosition,
 		to: endPosition,
 		duration: this.animationDuration,
-		curve: this.animationType
+		curve: this.animationType,
+		onComplete: this.updateSceneOnTimer.bind(this)
 	});
 };
 
