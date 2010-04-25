@@ -262,8 +262,6 @@ NowPlayingAudioAssistant.prototype.updateSceneOnTimer = function() {
 		this.timeRemaining.update((this.audioPlayer.duration - this.audioPlayer.currentTime).secondsToDuration());
 		this.sliderModel.currentTime = this.audioPlayer.currentTime;
 		this.controller.modelChanged(this.sliderModel);
-	} else {
-		this.timerToggle('stop');
 	}
 };
 
