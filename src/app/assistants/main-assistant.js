@@ -44,6 +44,8 @@ function MainAssistant() {
 
 MainAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
+	this.albumArtDiv = this.controller.get('album-art');
+	this.albumArtDivInitPos = this.albumArtDiv.cumulativeOffset().left;
 
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed. */
 
@@ -65,7 +67,10 @@ MainAssistant.prototype.setup = function() {
 		// Listen for user to flick the album-art to change podcasts
 		this.controller.listen(this.controller.get('album-art-area-right'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
 		this.controller.listen(this.controller.get('album-art-area-left'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
-		this.controller.listen(this.controller.get('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
+		//this.controller.listen(this.controller.get('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
+		this.controller.listen(this.controller.get('album-art'), Mojo.Event.dragStart, this.handleAlbumArtFlick.bindAsEventListener(this));
+		this.controller.listen(this.controller.get('album-art'), Mojo.Event.dragging, this.handleAlbumArtFlick.bindAsEventListener(this));
+		this.controller.listen(this.controller.get('album-art'), Mojo.Event.dragEnd, this.handleAlbumArtFlick.bindAsEventListener(this));
 		this.controller.listen(this.controller.get('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
 		this.controller.listen(this.controller.get('album-art'), Mojo.Event.tap, this.handleAlbumArtTap.bindAsEventListener(this));
 		this.controller.listen(this.controller.get('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
@@ -112,7 +117,10 @@ MainAssistant.prototype.cleanup = function(event) {
 
 		this.controller.stopListening(this.controller.get('album-art-area-right'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
 		this.controller.stopListening(this.controller.get('album-art-area-left'), Mojo.Event.tap, this.albumArtAreaLeftOrRight.bind(this));
-		this.controller.stopListening(this.controller.get('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
+		//this.controller.stopListening(this.controller.get('album-art'), Mojo.Event.flick, this.handleAlbumArtFlick.bindAsEventListener(this));
+		this.controller.stopListening(this.controller.get('album-art'), Mojo.Event.dragStart, this.handleAlbumArtFlick.bindAsEventListener(this));
+		this.controller.stopListening(this.controller.get('album-art'), Mojo.Event.dragging, this.handleAlbumArtFlick.bindAsEventListener(this));
+		this.controller.stopListening(this.controller.get('album-art'), Mojo.Event.dragEnd, this.handleAlbumArtFlick.bindAsEventListener(this));
 		this.controller.stopListening(this.controller.get('album-art'), Mojo.Event.hold, this.handleAlbumArtHold.bindAsEventListener(this));
 		this.controller.stopListening(this.controller.get('episodeList'), Mojo.Event.listTap, this.handleListClick.bindAsEventListener(this));
 		this.controller.stopListening(this.controller.get('episodeList'), Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
@@ -431,23 +439,34 @@ MainAssistant.prototype.handleAlbumArtTap = function(event) {
 MainAssistant.prototype.handleAlbumArtFlick = function(event) {
 	// Stop the event from propagating
 	event.stop();
-	var start = this.controller.get("album-art").cumulativeOffset().left;
-	if(event.velocity.x >= 500) {
-		Mojo.Animation.animateStyle(this.controller.get("album-art"), 'left', 'bezier', {
-			from: start,
-			to: this.animationFinish,
-			duration: this.animationDuration,
-			curve: this.animationType,
-			onComplete: this.switchPodcast.bind(this, 'previous')
-		});
-	} else if(event.velocity.x <= - 500) {
-		Mojo.Animation.animateStyle(this.controller.get("album-art"), 'left', 'bezier', {
-			from: start,
-			to: -this.animationFinish,
-			duration: this.animationDuration,
-			curve: this.animationType,
-			onComplete: this.switchPodcast.bind(this, 'next')
-		});
+	var start = event.currentTarget.cumulativeOffset().left;
+	var prevOrNext = undefined;
+	switch(event.type) {
+		case Mojo.Event.dragStart:
+			event.currentTarget.makePositioned();
+		case Mojo.Event.dragging:
+			var position = event.move.pageX - 150;
+			event.currentTarget.setStyle({'left': position +'px'});
+			break;
+		case Mojo.Event.dragEnd:
+			prevOrNext = (start - this.albumArtDivInitPos > 0 ) ? 'next' : 'previous'
+			Mojo.Log.info("Dragged %s", prevOrNext);
+		//case Mojo.Event.flick:
+			event.currentTarget.makePositioned();
+			if(!prevOrNext && (event.velocity.x >= 500 || event.velocity.x <= -500)) {
+				prevOrNext = (event.velocity.x >= 500) ? 'previous' : undefined;
+				prevOrNext = (event.velocity.x <= -500) ? 'next' : undefined;
+			}
+			if(prevOrNext) {
+				Mojo.Animation.animateStyle(this.albumArtDiv, 'left', 'bezier', {
+					from: start,
+					to: (prevOrNext === 'next') ? this.animationFinish : -this.animationFinish,
+					duration: this.animationDuration,
+					curve: this.animationType,
+					onComplete: this.switchPodcast.bind(this, prevOrNext)
+				});
+			}
+			break;
 	}
 };
 
@@ -459,15 +478,21 @@ MainAssistant.prototype.albumArtAreaLeftOrRight = function(event) {
 	}
 };
 
-MainAssistant.prototype.switchPodcast = function(next) {
+/**
+ * Once the podcast has been animated off the screen, this event handler
+ * is called and it switches the podcast on the screen. It thenperforms
+ * the necessary podcast changes within the database object. It also,
+ * starts the animation to finish drawing the image on the screen.
+ */
+MainAssistant.prototype.switchPodcast = function(prevOrNext) {
 	// Calculate the start and ending positions of the animations
-	var start = (next === 'next') ? this.animationFinish : -this.animationFinish;
+	var start = (prevOrNext === 'next') ? -this.animationFinish : this.animationFinish;
 	var finish = 0;
 	// Actually perform loading or changing to next podcast
-	if(next === 'next') {
+	if(prevOrNext === 'next') {
 		AppAssistant.db.nextPodcast();
 		this.podcastDisplayUpdate();
-	} else if(next === 'previous') {
+	} else if(prevOrNext === 'previous') {
 		AppAssistant.db.previousPodcast();
 		this.podcastDisplayUpdate();
 	}
@@ -476,7 +501,7 @@ MainAssistant.prototype.switchPodcast = function(next) {
 		left: start + "px"
 	});
 	// Perform the animation
-	Mojo.Animation.animateStyle(this.controller.get('album-art'), 'left', 'bezier', {
+	Mojo.Animation.animateStyle(this.albumArtDiv, 'left', 'bezier', {
 		from: start,
 		to: finish,
 		duration: this.animationDuration,
