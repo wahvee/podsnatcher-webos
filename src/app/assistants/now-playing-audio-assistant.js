@@ -82,13 +82,6 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	// Set the media class
 	this.extObj.audioClass = Media.AudioClass.MEDIA;
 
-	// Fix for making the slider render correctly if resuming play-back screen
-	if(this.isPlaying()) {
-		Mojo.Log.error("Setting duration to: %s", this.audioPlayer.duration);
-		this.sliderModel.sliderMaxValue = this.audioPlayer.duration;
-		this.sliderModel.currentTime = this.audioPlayer.currentTime;
-	}
-
 	this.controller.setupWidget(
 		"player-controls-slider",
 		this.sliderAttributes,
@@ -113,6 +106,10 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 		this.playPauseElement.removeClassName('play');
 		this.playPauseElement.addClassName('pause');
 		this.timerToggle('start');
+
+		// Fix for making the slider render correctly if resuming play-back screen
+		this.progressSlider.mojo.updateDraggingArea(0, this.audioPlayer.duration);
+		this.sliderModel.currentTime = this.audioPlayer.currentTime;
 	}
 
 	// Audio events
@@ -365,7 +362,7 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 		case Media.Event.DURATIONCHANGE:
 			if(!isNaN(this.audioPlayer.duration)) {
 				// Set the maximum value to be the duration
-				this.controller.get("player-controls-slider").mojo.updateDraggingArea(0, this.audioPlayer.duration);
+				this.progressSlider.mojo.updateDraggingArea(0, this.audioPlayer.duration);
 			}
 			break;
 		case Media.Event.PLAY:
