@@ -108,6 +108,7 @@ NowPlayingAudioAssistant.prototype.activate = function(event) {
 		this.timerToggle('start');
 
 		// Fix for making the slider render correctly if resuming play-back screen
+		this.sliderModel.sliderMaxValue = this.audioPlayer.duration;
 		this.progressSlider.mojo.updateDraggingArea(0, this.audioPlayer.duration);
 		this.sliderModel.currentTime = this.audioPlayer.currentTime;
 	}
@@ -365,6 +366,7 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 		case Media.Event.DURATIONCHANGE:
 			if(!isNaN(this.audioPlayer.duration)) {
 				// Set the maximum value to be the duration
+				this.sliderModel.sliderMaxValue = this.audioPlayer.duration;
 				this.progressSlider.mojo.updateDraggingArea(0, this.audioPlayer.duration);
 			}
 			break;
