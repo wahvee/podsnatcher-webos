@@ -50,7 +50,7 @@ if (typeof String.isPath !== 'function') {
 if (typeof String.isUrl !== 'function') {
 	Mojo.Log.info("[String.isUrl] is not defined.");
 	String.prototype.isUrl = function() {
-		var regexp = /http:\/\/[A-Za-z0-9\.-]{3,}\.[A-Za-z]{3}/;
+		var regexp = /http:\/\/[A-Za-z0-9\.-]{3,}\.[A-Za-z]{2,}/;
 		return regexp.test(this);
 	};
 } else {

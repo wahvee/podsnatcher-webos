@@ -3,6 +3,7 @@ function StageAssistant() {
 }
 
 StageAssistant.prototype.setup = function() {
+	
 	this.controller.pushCommander(AppAssistant.db);
 
 	// Push the splash screen onto the stage
