@@ -647,6 +647,7 @@ MainAssistant.prototype.handleListClick = function(event) {
 			break;
 		case 'audio/mp3':
 		case 'audio/mpeg':
+		case 'audio/x-mpeg':
 			Mojo.Log.info("[MainAssistant.handleListClick] Playing Audio");
 			this.nowPlayingKey = nowPlaying.key;
 			this.nowPlayingNode = this.controller.get(nowPlaying.key);
