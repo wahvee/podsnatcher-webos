@@ -8,6 +8,7 @@ AddFeedAssistant.prototype.setup = function(widget) {
 	this.errorDialog = this.sceneAssistant.controller.get('error-dialog');
 	this.errorMessage = this.sceneAssistant.controller.get('error-message');
 	this.title = this.sceneAssistant.controller.get('palm-dialog-title');
+	this.textField = this.sceneAssistant.controller.get('new-feed-url');
 	// set title
 	this.title.update($L("Add New Podcast"));
 	// Remove the error message from the screen
@@ -16,8 +17,9 @@ AddFeedAssistant.prototype.setup = function(widget) {
 	this.sceneAssistant.controller.setupWidget("new-feed-url",
 		this.urlAttributes = {
 			property: "value",
-			hintText: $L("RSS or ATOM feed"),
-			focus: true,
+			hintText: $L("http://"),
+			focus: false,
+			changeOnKeyPress: true,
 			limitResize: true,
 			textReplacement: false,
 			enterSubmits: false
@@ -34,7 +36,17 @@ AddFeedAssistant.prototype.setup = function(widget) {
 		this.okButtonModel
 	);
 	Mojo.Event.listen(this.okButton, Mojo.Event.tap, this.validateAndAdd.bindAsEventListener(this));
+	Mojo.Event.listen(this.textField, Mojo.Event.propertyChange, this.prependHttp.bindAsEventListener(this));
 };
+
+AddFeedAssistant.prototype.prependHttp = function(event) {
+	//{model:model, property:property, value:value, oldValue: oldValue, originalEvent: originalEvent}
+	if(event.oldValue.blank()) {
+		this.urlModel.value = "http://" + event.value;
+		this.sceneAssistant.controller.modelChanged(this.urlModel);
+		event.target.mojo.setCursorPosition(8,8);
+	}
+}
 
 /**
  * This method should check to see if what was typed in was a valid URL. If
@@ -92,4 +104,9 @@ AddFeedAssistant.prototype.handleCommand = function(command) {
 			this.widget.mojo.close();
 			break;
 	}
+}
+
+AddFeedAssistant.prototype.cleanup = function() {
+	Mojo.Event.stopListening(this.okButton, Mojo.Event.tap, this.validateAndAdd.bindAsEventListener(this));
+	Mojo.Event.stopListening(this.textField, Mojo.Event.propertyChange, this.prependHttp.bindAsEventListener(this));
 }
