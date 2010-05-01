@@ -18,6 +18,9 @@ var PFeed = Class.create({
 		this.copyright = '';
 		this.imgURL = '';
 		this.items = new Hash();
+		this.iteration = 1;
+		// Required for defer to propertly execute
+		this.deferableParseRss = this.rssNode.bind(this);
 	},
      /**
       * Parse the XML DOM to find out what type of Feed this is.
@@ -38,7 +41,7 @@ var PFeed = Class.create({
 			case 'feed':
 				Mojo.Log.info("[PFeed.parse] Atom");
 				this.type = 'atom';
-				this.parseAtom(xmlObj);
+				this.parseAtom.defer(xmlObj);
 				break;
 			default:
 				Mojo.Log.error("[PFeed.parse] Uknown type: %s", this.type);
@@ -63,9 +66,18 @@ var PFeed = Class.create({
 		// Get the list of nodes
 		var elementIterator = xmlObj.evaluate("rss/channel//item", xmlObj, this.nsResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 		// Get first node
+		this.deferableParseRss.defer(elementIterator);
+	},
+	/**
+	 * Recursive function to load all the XML nodes. Specific
+	 * processing to be done from RSS feeds.
+	 */
+	rssNode: function(elementIterator) {
+		Mojo.Log.info("This is my %s time through.", this.iteration);
+		// Get the node to be processed
 		var thisNode = elementIterator.iterateNext();
-		// Loop over all nodes.
-		while(thisNode) {
+		// Check that a node was received
+		if(thisNode) {
 			// Create a PRssItem from the feed
 			var loadedPRssItem = new PRssItem(thisNode);
 			// Check to see if it is already in the db
@@ -73,8 +85,12 @@ var PFeed = Class.create({
 			if(!this.hasItem(loadedPRssItem.key)) {
 				this.items.set(loadedPRssItem.key, loadedPRssItem);
 			}
-			// Go to the next node
-			thisNode = elementIterator.iterateNext();
+			this.iteration++;
+			// Goto the next node
+			this.deferableParseRss.defer(elementIterator);
+		} else {
+			// Do something now that the JSON object has been parsed
+			Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
 		}
 	},
 	parseAtom: function(xmlObj) {
@@ -99,6 +115,9 @@ var PFeed = Class.create({
 			this.items.push(new PAtomItem(thisNode));
 			thisNode = elementIterator.iterateNext();
 		}
+	},
+	atomNode: function() {
+
 	},
 	/**
 	 * Uses Enumerable#detect method to determine if the Hash contains
