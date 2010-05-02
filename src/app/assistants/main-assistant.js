@@ -45,6 +45,7 @@ function MainAssistant() {
 
 MainAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
+	this.podcastCount = this.controller.get('podcast-count');
 	this.albumArtDiv = this.controller.get('album-art');
 	this.albumArtDivInitPos = this.albumArtDiv.cumulativeOffset().left;
 
@@ -554,6 +555,17 @@ MainAssistant.prototype.handleCommand = function(command) {
 			case PodcastStorage.SavingDatabaseFailure:
 				Mojo.Log.error("[MainAssistant.SavingDatabaseFailure] %s", command.error.message);
 				break;
+			case Podcast.PodcastDownloadProgress:
+				break;
+			case Podcast.PodcastParseProgress:
+				// Create the text for the bannder message
+				var bannerTemplate = new Template($L("Parsing item #{item} of #{numItems}"));
+				// Fill out for correct updating
+				var message = bannerTemplate.evaluate({item: command.item, numItems: command.numItems, title: command.podcast.title});
+				// Show the banner quickly!!!
+				this.podcastCount.update(message);
+				//Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
+				break;
 			case Podcast.PodcastStartUpdate:
 				Mojo.Log.info("[MainAssistant.PodcastStartUpdate] %s starting update.", podcastKey);
 				// Updated podcast is the currently showing podcast
@@ -569,6 +581,11 @@ MainAssistant.prototype.handleCommand = function(command) {
 				break;
 			case Podcast.PodcastUpdateSuccess:
 				Mojo.Log.info("[MainAssistant.PodcastUpdateSuccess] %s finished updating.", podcastKey);
+				// Remove any text in the display area
+				this.podcastCount.update('');
+				// Remove all notification banners
+				Mojo.Controller.getAppController().removeAllBanners();
+				// Shut-off the spinner
 				if(this.spinnerModel.spinning) {
 					this.spinnerModel.spinning = false;
 					this.controller.modelChanged(this.spinnerModel);
@@ -587,8 +604,11 @@ MainAssistant.prototype.handleCommand = function(command) {
 						this.controller.modelChanged(this.spinnerModel);
 					}
 					//msg = $L("Update of ") + command.podcast.key + $L(" failed. ") + command.message;
-					msg = $L("Update of #{key} failed. #{message}");
-					msg = Mojo.View.render({object: {key: command.podcast.key, message: command.message}, template: msg});
+					// Make a template for display on the screen
+					var msgTemplate = new Template($L("Update of #{key} failed. #{message}"));
+					// Render the template
+					msg = msgTemplate.evaluate({key: command.podcast.key, message: command.message});
+					// Display it to the end user
 					Mojo.Controller.errorDialog(msg);
 				} catch(error) {
 					Mojo.Log.error("[MainAssistant.PodcastUpdateFailure] %s", error.message);

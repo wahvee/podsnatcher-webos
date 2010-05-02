@@ -62,8 +62,11 @@ var PFeed = Class.create({
 		this.imgWidth = xmlObj.evaluate("rss/channel/image/width/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.imgHeight = xmlObj.evaluate("rss/channel/image/height/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 
-		var numElements = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
-		Mojo.Log.info("[PFeed.parseRSS] %s has %i item(s).", this.title, numElements);
+		this.podcastParseProgress.numItems = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+		// Reset the event by telling it the total number of elements
+		this.podcastParseProgress.item = 0;
+		// Print some info to the command-line
+		Mojo.Log.info("[PFeed.parseRSS] %s has %i item(s).", this.title, this.podcastParseProgress.numItems);
 		// Get the list of nodes
 		var elementIterator = xmlObj.evaluate("rss/channel//item", xmlObj, this.nsResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 		// Get first node
@@ -78,6 +81,8 @@ var PFeed = Class.create({
 		var thisNode = elementIterator.iterateNext();
 		// Check that a node was received
 		if(thisNode) {
+			// Increase the item number that we are currently operating on
+			this.podcastParseProgress.item++;
 			// Create a PRssItem from the feed
 			var loadedPRssItem = new PRssItem(thisNode);
 			// Check to see if it is already in the db
@@ -85,6 +90,8 @@ var PFeed = Class.create({
 			if(!this.hasItem(loadedPRssItem.key)) {
 				this.items.set(loadedPRssItem.key, loadedPRssItem);
 			}
+			// Trigger the event that this item has now been processed
+			Mojo.Controller.stageController.sendEventToCommanders(this.podcastParseProgress);
 			// Goto the next node
 			this.deferableRssNode.defer(elementIterator);
 		} else {

@@ -29,24 +29,40 @@ var Podcast = Class.create(PFeed, {
 				// to this instance of Podcast
 				this.copy(feedURL);
 			}
-
+			// Event for this podcast begining it's update
 			this.podcastStartUpdate = Mojo.Event.make(Podcast.PodcastStartUpdate, {
 				podcast: this
 			},
 			Mojo.Controller.stageController.document);
+			// Event for this podcast download progress
+			this.podcastDownloadProgress = Mojo.Event.make(Podcast.PodcastDownloadProgress, {
+				podcast: this
+			},
+			Mojo.Controller.stageController.document);
+			// Event for this podcast parsing progress
+			this.podcastParseProgress = Mojo.Event.make(Podcast.PodcastParseProgress, {
+				podcast: this,
+				item: 0,
+				numItems: 1
+			},
+			Mojo.Controller.stageController.document);
+			// Event for when the download and parsing finish
 			this.podcastUpdateSuccess = Mojo.Event.make(Podcast.PodcastUpdateSuccess, {
 				podcast: this
 			},
 			Mojo.Controller.stageController.document);
+			// Event for when and item from this podcast is deleted
 			this.podcastItemDeleted = Mojo.Event.make(Podcast.PodcastItemDeleted, {
 				key: '',
 				item: undefined
 			},
 			Mojo.Controller.stageController.document);
+			// Event for when the podcast fails to update
 			this.podcastUpdateFailure = Mojo.Event.make(Podcast.PodcastUpdateFailure, {
 				podcast: this
 			},
 			Mojo.Controller.stageController.document);
+			// Event for when the podcasts album art is finished caching
 			this.imageCached = Mojo.Event.make(Podcast.ImageCached, {
 				podcast: this
 			},
@@ -175,6 +191,8 @@ var Podcast = Class.create(PFeed, {
 // Static properties of the Podcast class
 Podcast.PodcastStartUpdate = 'onStartPodcastUpdate';
 Podcast.PodcastItemDeleted = 'onPodcastItemDelete';
+Podcast.PodcastDownloadProgress = 'onPodcastUpdateProgress';
+Podcast.PodcastParseProgress = 'onPodcastParseProgress';
 Podcast.PodcastUpdateSuccess = 'onPodcastSuccess';
 Podcast.PodcastUpdateFailure = 'onPodcastFailure';
 Podcast.ImageCached = 'onImageCached';
@@ -465,27 +483,19 @@ Podcast.prototype.updateFeed = function(newUrl) {
 			}.bind(this),
 			onException: function(transport) {
 				Mojo.Log.error("[Podcast.getFeed Exception] %j", transport);
+				Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 			},
 			onFailure: function(transport) {
 				Mojo.Log.error("[Podcast.getFeed Error] %j", transport);
 				Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 			}.bind(this),
 			onLoaded: function() {
-				Mojo.Log.error("[Podcast.getFeed Loaded]");
-			},
-			onLoading: function() {
-				Mojo.Log.error("[Podcast.getFeed Loading]");
 				Mojo.Controller.stageController.sendEventToCommanders(this.podcastStartUpdate);
 			}.bind(this),
 			onInteractive: function() {
-				Mojo.Log.info("[Podcast.getFeed Interactive]");
+				// Send the event that the update is progressed
+				Mojo.Controller.stageController.sendEventToCommanders(this.podcastDownloadProgress);
 			}.bind(this),
-			onCreate: function() {
-				Mojo.Log.error("[Podcast.getFeed Create]");
-			},
-			onComplete: function() {
-				Mojo.Log.error("[Podcast.getFeed Complete]");
-			},
 			onUninitialized: function() {
 				Mojo.Log.error("[Podcast.getFeed Uninitialized]");
 			}

@@ -195,24 +195,14 @@ PodcastStorage.prototype.populateInitialDB = function() {
 
 	var sqlArr = [
 		[
+			hex_md5("http://issuesetc.org/podcast/podcast.xml"),
+			"http://issuesetc.org/podcast/podcast.xml",
+			"Issues, Etc."
+		],
+		[
 			hex_md5("http://www.wdwradio.com/xml/wdwradio.xml"),
 			"http://www.wdwradio.com/xml/wdwradio.xml",
 			"WDW Radio Show"
-		],
-		[
-			hex_md5("http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595"),
-			"http://sports.espn.go.com/espnradio/podcast/feeds/itunes/podCast?id=2406595",
-			"ESPN: PTI"
-		],
-		[
-			hex_md5("http://revision3.com/diggnation/feed/MP4-Large"),
-			"http://revision3.com/diggnation/feed/MP4-Large",
-			"Diggnation"
-		],
-		[
-			 hex_md5("http://buzzreportpodcast.cnettv.com"),
-			"http://buzzreportpodcast.cnettv.com",
-			"Buzz Report"
 		]
 	];
 
