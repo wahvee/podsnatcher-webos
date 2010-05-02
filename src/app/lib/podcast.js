@@ -443,8 +443,6 @@ Podcast.prototype.updateFeed = function(newUrl) {
 						// Turn the XML response into a JSON Object
 						// PFeed method
 						this.parse(transport.responseXML);
-						// Do something now that the JSON object has been parsed
-						Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
 					} else {
 						// Check if we should be redirecting
 						// FIX FOR REDIRECTION ISSUE!
@@ -465,16 +463,32 @@ Podcast.prototype.updateFeed = function(newUrl) {
 					Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 				}
 			}.bind(this),
+			onException: function(transport) {
+				Mojo.Log.error("[Podcast.getFeed Exception] %j", transport);
+			},
 			onFailure: function(transport) {
 				Mojo.Log.error("[Podcast.getFeed Error] %j", transport);
 				Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 			}.bind(this),
+			onLoaded: function() {
+				Mojo.Log.error("[Podcast.getFeed Loaded]");
+			},
 			onLoading: function() {
+				Mojo.Log.error("[Podcast.getFeed Loading]");
 				Mojo.Controller.stageController.sendEventToCommanders(this.podcastStartUpdate);
-			}.bind(this) //,
-			//onInteractive: function() {
-			//	Mojo.Log.info("[Podcast.getFeed] onInteractive");
-			//}.bind(this)
+			}.bind(this),
+			onInteractive: function() {
+				Mojo.Log.info("[Podcast.getFeed Interactive]");
+			}.bind(this),
+			onCreate: function() {
+				Mojo.Log.error("[Podcast.getFeed Create]");
+			},
+			onComplete: function() {
+				Mojo.Log.error("[Podcast.getFeed Complete]");
+			},
+			onUninitialized: function() {
+				Mojo.Log.error("[Podcast.getFeed Uninitialized]");
+			}
 		});
 	} else {
 		Mojo.Log.error("[Podcast.getFeed] URL is empty. Not perfroming request.");
