@@ -37,7 +37,6 @@
 }
 
 img#image {
-	background-image: url(../images/default-album-art.png);
 	background-color: #caff42;
 	margin: 28px;
 }
@@ -291,7 +290,6 @@ img#image {
 }
 img#info-image,
 img#now-playing-audio-image {
-	background-image: url(../images/default-info-album-art.png);
 	background-color: #caff42;
 	height: 85px;
 	width: 85px;

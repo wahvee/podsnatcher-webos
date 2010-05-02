@@ -361,9 +361,10 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 		var currPodcast = AppAssistant.db.currentPodcast();
 		if(currPodcast) {
 			this.albumArtDiv.removeChild(this.controller.get('image'));
+			var image = currPodcast.getImage();
 			this.albumArtDiv.appendChild(new Element('img', {
 				id: 'image',
-				src: (currPodcast.getImage) ? currPodcast.getImage() : '',
+				src: (!image.blank()) ? image : './images/default-album-art.png',
 				alt: '',
 				height: '144px',
 				width: '144px'

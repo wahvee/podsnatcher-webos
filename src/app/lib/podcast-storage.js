@@ -292,11 +292,12 @@ PodcastStorage.prototype.getPodcasts = function() {
 	var arr = [];
 	// Loop all of the items
 	this.listOfPodcasts.each(function(item, index) {
+		var image = item.getImage();
 		arr.push({
 			key: item.key,
 			title: item.title,
 			description: item.description,
-			image: item.getImage()
+			image: (!image.blank()) ? image : './images/default-settings-album-art.png' 
 		});
 	});
 	return arr;

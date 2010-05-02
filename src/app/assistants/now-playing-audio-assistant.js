@@ -45,6 +45,7 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	this.controller.setupWidget(Mojo.Menu.appMenu, AppAssistant.appMenuAttr, AppAssistant.standardModel);
 
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
+	var image = this.podcast.getImage();
 	var renderedInfo = Mojo.View.render(
 		{
 			object: {
@@ -53,7 +54,7 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 				category: Mojo.Format.runTextIndexer(this.podcast.category),
 				language: Mojo.Format.runTextIndexer(this.podcast.language),
 				copyright: Mojo.Format.runTextIndexer(this.podcast.copyright),
-				image: this.podcast.getImage(),
+				image: (!image.blank()) ? image : "./images/default-info-album-art.png",
 				episodeTitle: Mojo.Format.runTextIndexer(this.podcastItem.title),
 				episodeDescription: Mojo.Format.runTextIndexer(this.podcastItem.description)
 			},

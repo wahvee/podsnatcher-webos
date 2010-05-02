@@ -3,7 +3,8 @@ function InfoAssistant(podcast) {
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
-
+	
+	var image = podcast.getImage();
 	this.renderedInfo = Mojo.View.render(
 		{
 			object: {
@@ -13,7 +14,7 @@ function InfoAssistant(podcast) {
 				language: Mojo.Format.runTextIndexer(podcast.language),
 				copyright: Mojo.Format.runTextIndexer(podcast.copyright),
 				description: Mojo.Format.runTextIndexer(podcast.description),
-				image: podcast.getImage()
+				image: (!image.blank()) ? image : './images/default-info-album-art.png'
 			},
 			template: 'info/info-scene-template'
 		}
