@@ -44,9 +44,9 @@ StageAssistant.prototype.handleCommand = function(event) {
 				case 'palm-help-cmd':
 					this.controller.pushAppSupportInfoScene();
 					break;
-				case 'do-refresh-all':
-					// Unload all scenes and then load the login scene
-					//this.controller.popScenesTo(undefined, undefined, undefined);
+				case 'refresh-all-album-art':
+					AppAssistant.db.flagAlbumArt();
+					AppAssistant.db.updatePodcasts();
 					break;
 				case 'do-add-remove':
 					// Start the add remove buttons

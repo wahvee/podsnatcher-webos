@@ -362,6 +362,7 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 		if(currPodcast) {
 			this.albumArtDiv.removeChild(this.controller.get('image'));
 			var image = currPodcast.getImage();
+			//Mojo.Log.info("Image art: %s",image);
 			this.albumArtDiv.appendChild(new Element('img', {
 				id: 'image',
 				src: (!image.blank()) ? image : './images/default-album-art.png',
@@ -614,6 +615,9 @@ MainAssistant.prototype.handleCommand = function(command) {
 			case PFeedItem.EnclosureCached:
 				this.downloadingPercentage.unset(command.key);
 				this.listItemUpdate(command.key);
+				break;
+			case Podcast.ImageCached:
+				this.podcastDisplayUpdate();
 				break;
 			default:
 				Mojo.Log.info("[MainAssistant.handleCommand] Not handling %s", command.type);

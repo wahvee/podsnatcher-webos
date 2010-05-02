@@ -6,6 +6,7 @@ function PodcastStorage(name) {
 	this.updatingAll = false;
 	this.db = undefined;
 	this.isFirstRun = false;
+	this.updateAlbumArt = false;
 
 	this.listOfPodcasts = [];
 
@@ -462,7 +463,7 @@ PodcastStorage.prototype.savePodcast = function(key, triggerSaveAll, saveOnlyPod
  * @param numToKeepCached {Number} The number of cached items to keep on hand.
  * @returns True if it can be added to the database, false if it cannot.
  */
-PodcastStorage.prototype.addNewPodcast= function(url, title, autoDelete, numToKeepCached) {
+PodcastStorage.prototype.addNewPodcast = function(url, title, autoDelete, numToKeepCached) {
 	var hash = hex_md5(url);
 
 	if(!this.podcastExists(hash) && url.isUrl()) {
@@ -529,6 +530,10 @@ PodcastStorage.prototype.updatePodcasts = function() {
 		Mojo.Log.error("[PodcastStorage.updatePodcasts] %s", error.message);
 	}
 };
+
+PodcastStorage.prototype.flagAlbumArt = function() {
+	this.updateAlbumArt = true;
+}
 
 /**
  * Gets the podcast that has the item that matches the referenced key.
@@ -709,6 +714,10 @@ PodcastStorage.prototype.handleCommand = function(command) {
 		case Podcast.PodcastUpdateSuccess:
 			Mojo.Log.info("[PodcastStorage.%s] %s finished updating.", command.type, command.podcast.title);
 			// Check to see if this is just one podcast updating or one in a series
+			if(this.updateAlbumArt) {
+				this.listOfPodcasts[this.indexUpdating].clearCachedImage();
+				this.listOfPodcasts[this.indexUpdating].cacheImage();
+			}
 			if(this.updatingAll) {
 				// Increment the podcast number that is currently updating
 				this.indexUpdating++;
@@ -720,6 +729,8 @@ PodcastStorage.prototype.handleCommand = function(command) {
 					this.requiresUpdate = false;
 					// Save the database since updates are done
 					this.saveAllPodcasts();
+					// Clear flagged album art
+					this.updateAlbumArt = false;
 					// If they are equal everything is done updating
 					Mojo.Controller.stageController.sendEventToCommanders(this.podcastListFinishUpdate);
 				} else {

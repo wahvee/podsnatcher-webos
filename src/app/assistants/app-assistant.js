@@ -63,12 +63,11 @@ AppAssistant.appMenuModel = {
 			{
 			label: $L("Update All Podcasts"),
 			command: 'do-refresh-all'
-		}/*,
+		},
 			{
 			label: $L("Refresh Album Art"),
-			disabled: true,
 			command: 'refresh-all-album-art'
-		}*/
+		}
 			]
 	},
 		{
