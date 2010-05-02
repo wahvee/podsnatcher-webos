@@ -18,9 +18,10 @@ var PFeed = Class.create({
 		this.copyright = '';
 		this.imgURL = '';
 		this.items = new Hash();
-		this.iteration = 1;
 		// Required for defer to propertly execute
-		this.deferableParseRss = this.rssNode.bind(this);
+		this.deferableParse = this.parse.bind(this);
+		this.deferableParseRss = this.parseRSS.bind(this);
+		this.deferableRssNode = this.rssNode.bind(this);
 	},
      /**
       * Parse the XML DOM to find out what type of Feed this is.
@@ -66,14 +67,13 @@ var PFeed = Class.create({
 		// Get the list of nodes
 		var elementIterator = xmlObj.evaluate("rss/channel//item", xmlObj, this.nsResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 		// Get first node
-		this.deferableParseRss.defer(elementIterator);
+		this.deferableRssNode.defer(elementIterator);
 	},
 	/**
 	 * Recursive function to load all the XML nodes. Specific
 	 * processing to be done from RSS feeds.
 	 */
 	rssNode: function(elementIterator) {
-		Mojo.Log.info("This is my %s time through.", this.iteration);
 		// Get the node to be processed
 		var thisNode = elementIterator.iterateNext();
 		// Check that a node was received
@@ -85,9 +85,8 @@ var PFeed = Class.create({
 			if(!this.hasItem(loadedPRssItem.key)) {
 				this.items.set(loadedPRssItem.key, loadedPRssItem);
 			}
-			this.iteration++;
 			// Goto the next node
-			this.deferableParseRss.defer(elementIterator);
+			this.deferableRssNode.defer(elementIterator);
 		} else {
 			// Do something now that the JSON object has been parsed
 			Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateSuccess);
