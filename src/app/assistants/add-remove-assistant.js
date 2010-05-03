@@ -48,6 +48,9 @@ AddRemoveAssistant.prototype.activate = function(event) {
 AddRemoveAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
+	this.controller.stopListening("podcastList", Mojo.Event.listTap, this.handleListTap.bindAsEventListener(this));
+	this.controller.stopListening("podcastList", Mojo.Event.listAdd, this.handleListAdd.bindAsEventListener(this));
+	this.controller.stopListening("podcastList", Mojo.Event.listDelete, this.handleListDelete.bindAsEventListener(this));
 };
 
 AddRemoveAssistant.prototype.cleanup = function(event) {
@@ -91,10 +94,17 @@ AddRemoveAssistant.prototype.handleListDelete = function(event) {
 	this.controller.get("podcastList").mojo.noticeRemovedItems(event.index, 1);
 };
 
+/**
+ * Handle events sent to the command chain.
+ */
 AddRemoveAssistant.prototype.handleCommand = function(command) {
 	switch(command.type) {
+		case Podcast.PodcastXMLDownloadComplete:
+			this.podcastListModel.items = AppAssistant.db.getPodcasts();
+			this.controller.modelChanged(this.podcastListModel);
+			break;
 		case Podcast.PodcastUpdateSuccess:
-			this.podcastListModel.items = AppAssistant.db.getPodcasts()
+			this.podcastListModel.items = AppAssistant.db.getPodcasts();
 			this.controller.modelChanged(this.podcastListModel);
 			break;
 	}

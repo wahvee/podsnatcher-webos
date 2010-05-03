@@ -561,7 +561,9 @@ MainAssistant.prototype.handleCommand = function(command) {
 			case PodcastStorage.SavingDatabaseFailure:
 				Mojo.Log.error("[MainAssistant.SavingDatabaseFailure] %s", command.error.message);
 				break;
-			case Podcast.PodcastDownloadProgress:
+			case Podcast.PodcastXMLDownloadProgress:
+				break;
+			case Podcast.PodcastXMLDownloadComplete:
 				break;
 			case Podcast.PodcastParseProgress:
 				// Updated podcast is the currently showing podcast

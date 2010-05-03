@@ -98,7 +98,7 @@ AddFeedAssistant.prototype.handleCommand = function(command) {
 			this.okButton.mojo.deactivate();
 			AppAssistant.db.deletePodcast(command.podcast.key);
 			break;
-		case Podcast.PodcastUpdateSuccess:
+		case Podcast.PodcastXMLDownloadComplete:
 			this.okButton.mojo.deactivate();
 			this.cleanError();
 			this.widget.mojo.close();

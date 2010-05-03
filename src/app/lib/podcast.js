@@ -35,7 +35,12 @@ var Podcast = Class.create(PFeed, {
 			},
 			Mojo.Controller.stageController.document);
 			// Event for this podcast download progress
-			this.podcastDownloadProgress = Mojo.Event.make(Podcast.PodcastDownloadProgress, {
+			this.podcastDownloadProgress = Mojo.Event.make(Podcast.PodcastXMLDownloadProgress, {
+				podcast: this
+			},
+			Mojo.Controller.stageController.document);
+			// Event for this podcast XML download complete
+			this.podcastXMLDownloadComplete = Mojo.Event.make(Podcast.PodcastXMLDownloadComplete, {
 				podcast: this
 			},
 			Mojo.Controller.stageController.document);
@@ -191,7 +196,8 @@ var Podcast = Class.create(PFeed, {
 // Static properties of the Podcast class
 Podcast.PodcastStartUpdate = 'onStartPodcastUpdate';
 Podcast.PodcastItemDeleted = 'onPodcastItemDelete';
-Podcast.PodcastDownloadProgress = 'onPodcastUpdateProgress';
+Podcast.PodcastXMLDownloadProgress = 'onPodcastXMLDownloadProgress';
+Podcast.PodcastXMLDownloadComplete = 'onPodcastXMLDownloadCompleted';
 Podcast.PodcastParseProgress = 'onPodcastParseProgress';
 Podcast.PodcastUpdateSuccess = 'onPodcastSuccess';
 Podcast.PodcastUpdateFailure = 'onPodcastFailure';
@@ -458,9 +464,10 @@ Podcast.prototype.updateFeed = function(newUrl) {
 			onSuccess: function(transport) {
 				try {
 					if (!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML) && transport.status === 200) {
-						// Turn the XML response into a JSON Object
 						// PFeed method
 						this.parse(transport.responseXML);
+						// Let everyone know that the XML has finished downloading
+						Mojo.Controller.stageController.sendEventToCommanders(this.podcastXMLDownloadComplete);
 					} else {
 						// Check if we should be redirecting
 						// FIX FOR REDIRECTION ISSUE!
