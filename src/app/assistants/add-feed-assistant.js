@@ -24,7 +24,7 @@ AddFeedAssistant.prototype.setup = function(widget) {
 			textReplacement: false,
 			enterSubmits: false
 		},
-		this.urlModel = {value : ""}
+		this.urlModel = {value : "http://"}
 	);
 	// Setup button and event handler
 	this.okButtonModel = {
@@ -36,7 +36,7 @@ AddFeedAssistant.prototype.setup = function(widget) {
 		this.okButtonModel
 	);
 	Mojo.Event.listen(this.okButton, Mojo.Event.tap, this.validateAndAdd.bindAsEventListener(this));
-	Mojo.Event.listen(this.textField, Mojo.Event.propertyChange, this.prependHttp.bindAsEventListener(this));
+	//Mojo.Event.listen(this.textField, Mojo.Event.propertyChange, this.prependHttp.bindAsEventListener(this));
 };
 
 AddFeedAssistant.prototype.prependHttp = function(event) {
@@ -108,5 +108,5 @@ AddFeedAssistant.prototype.handleCommand = function(command) {
 
 AddFeedAssistant.prototype.cleanup = function() {
 	Mojo.Event.stopListening(this.okButton, Mojo.Event.tap, this.validateAndAdd.bindAsEventListener(this));
-	Mojo.Event.stopListening(this.textField, Mojo.Event.propertyChange, this.prependHttp.bindAsEventListener(this));
+	//Mojo.Event.stopListening(this.textField, Mojo.Event.propertyChange, this.prependHttp.bindAsEventListener(this));
 }
