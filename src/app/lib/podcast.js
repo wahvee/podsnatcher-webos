@@ -166,12 +166,14 @@ var Podcast = Class.create(PFeed, {
 				mojoController.serviceRequest('palm://com.palm.downloadmanager', {
 					method: 'download',
 					parameters: {
+						subscribe: true,
 						target: this.imgURL,
 						targetDir: "/media/internal/PodSnatcher/.cache",
 						keepFilenameOnRedirect: true
 					},
 					onSuccess: function(response) {
-						if (response.returnValue) {
+						Mojo.Log.info("[Podcast.cacheImage2] ");
+						if (response.returnValue && response.completed) {
 							Mojo.Log.info("[Podcast.cacheImage] (%s) %s", response.ticket, response.target);
 							this.imgPath = response.target;
 							this.imgTicket = response.ticket;

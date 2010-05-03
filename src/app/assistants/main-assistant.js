@@ -363,7 +363,7 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 		if(currPodcast) {
 			this.albumArtDiv.removeChild(this.controller.get('image'));
 			var image = currPodcast.getImage();
-			//Mojo.Log.info("Image art: %s",image);
+			Mojo.Log.info("Image art: %s",image);
 			this.albumArtDiv.appendChild(new Element('img', {
 				id: 'image',
 				src: (!image.blank()) ? image : './images/default-album-art.png',
