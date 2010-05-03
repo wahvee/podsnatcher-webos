@@ -172,8 +172,8 @@ var Podcast = Class.create(PFeed, {
 						keepFilenameOnRedirect: true
 					},
 					onSuccess: function(response) {
-						Mojo.Log.info("[Podcast.cacheImage2] ");
-						if (response.returnValue && response.completed) {
+						// Check if the download of the album art is finished
+						if (response.completed) {
 							Mojo.Log.info("[Podcast.cacheImage] (%s) %s", response.ticket, response.target);
 							this.imgPath = response.target;
 							this.imgTicket = response.ticket;
@@ -498,7 +498,7 @@ Podcast.prototype.updateFeed = function(newUrl) {
 				Mojo.Log.error("[Podcast.getFeed Error] %j", transport);
 				Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 			}.bind(this),
-			onLoaded: function() {
+			onLoading: function() {
 				Mojo.Controller.stageController.sendEventToCommanders(this.podcastStartUpdate);
 			}.bind(this),
 			onInteractive: function() {

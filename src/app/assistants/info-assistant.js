@@ -14,7 +14,7 @@ function InfoAssistant(podcast) {
 				language: Mojo.Format.runTextIndexer(podcast.language),
 				copyright: Mojo.Format.runTextIndexer(podcast.copyright),
 				description: Mojo.Format.runTextIndexer(podcast.description),
-				image: (!image.blank()) ? image : './images/default-info-album-art.png'
+				image: (!image.blank()) ? image : './images/default-album-art-85-85.png'
 			},
 			template: 'info/info-scene-template'
 		}

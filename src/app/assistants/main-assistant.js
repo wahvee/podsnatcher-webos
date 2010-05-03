@@ -361,12 +361,14 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 	try {
 		var currPodcast = AppAssistant.db.currentPodcast();
 		if(currPodcast) {
-			this.albumArtDiv.removeChild(this.controller.get('image'));
+			// Remove the beginning album-art-image
+			this.controller.get('album-art-image').remove();
 			var image = currPodcast.getImage();
-			Mojo.Log.info("Image art: %s",image);
+			Mojo.Log.info("Image art: %s", image);
 			this.albumArtDiv.appendChild(new Element('img', {
-				id: 'image',
-				src: (!image.blank()) ? image : './images/default-album-art.png',
+				id: 'album-art-image',
+				'class': 'default-album-art-large',
+				src: (!image.blank()) ? image : './images/default-album-art-144-144.png',
 				alt: '',
 				height: '144px',
 				width: '144px'
@@ -391,10 +393,10 @@ MainAssistant.prototype.podcastDisplayUpdate = function() {
 			this.controller.modelChanged(this.episodeListModel);
 		} else {
 			// No Podcasts are in the datbase, so clear the display
-			this.albumArtDiv.removeChild(this.controller.get('image'));
+			this.controller.get('album-art-image').remove();
 			this.albumArtDiv.appendChild(new Element('img', {
-				id: 'image',
-				src: './images/default-album-art.png',
+				id: 'album-art-image',
+				src: './images/default-album-art-144-144.png',
 				alt: '',
 				height: '144px',
 				width: '144px'

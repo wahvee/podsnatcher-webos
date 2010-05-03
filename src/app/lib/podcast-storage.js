@@ -298,7 +298,7 @@ PodcastStorage.prototype.getPodcasts = function() {
 			key: item.key,
 			title: item.title,
 			description: item.description,
-			image: (!image.blank()) ? image : './images/default-settings-album-art.png'
+			image: (!image.blank()) ? image : './images/default-album-art-42-42.png'
 		});
 	});
 	return arr;

@@ -54,7 +54,7 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 				category: Mojo.Format.runTextIndexer(this.podcast.category),
 				language: Mojo.Format.runTextIndexer(this.podcast.language),
 				copyright: Mojo.Format.runTextIndexer(this.podcast.copyright),
-				image: (!image.blank()) ? image : "./images/default-info-album-art.png",
+				image: (!image.blank()) ? image : "./images/default-album-art-85-85.png",
 				episodeTitle: Mojo.Format.runTextIndexer(this.podcastItem.title),
 				episodeDescription: Mojo.Format.runTextIndexer(this.podcastItem.description)
 			},

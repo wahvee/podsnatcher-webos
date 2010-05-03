@@ -36,7 +36,7 @@
 	/*border: 1px solid red;*/
 }
 
-img#image {
+#album-art-image {
 	background-color: #caff42;
 	margin: 28px;
 }
@@ -496,4 +496,20 @@ img#podsnatcher-logo {
 .palm-row.palm-swipe-delete {
 	-webkit-border-image: none !important;
 	margin-top: 24px;
+}
+
+
+/**
+ * Styles for the different default background images
+ */
+.default-album-art-large {
+	background-image: url('../images/default-album-art-144-144.png');
+}
+
+.default-album-art-medium {
+	background-image: url('../images/default-album-art-85-85.png');
+}
+
+.default-album-art-small {
+	background-image: url('../images/default-album-art-42-42.png');
 }
