@@ -491,8 +491,7 @@ MainAssistant.prototype.albumArtAreaLeftOrRight = function(event) {
 
 /**
  * Once the podcast has been animated off the screen, this event handler
- * is called and it switches the podcast on the screen. It then
-performs
+ * is called and it switches the podcast on the screen. It then performs
  * the necessary podcast changes within the database object. It also,
  * starts the animation to finish drawing the image on the screen.
  */
@@ -500,6 +499,13 @@ MainAssistant.prototype.switchPodcast = function(prevOrNext) {
 	// Calculate the start and ending positions of the animations
 	var start = (prevOrNext === 'next') ? -this.animationFinish : this.animationFinish;
 	var finish = 0;
+	// Shut-off the spinner
+	if(this.spinnerModel.spinning) {
+		this.spinnerModel.spinning = false;
+		this.controller.modelChanged(this.spinnerModel);
+	}
+	// Remove any text in the display area
+	this.podcastCount.update('');
 	// Actually perform loading or changing to next podcast
 	if(prevOrNext === 'next') {
 		AppAssistant.db.nextPodcast();
@@ -558,13 +564,16 @@ MainAssistant.prototype.handleCommand = function(command) {
 			case Podcast.PodcastDownloadProgress:
 				break;
 			case Podcast.PodcastParseProgress:
-				// Create the text for the bannder message
-				var bannerTemplate = new Template($L("Parsing item #{item} of #{numItems}"));
-				// Fill out for correct updating
-				var message = bannerTemplate.evaluate({item: command.item, numItems: command.numItems, title: command.podcast.title});
-				// Show the banner quickly!!!
-				this.podcastCount.update(message);
-				//Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
+				// Updated podcast is the currently showing podcast
+				if(AppAssistant.db.currentPodcast().key == podcastKey) {
+					// Create the text for the bannder message
+					var bannerTemplate = new Template($L("Parsing item #{item} of #{numItems}"));
+					// Fill out for correct updating
+					var message = bannerTemplate.evaluate({item: command.item, numItems: command.numItems, title: command.podcast.title});
+					// Show the banner quickly!!!
+					this.podcastCount.update(message);
+					//Mojo.Controller.getAppController().showBanner(message, {source: 'notification'});
+				}
 				break;
 			case Podcast.PodcastStartUpdate:
 				Mojo.Log.info("[MainAssistant.PodcastStartUpdate] %s starting update.", podcastKey);
@@ -585,6 +594,9 @@ MainAssistant.prototype.handleCommand = function(command) {
 				this.podcastCount.update('');
 				// Remove all notification banners
 				Mojo.Controller.getAppController().removeAllBanners();
+				// Put a message that the podcast has finished updating
+				var title = command.podcast.title + $L(" Updated");
+				Mojo.Controller.getAppController().showBanner(title, {source: 'notification'});
 				// Shut-off the spinner
 				if(this.spinnerModel.spinning) {
 					this.spinnerModel.spinning = false;
