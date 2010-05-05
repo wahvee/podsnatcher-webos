@@ -710,7 +710,7 @@ PodcastStorage.prototype.handleCommand = function(command) {
 		case Podcast.PodcastStartUpdate:
 			Mojo.Log.info("[PodcastStorage.podcastUpdating] %s starting update.", podcastKey);
 			break;
-		case Podcast.PodcastUpdateFailure:
+		//case Podcast.PodcastUpdateFailure:
 		case Podcast.PodcastUpdateSuccess:
 			Mojo.Log.info("[PodcastStorage.%s] %s finished updating.", command.type, command.podcast.title);
 			// Check to see if this is just one podcast updating or one in a series

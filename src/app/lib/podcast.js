@@ -465,7 +465,15 @@ Podcast.prototype.updateFeed = function(newUrl) {
 			sanitizeJSON: false,
 			onSuccess: function(transport) {
 				try {
-					if (!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML) && transport.status === 200) {
+					if (transport.status >= 200 && transport.status < 300) {
+						var xml;
+						// If XML is already parsed then do this
+						if(!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML)) {
+							xml = transport.responseXML;
+						} else if(!Object.isUndefined(transport.responseText) && !isNull(transport.responseText)) {
+							var parser = new DOMParser();
+							xml = parser.parseFromString(transport.responseText, 'text/xml');
+						}
 						// PFeed method
 						this.parse(transport.responseXML);
 						// Let everyone know that the XML has finished downloading
