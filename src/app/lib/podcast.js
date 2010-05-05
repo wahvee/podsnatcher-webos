@@ -457,6 +457,10 @@ Podcast.prototype.updateFeed = function(newUrl) {
 	}
 	// Make sure the URL is not blank, and is set
 	if (Object.isString(this.url) && !this.url.blank()) {
+		// Error messages to be displayed
+		var err1Template = new Template($L("(#{status}) Bad response from server."));
+		var err2Template = new Template($L("Unknown content-type: #{contentType}"));
+		// Actual Ajax call
 		var temp = new Ajax.Request(this.url, {
 			asynchronous: true,
 			method: 'get',
@@ -465,8 +469,15 @@ Podcast.prototype.updateFeed = function(newUrl) {
 			sanitizeJSON: false,
 			onSuccess: function(transport) {
 				try {
-					if (transport.status >= 200 && transport.status < 300) {
-						var xml;
+					// Check if we should be redirecting
+					// FIX FOR REDIRECTION ISSUE!
+					var redirect = transport.getHeader("Location");
+					var contentType = transport.getHeader("content-type");
+					if(!isNull(redirect)) {
+						Mojo.Log.info("[Podcast.updateFeed] Need to redirect %s", redirect);
+						this.updateFeed(redirect);
+					} else if (transport.status >= 200 && transport.status < 300) {
+						var xml = undefined;
 						// If XML is already parsed then do this
 						if(!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML)) {
 							xml = transport.responseXML;
@@ -475,22 +486,20 @@ Podcast.prototype.updateFeed = function(newUrl) {
 							xml = parser.parseFromString(transport.responseText, 'text/xml');
 						}
 						// PFeed method
-						this.parse(transport.responseXML);
-						// Let everyone know that the XML has finished downloading
-						Mojo.Controller.stageController.sendEventToCommanders(this.podcastXMLDownloadComplete);
-					} else {
-						// Check if we should be redirecting
-						// FIX FOR REDIRECTION ISSUE!
-						var redirect = transport.getHeader("Location");
-						if (!isNull(redirect)) {
-							Mojo.Log.info("[Podcast.updateFeed] Need to redirect %s", redirect);
-							this.updateFeed(redirect);
+						if(this.parse(xml)) {
+							// Let everyone know that the XML has finished downloading
+							Mojo.Controller.stageController.sendEventToCommanders(this.podcastXMLDownloadComplete);
 						} else {
 							Object.extend(this.podcastUpdateFailure, {
-								message: "(" + transport.status + $L(") XML was empty!")
+								message: err2Template.evaluate({contentType: contentType})
 							});
 							Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 						}
+					} else {
+						Object.extend(this.podcastUpdateFailure, {
+							message: err1Template.evaluate({status: transport.status})
+						});
+						Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 					}
 				} catch(error) {
 					Mojo.Log.error("[Podcast.getFeed try catch error] %s", error.message);
@@ -499,11 +508,17 @@ Podcast.prototype.updateFeed = function(newUrl) {
 				}
 			}.bind(this),
 			onException: function(transport) {
-				Mojo.Log.error("[Podcast.getFeed Exception] %j", transport);
+				Mojo.Log.error("[Podcast.getFeed Exception]");
+				Object.extend(this.podcastUpdateFailure, {
+					message: err1Template.evaluate({status: transport.status})
+				});
 				Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 			},
 			onFailure: function(transport) {
-				Mojo.Log.error("[Podcast.getFeed Error] %j", transport);
+				Mojo.Log.error("[Podcast.getFeed Error]");
+				Object.extend(this.podcastUpdateFailure, {
+					message: err1Template.evaluate({status: transport.status})
+				});
 				Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 			}.bind(this),
 			onLoading: function() {
@@ -515,6 +530,10 @@ Podcast.prototype.updateFeed = function(newUrl) {
 			}.bind(this),
 			onUninitialized: function() {
 				Mojo.Log.error("[Podcast.getFeed Uninitialized]");
+				Object.extend(this.podcastUpdateFailure, {
+					message: $L("Uninitialized")
+				});
+				Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
 			}
 		});
 	} else {

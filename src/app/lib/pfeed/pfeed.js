@@ -33,21 +33,26 @@ var PFeed = Class.create({
 	parse: function(xmlObj) {
 		// Determine if this is RSS or Atom
 		// see if the top element is an rss element
+		var returnVal = false;
 		this.type = xmlObj.evaluate("name(/*)", xmlObj, null, XPathResult.STRING_TYPE, null).stringValue.toLowerCase();
 		switch(this.type) {
 			case 'rss':
 				Mojo.Log.info("[PFeed.parse] RSS");
+				returnVal = true;
 				this.parseRSS(xmlObj);
 				break;
 			case 'feed':
 				Mojo.Log.info("[PFeed.parse] Atom");
 				this.type = 'atom';
+				returnVal = true;
 				this.parseAtom.defer(xmlObj);
 				break;
 			default:
 				Mojo.Log.error("[PFeed.parse] Uknown type: %s", this.type);
 				break;
 		}
+		// To return false if the feed type is not recognized
+		return returnVal;
 	},
 	parseRSS: function(xmlObj) {
 		this.version = xmlObj.evaluate("string(rss/@version)", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
