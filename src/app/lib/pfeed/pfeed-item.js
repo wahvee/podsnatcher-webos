@@ -129,9 +129,8 @@ var PFeedItem = Class.create({
 				},
 				onSuccess: this.cacheUpdate.bind(this),
 				onFailure: function(error) {
-					Mojo.Log.logProperties(error);
 					Mojo.Log.error("[PFeedItem.cacheEnclosure] Failed downloading enclosure.");
-					this.cacheError.key = this.key;
+					Object.extend(this.cacheError, error);
 					Mojo.Controller.stageController.sendEventToCommanders(this.cacheError);
 				}.bind(this)
 			});

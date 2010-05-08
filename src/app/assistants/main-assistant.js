@@ -643,9 +643,8 @@ MainAssistant.prototype.handleCommand = function(command) {
 				// Something went wrong
 				this.downloadingPercentage.unset(command.key);
 				this.listItemUpdate(command.key);
-				//msg = $L("[Code ") + command.completionStatusCode + $L("] Cache of ") + command.url + $L(" failed.");
-				msg = $L("[Code #{completionStatusCode}] Cache of #{url} failed.");
-				msg = Mojo.View.render({object: command, template: msg});
+				var msgTemplate = new Template($L("[Code #{completionStatusCode}] Cache of #{url} failed."));
+				msg = msgTemplate.evaluate(command);
 				Mojo.Controller.errorDialog(msg);
 				break;
 			case PFeedItem.EnclosureCached:
