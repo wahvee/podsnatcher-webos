@@ -78,10 +78,10 @@ AddFeedAssistant.prototype.activate = function(event) {
 AddFeedAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
-	//Mojo.Event.listen(this.textSearch, Mojo.Event.propertyChange, this.searchOrUrlChangeListener);
-	//Mojo.Event.listen(this.searchResultsList, Mojo.Event.listTap, this.searchSelectionListener);
-	//this.controller.document.addEventListener("keyup", this.btnPressListener, true);
-	//Mojo.Event.listen(this.searchBtn, Mojo.Event.tap, this.btnPressListener);
+	Mojo.Event.stopListening(this.textSearch, Mojo.Event.propertyChange, this.searchOrUrlChangeListener);
+	Mojo.Event.stopListening(this.searchResultsList, Mojo.Event.listTap, this.searchSelectionListener);
+	this.controller.document.removeEventListener("keyup", this.btnPressListener, true);
+	Mojo.Event.stopListening(this.searchBtn, Mojo.Event.tap, this.btnPressListener);
 };
 
 AddFeedAssistant.prototype.cleanup = function(event) {
