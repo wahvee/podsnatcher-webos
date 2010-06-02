@@ -129,8 +129,9 @@ var PFeedItem = Class.create({
 				},
 				onSuccess: this.cacheUpdate.bind(this),
 				onFailure: function(error) {
+					Mojo.Log.logProperties(error);
 					Mojo.Log.error("[PFeedItem.cacheEnclosure] Failed downloading enclosure.");
-					Object.extend(this.cacheError, error);
+					this.cacheError.key = this.key;
 					Mojo.Controller.stageController.sendEventToCommanders(this.cacheError);
 				}.bind(this)
 			});
@@ -212,6 +213,14 @@ PFeedItem.Status.InProgressCached = 'inProgressCached';
 PFeedItem.Status.Listened = 'listened';
 PFeedItem.Status.ListenedCaching = 'listenedCaching';
 PFeedItem.Status.ListenedCached = 'listenedCached';
+
+/**
+ * Returns the title of the item.
+ * Currently, this is just the title from the XML.
+ */
+PFeedItem.prototype.getTitle = function() {
+	return this.title;
+};
 
 /**
  * Calculates what the current status of the item is.

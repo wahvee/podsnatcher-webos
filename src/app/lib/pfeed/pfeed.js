@@ -5,7 +5,8 @@
  * @base
  */
 var PFeed = Class.create({
-	initialize: function() {
+	initialize: function(async) {
+		this.async = (!Object.isUndefined(async) && Object.isBoolean(async)) ? async : true;
 		this.id = '';
 		this.key = '';
 		this.type = '';
@@ -17,6 +18,8 @@ var PFeed = Class.create({
 		this.language = '';
 		this.copyright = '';
 		this.imgURL = '';
+		this.link = '';
+		this.published = new Date();
 		this.items = new Hash();
 		// Required for defer to propertly execute
 		this.deferableParse = this.parse.bind(this);
@@ -63,19 +66,45 @@ var PFeed = Class.create({
 		this.category = xmlObj.evaluate("rss/channel/category/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.copyright = xmlObj.evaluate("rss/channel/copyright/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.imgURL = xmlObj.evaluate("rss/channel/image/url/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.link = xmlObj.evaluate("rss/channel/link/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.published = xmlObj.evaluate("rss/channel/pubDate/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.generator = xmlObj.evaluate("rss/channel/generator/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+
 		this.imgTitle = xmlObj.evaluate("rss/channel/image/title/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.imgWidth = xmlObj.evaluate("rss/channel/image/width/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.imgHeight = xmlObj.evaluate("rss/channel/image/height/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 
-		this.podcastParseProgress.numItems = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
-		// Reset the event by telling it the total number of elements
-		this.podcastParseProgress.item = 0;
-		// Print some info to the command-line
-		Mojo.Log.info("[PFeed.parseRSS] %s has %i item(s).", this.title, this.podcastParseProgress.numItems);
-		// Get the list of nodes
-		var elementIterator = xmlObj.evaluate("rss/channel//item", xmlObj, this.nsResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-		// Get first node
-		this.deferableRssNode.defer(elementIterator);
+		// Check to see if we are running the PFeed item async or not
+		if(this.async) {
+			this.podcastParseProgress.numItems = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+			// Reset the event by telling it the total number of elements
+			this.podcastParseProgress.item = 0;
+			// Print some info to the command-line
+			Mojo.Log.info("[PFeed.parseRSS] %s has %i item(s).", this.title, this.podcastParseProgress.numItems);
+			// Get the list of nodes
+			var elementIterator = xmlObj.evaluate("rss/channel//item", xmlObj, this.nsResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+			// Get first node
+			this.deferableRssNode.defer(elementIterator);
+		} else {
+			var numElements = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+			Mojo.Log.info("[PFeed.parseRSS] %s has %i item(s).", this.title, numElements);
+			// Get the list of nodes
+			var elementIterator = xmlObj.evaluate("rss/channel//item", xmlObj, this.nsResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+			// Get first node
+			var thisNode = elementIterator.iterateNext();
+			// Loop over all nodes.
+			while(thisNode) {
+				// Create a PRssItem from the feed
+				var loadedPRssItem = new PRssItem(thisNode);
+				// Check to see if it is already in the db
+				// Only add it to the db if it has not been set
+				if(!this.hasItem(loadedPRssItem.key)) {
+					this.items.set(loadedPRssItem.key, loadedPRssItem);
+				}
+				// Go to the next node
+				thisNode = elementIterator.iterateNext();
+			}
+		}
 	},
 	/**
 	 * Recursive function to load all the XML nodes. Specific
@@ -163,7 +192,8 @@ var PFeed = Class.create({
 		var ns = {
 			"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
 			"atom": "http://www.w3.org/2005/Atom",
-			"itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd"
+			"itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd",
+			"podcastSearch": "http://digitalpodcast.com/podcastsearchservice/output_specs.html"
 		};
 		return ns[prefix] || null;
 	}

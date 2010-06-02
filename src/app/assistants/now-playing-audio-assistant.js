@@ -49,13 +49,13 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	var renderedInfo = Mojo.View.render(
 		{
 			object: {
-				title: Mojo.Format.runTextIndexer(this.podcast.title),
+				title: Mojo.Format.runTextIndexer(this.podcast.getTitle()),
 				author: Mojo.Format.runTextIndexer(this.podcast.author),
 				category: Mojo.Format.runTextIndexer(this.podcast.category),
 				language: Mojo.Format.runTextIndexer(this.podcast.language),
 				copyright: Mojo.Format.runTextIndexer(this.podcast.copyright),
 				image: (!image.blank()) ? image : "./images/default-album-art-85-85.png",
-				episodeTitle: Mojo.Format.runTextIndexer(this.podcastItem.title),
+				episodeTitle: Mojo.Format.runTextIndexer(this.podcastItem.getTitle()),
 				episodeDescription: Mojo.Format.runTextIndexer(this.podcastItem.description)
 			},
 			template: 'now-playing-audio/now-playing-audio-scene-template'
@@ -420,6 +420,7 @@ NowPlayingAudioAssistant.prototype.audioEvent = function(event) {
 					break;
 			}
 			Mojo.Log.error("[NowPlayingAudioAssistant.Media.ERROR] %s", error);
+			Mojo.Controller.errorDialog(error);
 			break;
 		default:
 			Mojo.Log.info("[NowPlayingAudioAssistant.audioEvent] %s", event.type);

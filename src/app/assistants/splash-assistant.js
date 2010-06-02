@@ -44,15 +44,14 @@ SplashAssistant.prototype.handleCommand = function(event) {
 			break;
 		case PodcastStorage.PodcastListFinishUpdate:
 			break;
-		case PodcastStorage.FirstRun:
-			Mojo.Log.info("[SplashAssistant.FirstRun]");
+		case Migrator.Migration:
+			Mojo.Log.info("[SplashAssistant.Migration] Migrating to DB version: %s", event.version);
 			break;
-		case PodcastStorage.ConnectionToDatabase:
-			Mojo.Log.info("[SplashAssistant.ConnectionToDatabase]");
+		case Migrator.FinishMigration:
 			this.status.update($L("Loading the Database."));
 			AppAssistant.db.loadDatabase();
 			break;
-		case PodcastStorage.FailedConnectionToDatabase:
+		case Migrator.MigrationError:
 			this.status.update($L("Connection to the database failed. ") + event.error.message);
 			break;
 		case PodcastStorage.LoadingDatabaseSuccess:

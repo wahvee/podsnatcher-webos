@@ -6,6 +6,7 @@ var PRssItem = Class.create(PFeedItem, {
 		this.published = new Date();
 		this.author = '';
 		this.link = '';
+		this.source = '';
 		// Initialize PFeedItem
 		$super(elementItem);
 		if(Object.isElement(elementItem)) {
@@ -21,6 +22,7 @@ var PRssItem = Class.create(PFeedItem, {
 		this.published = new Date(document.evaluate("./pubDate/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue);
 		this.author = document.evaluate("./author/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.link = document.evaluate("./link/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.source = document.evaluate("string(./source/@url)", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 
 		// PODCAST ENCLOSURES
 		this.enclosure = document.evaluate("./enclosure/@url", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;

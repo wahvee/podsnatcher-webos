@@ -3,12 +3,12 @@ function InfoAssistant(podcast) {
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
-	
+
 	var image = podcast.getImage();
 	this.renderedInfo = Mojo.View.render(
 		{
 			object: {
-				title: Mojo.Format.runTextIndexer(podcast.title),
+				title: Mojo.Format.runTextIndexer(podcast.getTitle()),
 				author: Mojo.Format.runTextIndexer(podcast.author),
 				category: Mojo.Format.runTextIndexer(podcast.category),
 				language: Mojo.Format.runTextIndexer(podcast.language),

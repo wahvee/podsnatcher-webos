@@ -73,9 +73,9 @@ AddRemoveAssistant.prototype.handleListAdd = function(event) {
 	event.stop();
 	Mojo.Log.info("[AddRemoveAssistant.handleListAdd]");
 
-	this.controller.showDialog({
-		template: 'add-remove/add-feed-dialog',
-		assistant: new AddFeedAssistant(this)
+	this.controller.stageController.pushScene({
+		name: "add-feed",
+		transition: Mojo.Transition.zoomFade
 	});
 
 	//Mojo.Controller.errorDialog("Ok");
@@ -99,6 +99,15 @@ AddRemoveAssistant.prototype.handleListDelete = function(event) {
  */
 AddRemoveAssistant.prototype.handleCommand = function(command) {
 	switch(command.type) {
+		case PodcastStorage.SavingDatabaseFailure:
+			Mojo.Log.error("[AddRemoveAssistant.SavingDatabaseFailure] %s", command.error.message);
+			// Make a template for display on the screen
+			var msgTemplate = new Template($L("There was an error saving the database. #{message}"));
+			// Render the template
+			msg = msgTemplate.evaluate(command.error);
+			// Display it to the end user
+			Mojo.Controller.errorDialog(msg);
+			break;
 		case Podcast.PodcastXMLDownloadComplete:
 			this.podcastListModel.items = AppAssistant.db.getPodcasts();
 			this.controller.modelChanged(this.podcastListModel);

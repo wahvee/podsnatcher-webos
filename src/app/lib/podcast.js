@@ -1,6 +1,5 @@
 /**
- * Self-contained object used to manipulate and parse podcast
- * feeds from XML.
+ * Self-contained object used to manipulate and parse podcast feeds from XML.
  * @extends PFeed
  */
 var Podcast = Class.create(PFeed, {
@@ -19,6 +18,10 @@ var Podcast = Class.create(PFeed, {
 		try {
 			// Call the initialize method of it's extended object
 			$super();
+			// Create some properties that will exist for this
+			// instance of the Podcast object
+			this.usrTitle = '';
+			// Now actually populate the Podcast instance
 			if (Object.isString(feedURL)) {
 				// Store path to feed URL
 				this.url = feedURL;
@@ -91,6 +94,20 @@ var Podcast = Class.create(PFeed, {
 		// that the items db is a hash
 		// that the items db has items
 		return (this.title === undefined || this.title.blank() || this.items === undefined || !Object.isHash(this.items) || this.items.size() === 0);
+	},
+	/**
+	 * Returns the title that should be displayed to the user. Checks to see if
+	 * the usrTitle property is not filled out. If it does not exist or is
+	 * empty then it returns the feed title found in the XML.
+	 * @see usrTitle
+	 * @see title
+	 */
+	getTitle: function() {
+		if (!Object.isUndefined(this.usrTitle) && !isNull(this.usrTitle) && !this.usrTitle.blank() && !this.usrTitle.empty()) {
+			return this.usrTitle;
+		} else {
+			return this.title;
+		}
 	},
 	/**
 	 * Call this method to get the podcasts album-art or image. The method,
@@ -246,7 +263,7 @@ Podcast.prototype.getNewItems = function(sortAscending) {
 			arr.push({
 				key: item.key,
 				date: item.published,
-				title: item.title,
+				title: item.getTitle(),
 				currentTime: item.currentTime.secondsToDuration()
 			});
 		}
@@ -283,7 +300,7 @@ Podcast.prototype.getDownloadedItems = function(sortAscending) {
 			arr.push({
 				key: item.key,
 				date: item.published,
-				title: item.title,
+				title: item.getTitle(),
 				currentTime: item.currentTime.secondsToDuration()
 			});
 		}
@@ -320,7 +337,7 @@ Podcast.prototype.getListenedItems = function(sortAscending) {
 			arr.push({
 				key: item.key,
 				date: item.published,
-				title: item.title,
+				title: item.getTitle(),
 				currentTime: item.currentTime.secondsToDuration()
 			});
 		}
@@ -379,7 +396,7 @@ Podcast.prototype.deleteItem = function(key, sendEvent) {
 	var itemToDelete = this.getItem(key);
 
 	if (itemToDelete !== undefined) {
-		Mojo.Log.info("[Podcast.deleteItem] Deleting %s", itemToDelete.title);
+		Mojo.Log.info("[Podcast.deleteItem] Deleting %s", itemToDelete.getTitle());
 		if (itemToDelete instanceof PFeedItem) {
 			itemToDelete.markAsOld();
 			itemToDelete.removeCache(sendEvent);

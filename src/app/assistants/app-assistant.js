@@ -57,7 +57,7 @@ AppAssistant.appMenuModel = {
 		toggleCmd: 'podcast-actions',
 		items: [
 			{
-			label: $L("Add/Remove Podcasts ..."),
+			label: $L("Manage Podcasts"),
 			command: 'do-add-remove'
 		},
 			{

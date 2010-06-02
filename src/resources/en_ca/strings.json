@@ -1,4 +1,4 @@
-{	
+﻿{
 	"Add New Podcast": "",
 	"RSS or ATOM feed": "",
 	"Add Feed": "",
@@ -6,17 +6,17 @@
 	"Invalid URL.": "",
 	"Generic error.": "",
 	"URL did not contain a feed. ": "",
-	"Add New Podcast": "",
 	"Podcast Actions": "",
-	"Add/Remove Podcasts ...": "",
+	"Manage Podcasts": "",
 	"Update All Podcasts": "",
+	"Refresh Album Art": "",
 	"Filter List": "",
 	"Unheard": "",
 	"Listened": "",
 	"Downloaded": "",
 	"Quick Guide": "",
 	"There are no podcasts in the database.": "",
-	"Updating podcast...": "",
+	"Updating podcast ...": "",
 	"Updating ": "",
 	"Update of #{key} failed. #{message}": "",
 	"[Code #{completionStatusCode}] Cache of #{url} failed.": "",
@@ -32,5 +32,8 @@
 	"There was a problem loading information from the database. ": "",
 	") XML was empty!": "",
 	"Invalid database version": "",
-	"There are no podcasts in the database.": ""
+	"There are no podcasts in the database.": "",
+	"Search": "",
+	"There was an error saving the database. #{message}": "",
+	" Updated": ""
 }

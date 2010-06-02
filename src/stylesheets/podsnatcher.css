@@ -16,9 +16,13 @@
 	background: url(../images/tabs.png) no-repeat;
 	width: 216px;
 	height: 111px;
-	margin: 0 auto;
+	/*margin: 0 auto;
 	position: relative;
-	top: -145px;
+	top: -145px;*/
+	position: absolute;
+	left: 50%;
+	margin-left: -108px;
+	margin-top: 55px;
 	z-index: 500;
 }
 
@@ -29,11 +33,19 @@
 	background: url(../images/border.png) no-repeat;
 	width: 200px;
 	height: 200px;
-	margin: 0 auto;
+	/*margin: 0 auto;
 	position: relative;
-	top: 8px;
+	top: 8px;*/
+	position: absolute;
+	top: 6px;
+	left: 50%;
+	margin-left: -100px;
 	z-index: 1000;
 	/*border: 1px solid red;*/
+}
+
+.album-art-dragging-margin {
+	margin-left: -50px !important;
 }
 
 #album-art-image {
@@ -301,7 +313,8 @@ img#now-playing-audio-image {
 .list-click-and-swipe {
 	background-color: #ffffff;
 }
-.palm-button {
+#mojo-scene-add-remove-scene-scroller .palm-button,
+#mojo-scene-main-scene-scroller .palm-button {
 	font-size: 15px !important;
 }
 .palm-swipe-undo-button {
@@ -492,6 +505,35 @@ img#podsnatcher-logo {
 	color: #49708a;
 }
 /* END style for quick-guide scene */
+
+/* style for add feed scene */
+#mojo-scene-add-feed-scene-scroller {
+	background-image: url(../images/background-add-feed.png);
+	background-size: 480px 363px;
+	background-position: 0px 0px;
+	background-repeat: repeat-x;
+	background-color: #ebf7f8;
+	z-index: 0;
+}
+#add-feed-header {
+	padding: 10px 12px 0px 12px;
+	position: relative;
+	top: 4px;
+}
+#title-add-feed-header {
+	color: #49708a;
+}
+#subtitle-add-feed-header {
+	font-size: 15px;
+}
+#feed-search-title {
+	font-size: 18px;
+	color: #49708a;
+}
+#feed-search-url {
+	font-size: 14px;
+}
+/* END style for add feed scene */
 
 .palm-row.palm-swipe-delete {
 	-webkit-border-image: none !important;
