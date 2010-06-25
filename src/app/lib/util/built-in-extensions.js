@@ -35,6 +35,16 @@ if (typeof Number.roundNumber !== 'function') {
 	Mojo.Log.info("[Number.roundNumber] is defined.");
 }
 
+/**
+ * Function extracts a file extension from a string. It will return an empty
+ * string if no extenstion can be extracted.
+ * @returns {String} The extension found.
+ */
+String.prototype.getExtension = function() {
+	var ext = /^.+\.([^.]+)$/.exec(this);
+	return ext == null ? "" : ext[1];
+};
+
 // Add method to String to test if it is a valid pathname
 if (typeof String.isPath !== 'function') {
 	Mojo.Log.info("[String.isPath] is not defined.");

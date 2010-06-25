@@ -302,3 +302,30 @@ PFeedItem.prototype.copy = function(objToExtendFrom) {
 		}
 	}, this);
 };
+
+/**
+ * Checks that the MIME type that is specified is a valid one. The MIME types that
+ * would be found valid are found on this Wiki page:
+ * http://en.wikipedia.org/wiki/Mime_type for either the Audio or Video types.
+ * @returns {Boolean} True if the MIME type is detected here, false otherwise.
+ */
+PFeedItem.prototype.validMIME = function() {
+	var validTypes = [
+		'audio/basic',
+		'audio/mp4',
+		'audio/mpeg',
+		'audio/ogg',
+		'audio/vorbis',
+		'audio/x-ms-wma',
+		'audio/x-ms-wax',
+		'audio/vnd.rn-realaudio',
+		'audio/vnd.wave',
+		'video/mpeg',
+		'video/mp4',
+		'video/ogg',
+		'video/quicktime',
+		'video/x-ms-wmv'
+	];
+	// Determines if the type is within the valid types array
+	return validTypes.include(this.enclosureType);
+}
