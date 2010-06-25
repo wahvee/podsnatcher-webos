@@ -62,10 +62,10 @@ var PFeed = Class.create({
 		this.title = xmlObj.evaluate("rss/channel/title/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.description = xmlObj.evaluate("rss/channel/description/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.language = xmlObj.evaluate("rss/channel/language/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
-		this.author = xmlObj.evaluate("rss/channel/itunes:author/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.author = xmlObj.evaluate("rss/channel/*[local-name()='author']/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.category = xmlObj.evaluate("rss/channel/category/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.copyright = xmlObj.evaluate("rss/channel/copyright/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
-		this.imgURL = xmlObj.evaluate("rss/channel/image/url/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+		this.imgURL = xmlObj.evaluate("rss/channel/*[local-name()='image']/@href | rss/channel/image/url/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.link = xmlObj.evaluate("rss/channel/link/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.published = xmlObj.evaluate("rss/channel/pubDate/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.generator = xmlObj.evaluate("rss/channel/generator/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
