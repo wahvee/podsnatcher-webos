@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:wfw="http://wellformedweb.org/CommentAPI/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dcterms="http://purl.org/dc/terms/">
+  <channel>
+    <title>VeloCast</title>
+    <link>http://velocast.podOmatic.com</link>
+    <description>The weeks' road, urban &amp; mountain biking news lightly sprinkled with discussion and opinion.</description>
+    <language>en-gb</language>
+
+    <generator>podOmatic RSS Generator</generator>
+    <pubDate>Sat, 03 Jul 2010 20:06:39 GMT</pubDate>
+    <itunes:keywords>bicycle,cycling,mountain,race,road,urban</itunes:keywords>
+    <itunes:subtitle>road, urban &amp; mountain biking news</itunes:subtitle>
+    <itunes:explicit>no</itunes:explicit>
+
+    <itunes:block>no</itunes:block>
+    <itunes:image href="http://velocast.podOmatic.com/mymedia/thumb/pro/1196334/600x600_1687477.gif"/>
+    <itunes:author>John Galloway</itunes:author>
+    <itunes:summary>The weeks' road, urban &amp; mountain biking news lightly sprinkled with discussion and opinion.</itunes:summary>
+    <itunes:category text="Sports &amp; Recreation"/>
+    <atom:link rel="self" type="application/rss+xml" href="http://velocast.podOmatic.com/rss2.xml"/>
+
+    <item>
+      <title>Episode 84: Tour De France Prologue</title>
+      <description>&lt;img src="http://velocast.podOmatic.com/mymedia/thumb/1196334/600x600_1687477.gif" alt="itunes pic" /&gt;&lt;br /&gt;Today we discuss the opening prologue stage of the 2010 Tour De France
+
+http://www.velocast.co.uk</description>
+      <guid isPermaLink="true">http://velocast.podOmatic.com/entry/2010-07-03T13_02_21-07_00</guid>
+      <comments>http://velocast.podOmatic.com/entry/2010-07-03T13_02_21-07_00</comments>
+      <pubDate>Sat, 03 Jul 2010 19:53:26 GMT</pubDate>
+
+      <dcterms:modified>2010-07-03</dcterms:modified>
+      <dcterms:created>2010-07-03</dcterms:created>
+      <link>http://velocast.podOmatic.com</link>
+      <dc:creator>John Galloway</dc:creator>
+      <itunes:keywords>audio,bicycle,biking,cycling,de,france,mountain,news,race,road,tour,urban,velocast</itunes:keywords>
+      <enclosure type="audio/mpeg" url="http://velocast.podOmatic.com/enclosure/2010-07-03T13_02_21-07_00.mp3" length="8244580"/>
+
+      <itunes:image href="http://velocast.podOmatic.com/mymedia/thumb/1196334/600x600_1687477.gif"/>
+      <itunes:duration>1030</itunes:duration>
+      <itunes:explicit>no</itunes:explicit>
+      <itunes:summary>Today we discuss the opening prologue stage of the 2010 Tour De France
+
+http://www.velocast.co.uk</itunes:summary>
+    </item>
+  </channel>
+</rss>

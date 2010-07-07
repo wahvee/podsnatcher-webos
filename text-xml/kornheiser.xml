@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:itunes="http://www.itunes.com/DTDs/Podcast-1.0.dtd" version="2.0">
+	<channel>
+		<title>The Tony Kornheiser Show</title>
+		<description>The Tony Kornheiser Show from 10am - 12noon.</description>
+		<itunes:summary>The Tony Kornheiser Show from 10am - 12noon.</itunes:summary>
+		<itunes:author>WTEM</itunes:author>
+		<itunes:subtitle>The Tony Kornheiser Show</itunes:subtitle>
+		<itunes:category text="Sports"/>
+		<itunes:keywords>Tony Kornheiser, ESPN 980</itunes:keywords>
+		<link>http://www.espn980.com</link>
+		<language>en-us</language>
+		<pubDate>Fri, 25 Jun 2010 13:13:27 EST</pubDate>
+		<itunes:category text="News"/>
+		<itunes:owner>
+			<itunes:name>WTEM</itunes:name>
+		</itunes:owner>
+		<itunes:image href="http://www.stationcaster.com/stations/wtem/media/pjpeg/The_Tony_Kornheiser_Show.jpg"/>
+		<item>
+			<itunes:category text="Sports"/>
+			<itunes:image href="http://www.stationcaster.com/stations/wtem/media/jpeg/June_25_2010_The_Tony_Kornheiser_Show_Part_1-1277486055.jpg"/>
+			<itunes:summary>Ann Hornaday</itunes:summary>
+			<itunes:author>ESPN 980</itunes:author>
+			<itunes:duration>40:54</itunes:duration>
+			<title>June 25 2010 The Tony Kornheiser Show Part 1</title>
+			<enclosure url="http://www.stationcaster.com/clicktrack/index.mp3?media=%2Fstations%2Fwtem%2Fmedia%2Fmpeg%2FJune_25_2010_The_Tony_Kornheiser_Show_Part_1-1277486055.mp3&amp;usecat=580&amp;subscribed=true&amp;title=June+25+2010+The+Tony+Kornheiser+Show+Part+1&amp;ext=.mp3" type="application/download"/>
+			<pubDate>Fri, 25 Jun 2010 13:14:15 EST</pubDate>
+			<link>http://www.stationcaster.com/clicktrack/index.mp3?media=%2Fstations%2Fwtem%2Fmedia%2Fmpeg%2FJune_25_2010_The_Tony_Kornheiser_Show_Part_1-1277486055.mp3&amp;usecat=580&amp;subscribed=true&amp;title=June+25+2010+The+Tony+Kornheiser+Show+Part+1&amp;ext=.mp3</link>
+			<description>Ann Hornaday</description>
+		</item>
+	</channel>
+</rss>
