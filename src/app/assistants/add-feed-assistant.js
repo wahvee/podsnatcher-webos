@@ -184,7 +184,8 @@ AddFeedAssistant.prototype.handleCommand = function(command) {
 	switch(command.type) {
 		case Podcast.PodcastUpdateFailure:
 			this.searchBtn.mojo.deactivate();
-			this.showError($L("URL did not contain a feed. "));
+			var errorMsg = command.message || $L("URL did not contain a feed.");
+			this.showError(errorMsg);
 			break;
 		case Podcast.PodcastXMLDownloadComplete:
 			this.controller.stageController.popScene();

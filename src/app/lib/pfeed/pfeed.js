@@ -37,14 +37,14 @@ var PFeed = Class.create({
 		// Determine if this is RSS or Atom
 		// see if the top element is an rss element
 		var returnVal = false;
-		this.type = xmlObj.evaluate("name(/*)", xmlObj, null, XPathResult.STRING_TYPE, null).stringValue.toLowerCase();
+		this.type = this.parseType(xmlObj);
 		switch(this.type) {
 			case 'rss':
 				Mojo.Log.info("[PFeed.parse] RSS");
 				returnVal = true;
 				this.parseRSS(xmlObj);
 				break;
-			case 'feed':
+			case 'atom':
 				Mojo.Log.info("[PFeed.parse] Atom");
 				this.type = 'atom';
 				returnVal = true;
@@ -158,6 +158,32 @@ var PFeed = Class.create({
 	},
 	atomNode: function() {
 
+	},
+	/**
+	 * Get the feed type from an XML document. Returns the string name of the
+	 * type of feed.
+	 * @returns {String | Undefined} Returns 'rss' or 'atom'; undefined if unrecognized feed.
+	 */
+	parseType: function(xmlObj) {
+		try {
+			var returnVal = undefined;
+			var tempType = xmlObj.evaluate("name(/*)", xmlObj, null, XPathResult.STRING_TYPE, null).stringValue.toLowerCase();
+			switch(tempType) {
+				case 'rss':
+					returnVal = tempType;
+					break;
+				case 'feed':
+					returnVal = 'atom';
+					break;
+				default:
+					returnVal = undefined;
+					break;
+			}
+			return returnVal;
+		} catch(error) {
+			Mojo.Log.error("[parseType] %s", error.message);
+			return undefined;
+		}
 	},
 	/**
 	 * Uses Enumerable#detect method to determine if the Hash contains
