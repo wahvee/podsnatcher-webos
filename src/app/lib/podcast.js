@@ -465,6 +465,31 @@ Podcast.prototype.copy = function(objToExtendFrom) {
 };
 
 /**
+ * This method determines if a PFeed feed is infact a valid RSS or Atom
+ * feed. The method in which it does this (at least for the time being) is that
+ * it checks to see if there are items and that those items have an enclosure.
+ * @returns {Boolean} If passes test criteria returns true, false otherwise.
+ */
+Podcast.prototype.validateRSS = function(xmlObj) {
+	var type = this.parseType(xmlObj);
+	var returnVal = false;
+	switch(type) {
+		case 'rss':
+			var numberOfItems = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+			var numberOfEnclosures = xmlObj.evaluate("count(rss/channel//item//enclosure/@url)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+			returnVal = (numberOfItems > 0 && numberOfEnclosures > 0);
+			break;
+		case 'feed':
+			returnVal = true;
+			break;
+		default:
+			returnVal = false;
+			break;
+	}
+	return returnVal;
+};
+
+/**
  * Actually, performs the updating of the XML feed.
  */
 Podcast.prototype.updateFeed = function(newUrl) {
@@ -476,7 +501,7 @@ Podcast.prototype.updateFeed = function(newUrl) {
 	if (Object.isString(this.url) && !this.url.blank()) {
 		// Error messages to be displayed
 		var err1Template = new Template($L("(#{status}) Bad response from server."));
-		var err2Template = new Template($L("Unknown content-type: #{contentType}"));
+		var err2Template = new Template($L("XML failed feed validation. This could be caused by the content-type (#{contentType}) being unknown to the parser or no included enclosures."));
 		// Actual Ajax call
 		var temp = new Ajax.Request(this.url, {
 			asynchronous: true,
@@ -498,15 +523,28 @@ Podcast.prototype.updateFeed = function(newUrl) {
 						// If XML is already parsed then do this
 						if(!Object.isUndefined(transport.responseXML) && !isNull(transport.responseXML)) {
 							xml = transport.responseXML;
+
+						// Otherwise we need to make sure the XML document gets made
 						} else if(!Object.isUndefined(transport.responseText) && !isNull(transport.responseText)) {
 							var parser = new DOMParser();
 							xml = parser.parseFromString(transport.responseText, 'text/xml');
 						}
-						// PFeed method
-						if(this.parse(xml)) {
-							// Let everyone know that the XML has finished downloading
-							Mojo.Controller.stageController.sendEventToCommanders(this.podcastXMLDownloadComplete);
+
+						// Check to see if this is a valid Podcast feed
+						if(this.validateRSS(xml)) {
+							// PFeed method
+							if(this.parse(xml)) {
+								// Let everyone know that the XML has finished downloading
+								Mojo.Controller.stageController.sendEventToCommanders(this.podcastXMLDownloadComplete);
+							} else {
+								// For some reason the item could not be parsed
+								Object.extend(this.podcastUpdateFailure, {
+									message: err2Template.evaluate({contentType: contentType})
+								});
+								Mojo.Controller.stageController.sendEventToCommanders(this.podcastUpdateFailure);
+							}
 						} else {
+							// The XML failed the validation test
 							Object.extend(this.podcastUpdateFailure, {
 								message: err2Template.evaluate({contentType: contentType})
 							});
