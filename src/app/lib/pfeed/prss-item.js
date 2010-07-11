@@ -1,3 +1,10 @@
+/**
+ * @extends PFeedItem
+ * @constructor
+ * @name PRssItem
+ * @description
+ * This class was created to address feeds that conform to the RSS specification.
+ */
 var PRssItem = Class.create(PFeedItem, {
 	initialize: function($super, elementItem) {
 		this.id = '';
@@ -29,23 +36,8 @@ var PRssItem = Class.create(PFeedItem, {
 		this.enclosureLength = document.evaluate("./enclosure/@length", elementItem, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
 		this.enclosureType = document.evaluate("./enclosure/@type", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 
-		// Check to see if the MIME type is recognized
-		if(!this.validMIME()) {
-			var ext = this.enclosure.getExtension();
-			Mojo.Log.info("[PRssItem.parse] We have an invalid MIME type. Trying to infer one from the extension: %s", ext);
-			// Check to see if we recognize the file extension
-			switch(ext.toLowerCase()) {
-				case 'mp3':
-					this.enclosureType = 'audio/mpeg';
-					break;
-				case 'm4v':
-					this.enclosureType = 'video/mp4';
-					break;
-				default:
-					Mojo.Log.info("[PRssItem.parse] Unfortunately, cannot infer anything. Leaving as found.");
-					break;
-			}
-		}
+		// Try and infer a MIME based on extenstion
+		this.inferMIME();
 
 		// Regenerate the key
 		this.generateKey();

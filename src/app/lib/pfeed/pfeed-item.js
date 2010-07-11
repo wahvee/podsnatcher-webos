@@ -192,6 +192,52 @@ var PFeedItem = Class.create({
 			Object.extend(this.cacheError, response);
 			Mojo.Controller.stageController.sendEventToCommanders(this.cacheError);
 		}
+	},
+	/**
+	 * @function
+	 * @name PFeedItem#inferMIME
+	 * @description
+	 * Attempts to infer a MIME type based on the file extension. This inference
+	 * is only attempted in the event that the MIME type already stored is not
+	 * considered valid.
+	 * @see PFeedItem#isValidMIME
+	 */
+	inferMIME: function() {
+		// Check to see if the MIME type is recognized
+		if(!this.isValidMIME()) {
+			var ext = this.enclosure.getExtension();
+			Mojo.Log.info("[PFeedItem.generateMIME] We have an invalid MIME type. Trying to infer one from the extension: %s", ext);
+			// Check to see if we recognize the file extension
+			switch(ext.toLowerCase()) {
+				case 'mp3':
+					this.enclosureType = 'audio/mpeg';
+					break;
+				case 'm4v':
+					this.enclosureType = 'video/mp4';
+					break;
+				default:
+					Mojo.Log.info("[PFeedItem.generateMIME] Unfortunately, cannot infer anything. Leaving as found.");
+					break;
+			}
+		}
+	},
+	/**
+	 * @private
+	 * @function
+	 * @name PFeedItem#nsResolver
+	 * @description
+	 * This is used to resolve Namespaces within XML documents.
+	 */
+	nsResolver: function(prefix) {
+		prefix = prefix.toLowerCase();
+		var ns = {
+			"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+			"atom": "http://www.w3.org/2005/Atom",
+			"itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd",
+			"podcastSearch": "http://digitalpodcast.com/podcastsearchservice/output_specs.html",
+			"media": "http://search.yahoo.com/mrss/"
+		};
+		return ns[prefix] || null;
 	}
 });
 
@@ -309,7 +355,7 @@ PFeedItem.prototype.copy = function(objToExtendFrom) {
  * http://en.wikipedia.org/wiki/Mime_type for either the Audio or Video types.
  * @returns {Boolean} True if the MIME type is detected here, false otherwise.
  */
-PFeedItem.prototype.validMIME = function() {
+PFeedItem.prototype.isValidMIME = function() {
 	var validTypes = [
 		'audio/basic',
 		'audio/mp4',
