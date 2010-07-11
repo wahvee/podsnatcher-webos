@@ -1,8 +1,11 @@
-/* PFeed : Prototype feed parser plugin
- * Copyright (C) 2010 Ryan Lovelett - http://www.wahvee.com/
- * Dual licensed under the MIT (MIT-license.txt)
- * and GPL (GPL-license.txt) licenses.
- * @base
+/**
+ * @constructor
+ * @description Prototype feed parser. This class is used to handle all of low-level
+ * feed parsing. This class interfaces with the feed from the url and converts it
+ * into a parsed object in memory.
+ * @param async {Boolean} This determines if the parsing should be performed
+ * asyncronously or linearly. This parameter is optional and if not supplied
+ * defaults to be true (which is asyncrounous).
  */
 var PFeed = Class.create({
 	initialize: function(async) {
@@ -60,6 +63,10 @@ PFeed.prototype.parse = function(xmlObj) {
 	return returnVal;
 };
 
+/**
+ * @private
+ * Performs the parsing of an RSS feed.
+ */
 PFeed.prototype.parseRSS = function(xmlObj) {
 	this.version = xmlObj.evaluate("string(rss/@version)", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 	this.title = xmlObj.evaluate("rss/channel/title/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
@@ -76,32 +83,30 @@ PFeed.prototype.parseRSS = function(xmlObj) {
 	this.imgTitle = xmlObj.evaluate("rss/channel/image/title/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 	this.imgWidth = xmlObj.evaluate("rss/channel/image/width/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 	this.imgHeight = xmlObj.evaluate("rss/channel/image/height/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+	// Get the list of nodes
+	var elementIterator = xmlObj.evaluate("rss/channel//item", xmlObj, this.nsResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
 	// Check to see if we are running the PFeed item async or not
-	if(this.async) {
+	if (this.async) {
 		this.podcastParseProgress.numItems = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
 		// Reset the event by telling it the total number of elements
 		this.podcastParseProgress.item = 0;
 		// Print some info to the command-line
 		Mojo.Log.info("[PFeed.parseRSS] %s has %i item(s).", this.title, this.podcastParseProgress.numItems);
-		// Get the list of nodes
-		var elementIterator = xmlObj.evaluate("rss/channel//item", xmlObj, this.nsResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 		// Get first node
 		this.deferableRssNode.defer(elementIterator);
 	} else {
 		var numElements = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
 		Mojo.Log.info("[PFeed.parseRSS] %s has %i item(s).", this.title, numElements);
-		// Get the list of nodes
-		var elementIterator = xmlObj.evaluate("rss/channel//item", xmlObj, this.nsResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 		// Get first node
 		var thisNode = elementIterator.iterateNext();
 		// Loop over all nodes.
-		while(thisNode) {
+		while (thisNode) {
 			// Create a PRssItem from the feed
 			var loadedPRssItem = new PRssItem(thisNode);
 			// Check to see if it is already in the db
 			// Only add it to the db if it has not been set
-			if(!this.hasItem(loadedPRssItem.key)) {
+			if (!this.hasItem(loadedPRssItem.key)) {
 				this.items.set(loadedPRssItem.key, loadedPRssItem);
 			}
 			// Go to the next node
@@ -111,6 +116,7 @@ PFeed.prototype.parseRSS = function(xmlObj) {
 };
 
 /**
+ * @private
  * Recursive function to load all the XML nodes. Specific
  * processing to be done from RSS feeds.
  */
@@ -118,14 +124,14 @@ PFeed.prototype.rssNode = function(elementIterator) {
 	// Get the node to be processed
 	var thisNode = elementIterator.iterateNext();
 	// Check that a node was received
-	if(thisNode) {
+	if (thisNode) {
 		// Increase the item number that we are currently operating on
 		this.podcastParseProgress.item++;
 		// Create a PRssItem from the feed
 		var loadedPRssItem = new PRssItem(thisNode);
 		// Check to see if it is already in the db
 		// Only add it to the db if it has not been set
-		if(!this.hasItem(loadedPRssItem.key)) {
+		if (!this.hasItem(loadedPRssItem.key)) {
 			this.items.set(loadedPRssItem.key, loadedPRssItem);
 		}
 		// Trigger the event that this item has now been processed
@@ -138,13 +144,16 @@ PFeed.prototype.rssNode = function(elementIterator) {
 	}
 };
 
+/**
+ * @private
+ */
 PFeed.prototype.parseAtom = function(xmlObj) {
 	this.version = '1.0';
 	//TODO Fix language detection
 	//this.language = xmlObj.evaluate("string(Atom:feed/@lang)", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null);
 	this.id = xmlObj.evaluate("/Atom:feed/Atom:id/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 	this.title = xmlObj.evaluate("/Atom:feed/Atom:title/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
-	this.description  = xmlObj.evaluate("/Atom:feed/Atom:subtitle/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
+	this.description = xmlObj.evaluate("/Atom:feed/Atom:subtitle/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 	this.author = xmlObj.evaluate("/Atom:feed/Atom:author/Atom:name/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 
 	// Start reading all of the different items
@@ -156,13 +165,17 @@ PFeed.prototype.parseAtom = function(xmlObj) {
 	// Get first node
 	var thisNode = elementIterator.iterateNext();
 	// Loop over all nodes.
-	while(thisNode) {
+	while (thisNode) {
 		this.items.push(new PAtomItem(thisNode));
 		thisNode = elementIterator.iterateNext();
 	}
 };
 
-PFeed.prototype.atomNode = function() {}
+/**
+ * @private
+ * Not implemented!!
+ */
+PFeed.prototype.atomNode = function() {};
 
 /**
  * Get the feed type from an XML document. Returns the string name of the
@@ -195,8 +208,8 @@ PFeed.prototype.parseType = function(xmlObj) {
 };
 
 /**
- * Uses Enumerable#detect method to determine if the Hash contains
- * a reference to the feed item.
+ * Uses Enumerable#detect method to determine if the Hash contains a reference
+ * to the feed item.
  * @param key {String} Hash key of the podcast item to be found.
  * @returns {Boolean} True if has the key, false otherwise.
  */
@@ -222,8 +235,12 @@ PFeed.prototype.getItem = function(key) {
 		Mojo.Log.error("[PFeed.getItem] %s", error.message);
 		return undefined;
 	}
-}
+};
 
+/**
+ * @private
+ * This is used to resolve Namespaces within XML documents.
+ */
 PFeed.prototype.nsResolver = function(prefix) {
 	prefix = prefix.toLowerCase();
 	var ns = {
