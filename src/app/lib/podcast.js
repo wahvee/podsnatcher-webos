@@ -473,10 +473,17 @@ Podcast.prototype.copy = function(objToExtendFrom) {
 Podcast.prototype.validateRSS = function(xmlObj) {
 	var type = this.parseType(xmlObj);
 	var returnVal = false;
+	var numberOfItems = 0;
+	var numberOfEnclosures = 0;
 	switch(type) {
+		case 'mediarss':
+			numberOfItems = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+			numberOfEnclosures = xmlObj.evaluate("count(rss/channel//item//enclosure/@url | rss/channel//item//media:content/@url)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+			returnVal = (numberOfItems > 0 && numberOfEnclosures > 0);
+			break;
 		case 'rss':
-			var numberOfItems = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
-			var numberOfEnclosures = xmlObj.evaluate("count(rss/channel//item//enclosure/@url)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+			numberOfItems = xmlObj.evaluate("count(rss/channel//item)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
+			numberOfEnclosures = xmlObj.evaluate("count(rss/channel//item//enclosure/@url)", xmlObj, this.nsResolver, XPathResult.NUMBER_TYPE, null).numberValue;
 			returnVal = (numberOfItems > 0 && numberOfEnclosures > 0);
 			break;
 		case 'feed':

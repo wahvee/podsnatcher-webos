@@ -4,6 +4,7 @@
     {"source": "app/lib/pfeed/pfeed-item.js"},
     {"source": "app/lib/pfeed/prss-item.js"},
     {"source": "app/lib/pfeed/patom-item.js"},
+    {"source": "app/lib/pfeed/pmedia-rss-item.js"},
     {"source": "app/lib/podcast.js"},
     {"source": "app/lib/podcast-storage.js"},
     {"source": "app/lib/migrator.js"},

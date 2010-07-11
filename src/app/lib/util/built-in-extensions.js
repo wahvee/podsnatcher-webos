@@ -94,3 +94,23 @@ function createUUID() {
 	var uuid = s.join("");
 	return uuid;
 }
+
+/**
+ * Checks to see if an instance has any kind of value associated with
+ * it. Returns false if the object is Null, Undefined, Empty or Blank.
+ * Returns true otherwise.
+ */
+if(typeof Object.hasValue !== 'function') {
+	Mojo.Log.info("[Object.hasValue] is not defined.");
+	Object.hasValue = function(o) {
+		if(Object.isString(o)) {
+			return !(o.blank() || o.empty());
+		} else if(Object.isUndefined(o) || isNull(o)) {
+			return false;
+		} else {
+			return true;
+		}
+	};
+} else {
+	Mojo.Log.info("[Object.hasValue] is defined.");
+}
