@@ -45,7 +45,8 @@ NowPlayingAudioAssistant.prototype.setup = function() {
 	this.controller.setupWidget(Mojo.Menu.appMenu, AppAssistant.appMenuAttr, AppAssistant.standardModel);
 
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
-	var image = this.podcast.getImage();
+	Mojo.Log.info("[NowPlayingAudioAssistant.setup] %s", this.podcastItem.thumbnail);
+	var image = this.podcastItem.thumbnail || this.podcast.getImage();
 	var renderedInfo = Mojo.View.render(
 		{
 			object: {
