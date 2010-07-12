@@ -73,7 +73,7 @@ PFeed.prototype.parse = function(xmlObj) {
  * @see http://projects.wahvee.com/issues/54
  */
 PFeed.prototype.parseMediaRSS = function(xmlObj) {
-	this.version = '1.0';
+	this.version = '1.5';
 	this.title = xmlObj.evaluate("rss/channel/title/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 	this.description = xmlObj.evaluate("rss/channel/description/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 	this.language = xmlObj.evaluate("rss/channel/language/text()", xmlObj, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;

@@ -1,0 +1,21 @@
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+<channel>
+<title>DaSouth.com Radio</title>
+<link>http://www.dasouth.com/listen/radio</link>
+<!--//DO NOT EDIT ABOVE THIS //-->
+<!--// ADD SHOWS BELOW THIS //-->
+
+<item>
+<title>This is DaSouth.com Radio Network, THE LIFE in Hip Hop!</title>
+<link>http://www.dasouth.com/music/radio</link>
+<description>Subscribe to our FREE podcasts on iTunes and also on dasouthradio.blogspot.com!</description>
+<media:credit role="author"></media:credit>
+
+<media:content url="http://dasouthmedia.com/radio/sweeps/ensound_thankyou.mp3" type="audio/mpeg" start="00:00" />
+<media:thumbnail url="http://dasouthmedia.com/radio/thumbs/dasouth-star.jpg" />
+</item>
+
+<!--// ADD SHOWS ABOVE THIS //-->
+<!--//DO NOT EDIT BELOW THIS //-->
+</channel>
+</rss>
