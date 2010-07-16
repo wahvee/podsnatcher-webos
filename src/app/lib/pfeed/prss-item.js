@@ -22,6 +22,11 @@ var PRssItem = Class.create(PFeedItem, {
 			this.copy(elementItem);
 		}
 	},
+	/**
+	 * @function
+	 * @name PMediaRssItem#parse
+	 * @param elementItem {Element} The document element item to be parsed by XPath
+	 */
 	parse: function(elementItem) {
 		this.id = document.evaluate("./guid/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.title = document.evaluate("./title/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;

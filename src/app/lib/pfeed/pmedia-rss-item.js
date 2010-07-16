@@ -18,7 +18,7 @@ var PMediaRssItem = Class.create(PRssItem, {
 	},
 	/**
 	 * @function
-	 * @name PMediaItem#parse
+	 * @name PMediaRssItem#parse
 	 * @param elementItem {Element} The document element item to be parsed by XPath
 	 */
 	parse: function($super, elementItem) {

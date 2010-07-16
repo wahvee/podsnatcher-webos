@@ -1,3 +1,12 @@
+/**
+ * @extends PFeedItem
+ * @constructor
+ * @name PAtomItem
+ * @description This class is used to extract the pertanent information from an
+ * Atom formatted feed. Specifically the part of the feed this is supposted to
+ * read is each entry node within the feed.
+ * @param {Element} The XML DOM element that represents an entry node.
+ */
 var PAtomItem = Class.create(PFeedItem, {
 	initialize: function($super, elementItem) {
 		this.id = '';
@@ -13,6 +22,12 @@ var PAtomItem = Class.create(PFeedItem, {
 			this.copy(elementItem);
 		}
 	},
+	/**
+	 * @function
+	 * @name PAtomItem#parse
+	 * @description Extracts the PFeedItem parameter values from the XML DOM.
+	 * @param elementItem {Element} The XML DOM node to extract information from.
+	 */
 	parse: function(elementItem) {
 		this.id = document.evaluate("./Atom:id/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
 		this.title = document.evaluate("./Atom:title/text()", elementItem, this.nsResolver, XPathResult.STRING_TYPE, null).stringValue;
@@ -22,12 +37,5 @@ var PAtomItem = Class.create(PFeedItem, {
 
 		// Regenerate the key
 		this.generateKey();
-	},
-	nsResolver: function(prefix) {
-		prefix = prefix.toLowerCase();
-		var ns = {
-			"atom": "http://www.w3.org/2005/Atom"
-		};
-		return ns[prefix] || null;
 	}
 });
