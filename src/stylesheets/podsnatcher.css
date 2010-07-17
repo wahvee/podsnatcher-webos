@@ -152,24 +152,30 @@
 
 .episodeTitle {
 	width: 100%;
-	height: 23px;
 	float: left;
 	text-align: left;
-	padding: 2px 4px 0px 4px;
+	padding: 3px 0px 0px 2px;
 	font-size: 14px;
 }
 .currentTimeDiv {
-	width: 100%;
-	height: 23px;
+	width: 47px;
 	float: right;
-	text-align: right;
-	padding: 0px 4px 0px 4px;
+	text-align: left;
+	padding: 12px 0px 0px 0px;
 	font-size: 12px;
 }
-
 .withButton {
-	width: 82% !important;
+	width: 65% !important;
 	padding-left: 0px !important;
+}
+
+.noTime {
+	width: 85% !important;
+}
+
+.noTimeCached {
+	width: 97% !important;
+	margin: 0px 4px 0px 4px !important;
 }
 
 .newPFeedItem {

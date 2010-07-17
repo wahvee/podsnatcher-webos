@@ -177,6 +177,7 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 				case PFeedItem.Status.New:
 				case PFeedItem.Status.NewCaching:
 				case PFeedItem.Status.NewCached:
+					episodeTitle.addClassName('noTime');
 					currentTimeDiv.hide();
 					break;
 			}
@@ -188,6 +189,8 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 					// Remove the download button
 					episodeTitle.removeClassName('withButton');
 					currentTimeDiv.removeClassName('withButton');
+					episodeTitle.removeClassName('noTime');
+					episodeTitle.addClassName('noTimeCached');
 					downloadBtn.remove();
 					downloadBtn = undefined;
 					break;
