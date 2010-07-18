@@ -373,6 +373,8 @@ Podcast.prototype.addItem = function(objToAdd) {
 		item = new PRssItem(objToAdd);
 	} else if (this.type === 'atom') {
 		item = new PAtomItem(objToAdd);
+	} else if (this.type === 'mediarss') {
+		item = new PMediaRssItem(objToAdd);
 	} else {
 		Mojo.Log.error("[Podcast.addItem] Uknown type: %s", this.type);
 	}
