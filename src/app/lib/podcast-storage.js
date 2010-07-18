@@ -192,6 +192,11 @@ PodcastStorage.prototype.populateInitialDB = function() {
 
 	var sqlArr = [
 		[
+			hex_md5("http://feeds.feedburner.com/WORPodcasts/"),
+			"http://feeds.feedburner.com/WORPodcasts/",
+			"webOSRadio"
+		],
+		[
 			hex_md5("http://www.wdwradio.com/xml/wdwradio.xml"),
 			"http://www.wdwradio.com/xml/wdwradio.xml",
 			"WDW Radio Show"
@@ -207,7 +212,7 @@ PodcastStorage.prototype.populateInitialDB = function() {
 			"Diggnation"
 		],
 		[
-			 hex_md5("http://buzzreportpodcast.cnettv.com"),
+			hex_md5("http://buzzreportpodcast.cnettv.com"),
 			"http://buzzreportpodcast.cnettv.com",
 			"Buzz Report"
 		]
