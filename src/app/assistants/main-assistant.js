@@ -686,6 +686,7 @@ MainAssistant.prototype.handleListClick = function(event) {
 		case 'video/mp4':
 		case 'video/x-m4v':
 		case 'video/quicktime':
+		case 'video/MPEG4-visual':
 			Mojo.Log.info("[MainAssistant.handleListClick] Playing Video");
 			//this.controller.get('video-object').toggleClassName('video');
 			//this.videoPlayer.src = event.item.enclosure;
