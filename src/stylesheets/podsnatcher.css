@@ -164,17 +164,21 @@
 	padding: 12px 0px 0px 0px;
 	font-size: 12px;
 }
-.withButton {
+.withTimeWithButton {
 	width: 65% !important;
 	padding-left: 0px !important;
 }
 
-.noTime {
+.noTimeWithButton {
 	width: 85% !important;
 }
 
-.noTimeCached {
+.noTimeNoButton {
 	width: 97% !important;
+	margin: 0px 4px 0px 4px !important;
+}
+.withTimeNoButton {
+	width: 76% !important;
 	margin: 0px 4px 0px 4px !important;
 }
 

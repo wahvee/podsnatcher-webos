@@ -177,7 +177,6 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 				case PFeedItem.Status.New:
 				case PFeedItem.Status.NewCaching:
 				case PFeedItem.Status.NewCached:
-					episodeTitle.addClassName('noTime');
 					currentTimeDiv.hide();
 					break;
 			}
@@ -187,12 +186,52 @@ MainAssistant.prototype.listItemRender = function(listWidget, itemModel, itemNod
 				case PFeedItem.Status.InProgressCached:
 				case PFeedItem.Status.ListenedCached:
 					// Remove the download button
-					episodeTitle.removeClassName('withButton');
-					currentTimeDiv.removeClassName('withButton');
-					episodeTitle.removeClassName('noTime');
-					episodeTitle.addClassName('noTimeCached');
 					downloadBtn.remove();
 					downloadBtn = undefined;
+					break;
+			}
+			// Set up styles for New/NewCaching
+			switch(statusIndicator) {
+				case PFeedItem.Status.NewCaching:
+				case PFeedItem.Status.New:
+					episodeTitle.removeClassName('withTimeNoButton');
+					episodeTitle.removeClassName('noTimeNoButton');
+					episodeTitle.removeClassName('withTimeWithButton');
+					episodeTitle.addClassName('noTimeWithButton');
+					break;
+			}
+			// Set up styles for InProgressCached/ListenedCached
+			switch(statusIndicator) {
+				case PFeedItem.Status.InProgressCached:
+				case PFeedItem.Status.ListenedCached:
+				case PFeedItem.Status.InProgress:
+				case PFeedItem.Status.Listened:
+					episodeTitle.removeClassName('noTimeWithButton');
+					episodeTitle.removeClassName('withTimeWithButton');
+					episodeTitle.removeClassName('noTimeNoButton');
+					episodeTitle.addClassName('withTimeNoButton');
+					break;
+			}
+			// Set up styles for NewCached
+			switch(statusIndicator) {
+				case PFeedItem.Status.NewCached:
+					episodeTitle.removeClassName('noTimeWithButton');
+					episodeTitle.removeClassName('withTimeNoButton');
+					episodeTitle.removeClassName('withTimeWithButton');
+					episodeTitle.addClassName('noTimeNoButton');
+					
+					break;
+			}
+			// Set up styles for InProgressCaching/ListenedCaching
+			switch(statusIndicator) {
+				case PFeedItem.Status.InProgressCaching:
+				case PFeedItem.Status.ListenedCaching:
+				case PFeedItem.Status.InProgress:
+				case PFeedItem.Status.Listened:
+					episodeTitle.removeClassName('noTimeWithButton');
+					episodeTitle.removeClassName('withTimeNoButton');
+					episodeTitle.removeClassName('noTimeNoButton');
+					episodeTitle.addClassName('withTimeWithButton');
 					break;
 			}
 			// Set the actual styling of the title
@@ -281,14 +320,55 @@ MainAssistant.prototype.listItemUpdate = function(key) {
 				case PFeedItem.Status.InProgressCached:
 				case PFeedItem.Status.ListenedCached:
 					// Remove the download button
-					episodeTitle.removeClassName('withButton');
-					currentTimeDiv.removeClassName('withButton');
 					downloadBtn.remove();
 					downloadBtn = undefined;
 					statusDiv.removeClassName('downloading');
 					statusDiv.setStyle({width: "0%"});
 					break;
 			}
+			// Set up styles for New/NewCaching
+			switch(statusIndicator) {
+				case PFeedItem.Status.NewCaching:
+				case PFeedItem.Status.New:
+					episodeTitle.removeClassName('withTimeNoButton');
+					episodeTitle.removeClassName('noTimeNoButton');
+					episodeTitle.removeClassName('withTimeWithButton');
+					episodeTitle.addClassName('noTimeWithButton');
+					break;
+			}
+			// Set up styles for InProgressCached/ListenedCached
+			switch(statusIndicator) {
+				case PFeedItem.Status.InProgressCached:
+				case PFeedItem.Status.ListenedCached:
+				case PFeedItem.Status.InProgress:
+				case PFeedItem.Status.Listened:
+					episodeTitle.removeClassName('noTimeWithButton');
+					episodeTitle.removeClassName('withTimeWithButton');
+					episodeTitle.removeClassName('noTimeNoButton');
+					episodeTitle.addClassName('withTimeNoButton');
+					break;
+			}
+			// Set up styles for NewCached
+			switch(statusIndicator) {
+				case PFeedItem.Status.NewCached:
+					episodeTitle.removeClassName('noTimeWithButton');
+					episodeTitle.removeClassName('withTimeNoButton');
+					episodeTitle.removeClassName('withTimeWithButton');
+					episodeTitle.addClassName('noTimeNoButton');
+					break;
+			}
+			// Set up styles for InProgressCaching/ListenedCaching
+			switch(statusIndicator) {
+				case PFeedItem.Status.InProgressCaching:
+				case PFeedItem.Status.ListenedCaching:
+				case PFeedItem.Status.InProgress:
+				case PFeedItem.Status.Listened:
+					episodeTitle.removeClassName('noTimeWithButton');
+					episodeTitle.removeClassName('withTimeNoButton');
+					episodeTitle.removeClassName('noTimeNoButton');
+					episodeTitle.addClassName('withTimeWithButton');
+					break;
+			}			
 			// Set the actual styling of the title
 			switch(statusIndicator) {
 				case PFeedItem.Status.New:
