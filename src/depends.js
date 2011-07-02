@@ -12,5 +12,5 @@ enyo.depends(
   // "source/schema.js",
   // "source/seach.js",
   // "source/seach-xml-error.js"
-  "css/podsnatcher.css"
+  "css/PodSnatcher.css"
 );
