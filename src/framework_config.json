@@ -1,7 +1,8 @@
 {
-    "logLevel": 0,
-    "timingEnabled": false,
-    "logEvents": false,
-    "debuggingEnabled": false,
-    "escapeHTMLInTemplates": false
+    "debuggingEnabled": true,
+    "escapeHTMLInTemplates": true,
+    "logEvents": true,
+    "logLevel": 99,
+    "timingEnabled": true,
+    "useNativeJSONParser": true
 }
