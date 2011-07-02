@@ -1,8 +1,0 @@
-{
-    "debuggingEnabled": true,
-    "escapeHTMLInTemplates": true,
-    "logEvents": true,
-    "logLevel": 99,
-    "timingEnabled": true,
-    "useNativeJSONParser": true
-}
