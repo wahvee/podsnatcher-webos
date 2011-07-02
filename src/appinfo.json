@@ -1,6 +1,6 @@
 {
 	"id":"com.wahvee.podsnatcher",
-	"version":"1.1.5",
+	"version":"2.0.0",
 	"vendor": "Wahvee",
 	"vendorurl": "http://www.wahvee.com",
 	"type": "web",
@@ -29,9 +29,5 @@
 				"sceneName":"quick-guide"
 			}
 		]
-	},
-	"theme":"light",
-	"noWindow":false,
-	"noDeprecatedStyles":true,
-	"timingEnabled":false
+	}
 }

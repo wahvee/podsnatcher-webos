@@ -1,17 +1,17 @@
 // Returns true if property exists, false otherwise.
 if (typeof Object.hasOwnProperty !== 'function') {
-	Mojo.Log.info("[Object.hasOwnProperty] is not defined.");
+	// Mojo.Log.info("[Object.hasOwnProperty] is not defined.");
 	Object.prototype.hasOwnProperty = function(property) {
 		return typeof(this[property]) !== 'undefined';
 	};
 } else {
-	Mojo.Log.info("[Object.hasOwnProperty] is defined.");
+	// Mojo.Log.info("[Object.hasOwnProperty] is defined.");
 }
 
 // Add method to Number to convert seconds {Number} to a
 // string that represents HH:MM:SS
 if (typeof Number.secondsToDuration !== 'function') {
-	Mojo.Log.info("[Number.secondsToDuration] is not defined.");
+	// Mojo.Log.info("[Number.secondsToDuration] is not defined.");
 	Number.prototype.secondsToDuration = function() {
 		// divide your field by seconds per hour (60*60) => hrs
 		var hour = (Math.floor(this / 3600) % 24).toPaddedString(2);
@@ -23,16 +23,16 @@ if (typeof Number.secondsToDuration !== 'function') {
 		return hour + ":" + min + ":" + sec;
 	};
 } else {
-	Mojo.Log.info("[Number.secondsToDuration] is defined.");
+	// Mojo.Log.info("[Number.secondsToDuration] is defined.");
 }
 
 if (typeof Number.roundNumber !== 'function') {
-	Mojo.Log.info("[Number.roundNumber] is not defined.");
+	// Mojo.Log.info("[Number.roundNumber] is not defined.");
 	Number.prototype.roundNumber = function(dec) {
 		return Math.round(Math.round(this * Math.pow(10, dec + 1)) / Math.pow(10, 1)) / Math.pow(10, dec);
 	};
 } else {
-	Mojo.Log.info("[Number.roundNumber] is defined.");
+	// Mojo.Log.info("[Number.roundNumber] is defined.");
 }
 
 /**
@@ -47,35 +47,35 @@ String.prototype.getExtension = function() {
 
 // Add method to String to test if it is a valid pathname
 if (typeof String.isPath !== 'function') {
-	Mojo.Log.info("[String.isPath] is not defined.");
+	// Mojo.Log.info("[String.isPath] is not defined.");
 	String.prototype.isPath = function() {
 		var regEx = new RegExp("/[^/]+$", "i");
 		return regEx.test(this);
 	};
 } else {
-	Mojo.Log.info("[String.isPath] is defined.");
+	// Mojo.Log.info("[String.isPath] is defined.");
 }
 
 // Add method to String to test if it is a valid URL
 if (typeof String.isUrl !== 'function') {
-	Mojo.Log.info("[String.isUrl] is not defined.");
+	// Mojo.Log.info("[String.isUrl] is not defined.");
 	String.prototype.isUrl = function() {
 		var regexp = /http:\/\/[A-Za-z0-9\.-]{3,}\.[A-Za-z]{2,}/;
 		return regexp.test(this);
 	};
 } else {
-	Mojo.Log.info("[String.isUrl] is defined.");
+	// Mojo.Log.info("[String.isUrl] is defined.");
 }
 
 
 // Add method to Object to check if instance is a boolean
 if (typeof Object.isBoolean !== 'function') {
-	Mojo.Log.info("[Object.isBoolean] is not defined.");
+	// Mojo.Log.info("[Object.isBoolean] is not defined.");
 	Object.isBoolean = function(o) {
 		return typeof o === 'boolean';
 	};
 } else {
-	Mojo.Log.info("[Object.isBoolean] is defined.");
+	// Mojo.Log.info("[Object.isBoolean] is defined.");
 }
 
 function isNull(val) {
@@ -101,7 +101,7 @@ function createUUID() {
  * Returns true otherwise.
  */
 if(typeof Object.hasValue !== 'function') {
-	Mojo.Log.info("[Object.hasValue] is not defined.");
+	// Mojo.Log.info("[Object.hasValue] is not defined.");
 	Object.hasValue = function(o) {
 		if(Object.isString(o)) {
 			return !(o.blank() || o.empty());
@@ -112,5 +112,5 @@ if(typeof Object.hasValue !== 'function') {
 		}
 	};
 } else {
-	Mojo.Log.info("[Object.hasValue] is defined.");
+	// Mojo.Log.info("[Object.hasValue] is defined.");
 }
