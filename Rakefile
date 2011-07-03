@@ -60,6 +60,9 @@ namespace :launch do
   desc "Lauch on device, e.g., rake launch:device[Debug]"
   task :device, :context do |cmd, args|
     Rake::Task["install:device"].invoke(args[:context])
+    framework_config = args[:context] =~ /debug/i ? DEBUG_FRAMEWORK_CONFIG : RELEASE_FRAMEWORK_CONFIG
+    puts framework_config.to_json
+    `palm-launch -p #{framework_config.to_json} #{APP_ID}`
   end
 
   desc "Lauch in emulator, e.g., rake launch:emulator[Debug]"
