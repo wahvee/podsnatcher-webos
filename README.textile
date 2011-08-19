@@ -1,0 +1,15 @@
+h1. PodSnatcher for webOS
+
+"http://www.wahvee.com":"Home Page"
+
+h2. Description
+
+PodSnatcher is a great way to play and download all your favorite video and audio podcasts. A feed search has now been implemented as it was the number one user requested feature! PodSnatcher doesn't require a desktop application to sync with, and can indicate new and listened to episodes. If you're on the go, download episodes to your Palm device and play them later, or stream them directly from the internet. PodSnatcher doesn't require a subscription or any additional accounts; it's fully functional once downloaded. The application makes it fun and easy to browse your collection of podcasts by simply flicking the album. Tap an episode to play and again to pause. Tap the indicator to start a download, tap again to cancel. Touch and hold an album to update it, you'll see a notification while it's processing. Screen rotation from portrait and widescreen formats is supported, so listen to your podcasts upside-down if you like. PodSnatcher was made with its look and feel in mind; actually, the theme was the first step in the creation of this application. Download today if you want a good-looking, low-cost, full-featured podcast application. Also, feedback is encouraged! Visit www.wahvee.com to suggest new features and share your ideas.
+
+h2. Supported Platforms
+
+webOS 1.x
+
+h2. LICENSE
+
+SEE LICENSE
